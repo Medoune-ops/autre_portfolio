@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medoune SECK | Portfolio</title>
+    <!-- Police Inter : Propre et moderne -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Icônes Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Style principal -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Barre de navigation -->
+    <header class="navbar">
+        <nav class="container">
+            <a href="#" class="logo">SECK<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#a-propos">À propos</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#projets">Projets</a></li>
+                <li><a href="#parcours">Parcours</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="accueil" class="hero container">
+            <div class="hero-text">
+                <span class="badge">Disponible pour de nouveaux projets</span>
+                <h1>Bonjour, je suis <br><span class="name">Medoune SECK</span></h1>
+                <p class="description">
+                    Développeur Full-Stack spécialisé dans la création d'expériences numériques d'exception. 
+                    Passionné par le Web, le Mobile et le Gaming.
+                </p>
+                <div class="social-links">
+                    <a href="https://github.com/Medoune-ops" target="_blank"><i data-lucide="github"></i></a>
+                    <a href="https://www.linkedin.com/in/medoune-seck-633004305" target="_blank"><i data-lucide="linkedin"></i></a>
+                    <a href="mailto:smedoune16@gmail.com"><i data-lucide="mail"></i></a>
+                </div>
+                <div class="hero-actions">
+                    <a href="#projets" class="btn btn-primary">Voir mes projets</a>
+                    <a href="#contact" class="btn btn-outline">Me contacter</a>
+                </div>
+            </div>
+            <div class="hero-image ">
+<img src="WhatsApp Image 2025-07-17 à 18.36.27_c3f5cad2.jpg" 
+     alt="Medoune SECK" 
+     style="filter: grayscale(100%); transition: filter 0.5s, transform 0.5s;"
+     onmouseover="this.style.filter='grayscale(0%)'; this.style.transform='translateY(-4px) scale(1.1)';"
+     onmouseout="this.style.filter='grayscale(100%)'; this.style.transform='translateY(0) scale(1)';"
+     class="cursor-pointer">
+        </section>
+
+        <section id="services" class="services container">
+            <h2 class="section-title">Mes Services</h2>
+            <div class="grid">
+                <div class="service-card">
+                    <i data-lucide="code-2"></i>
+                    <h3>Développement Web</h3>
+                    <p>Sites modernes, responsives et optimisés pour le SEO.</p>
+                </div>
+                <div class="service-card">
+                    <i data-lucide="smartphone"></i>
+                    <h3>Développement Mobile</h3>
+                    <p>Applications fluides pour iOS et Android.</p>
+                </div>
+                <div class="service-card">
+                    <i data-lucide="database"></i>
+                    <h3>Backend & API</h3>
+                    <p>Architectures robustes et sécurisées.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projets" class="projects container">
+            <h2 class="section-title">Projets Récents</h2>
+            <div class="grid">
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="im1.png" alt="Projet 1">
+                    </div>
+                    <div class="project-content">
+                        <h3>Portfolio</h3>
+                        <p>Html5 • Css • Javascript</p>
+                        <a href="https://medoune.vercel.app/index.html" class="link">Voir le site <i data-lucide="external-link"></i></a>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-img">
+                        <img src="im2.png" alt="Projet 2">
+                    </div>
+                    <div class="project-content">
+                        <h3>Logiciel d'archivage électronique</h3>
+                        <p> html5 • Css • react • Node.js • supabase</p>
+                        <a href="https://logiciel-d-archivage-electronique.vercel.app/" class="link">Voir le site <i data-lucide="external-link"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+      
+        <section id="parcours" class="experience container">
+            <h2 class="section-title">Mon Parcours</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="date">2025 - Présent</div>
+                    <div class="content">
+                        <h3>Licence 3 - Informatique</h3>
+                        <span>Université UNCHK</span>
+                        <p>Spécialisation Web, Mobile & Gaming.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">2022 - 2025</div>
+                    <div class="content">
+                        <h3>Licence Informatique</h3>
+                        <span>Univers Professionnel</span>
+                        <p>Obtention de la licence avec Mention Bien.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact container">
+            <div class="contact-card">
+                <h2 class="section-title">Parlons de votre projet</h2>
+                <p>N'hésitez pas à me contacter pour une collaboration ou simplement pour discuter.</p>
+                <a href="mailto:smedoune16@gmail.com" class="btn btn-primary">Envoyer un Email</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="container">
+        <p>&copy; 2024 Medoune SECK. Créé avec simplicité et élégance.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Initialisation des icônes Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -25,11 +25,32 @@
                 <li><a href="#parcours">Parcours</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
+            <!-- Bouton Menu Mobile -->
+            <button id="mobile-menu-btn" class="mobile-menu-btn">
+                <i data-lucide="menu"></i>
+            </button>
         </nav>
     </header>
 
+    <!-- Menu Mobile Overlay -->
+    <div id="mobile-menu" class="mobile-menu">
+        <button id="close-menu" class="close-menu">
+            <i data-lucide="x"></i>
+        </button>
+        <ul class="mobile-nav-links">
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#a-propos">À propos</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#projets">Projets</a></li>
+            <li><a href="#parcours">Parcours</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </div>
+    
+    </header>
+
     <main>
-        <section id="accueil" class="hero container">
+        <section id="accueil" class="hero container flex flex-col lg:flex-row items-center gap-10">
             <div class="hero-text">
                 <span class="badge">Disponible pour de nouveaux projets</span>
                 <h1>Bonjour, je suis <br><span class="name">Medoune SECK</span></h1>
@@ -58,7 +79,7 @@
 
         <section id="services" class="services container">
             <h2 class="section-title">Mes Services</h2>
-            <div class="grid">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="service-card">
                     <i data-lucide="code-2"></i>
                     <h3>Développement Web</h3>
@@ -73,6 +94,41 @@
                     <i data-lucide="database"></i>
                     <h3>Backend & API</h3>
                     <p>Architectures robustes et sécurisées.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Technologies & Stacks -->
+        <section id="stack" class="stack container">
+            <h2 class="section-title">Mon Arsenal</h2>
+            <div class="stack-grid">
+                <div class="stack-category">
+                    <h3>Frontend</h3>
+                    <div class="badges">
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=html" alt="HTML5"> HTML5</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=css" alt="CSS3"> CSS3</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=js" alt="JS"> JavaScript</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=react" alt="React"> React.js</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=tailwind" alt="Tailwind"> Tailwind</span>
+                    </div>
+                </div>
+                <div class="stack-category">
+                    <h3>Backend</h3>
+                    <div class="badges">
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=nodejs" alt="NodeJS"> Node.js</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=py" alt="Python"> Python</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=php" alt="PHP"> PHP</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=express" alt="Express"> Express</span>
+                    </div>
+                </div>
+                <div class="stack-category">
+                    <h3>Outils</h3>
+                    <div class="badges">
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=git" alt="Git"> Git</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=docker" alt="Docker"> Docker</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=aws" alt="AWS"> AWS</span>
+                        <span class="badge"><img src="https://skillicons.dev/icons?i=figma" alt="Figma"> Figma</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -127,10 +183,29 @@
         </section>
 
         <section id="contact" class="contact container">
+           
             <div class="contact-card">
                 <h2 class="section-title">Parlons de votre projet</h2>
                 <p>N'hésitez pas à me contacter pour une collaboration ou simplement pour discuter.</p>
-                <a href="mailto:smedoune16@gmail.com" class="btn btn-primary">Envoyer un Email</a>
+                
+                <form action="#" method="POST" class="contact-form">
+                    <div class="form-group">
+                        <label for="name">Nom complet</label>
+                        <input type="text" id="name" name="name" placeholder="Votre nom" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" placeholder="Comment puis-je vous aider ?" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Envoyer le message</button>
+                </form>
             </div>
         </section>
     </main>

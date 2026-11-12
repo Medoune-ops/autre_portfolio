@@ -124,7 +124,7 @@
         <!-- ================= ACTE 1 — HERO ================= -->
         <section id="accueil" class="hero" data-act="0">
             <div class="container hero__inner">
-                <div class="hero__content">
+                <div class="hero__left">
                     <span class="badge" data-reveal="fade-up">
                         <span class="badge__dot"></span> Disponible pour de nouveaux projets
                     </span>
@@ -148,17 +148,11 @@
                             Démarrer un projet
                         </a>
                     </div>
-
-                    <ul class="hero__meta" data-reveal="fade-up" data-delay="0.4">
-                        <li><strong>3+</strong><span>ans de code</span></li>
-                        <li><strong>10+</strong><span>technologies</span></li>
-                        <li><strong>2</strong><span>projets livrés</span></li>
-                    </ul>
                 </div>
 
-                <aside class="hero__aside" data-reveal="fade-up" data-delay="0.35">
-                    <p class="hero__aside-text">
-                        Que ce soit une interface, un logiciel métier ou une scène 3D temps réel,
+                <div class="hero__right" data-reveal="fade-up" data-delay="0.25">
+                    <p class="hero__right-text">
+                        Que ce soit une interface, un logiciel métier ou une scène temps réel,
                         je livre des expériences qui ne se contentent pas d'être fonctionnelles —
                         elles <em>se ressentent</em>.
                     </p>
@@ -168,7 +162,12 @@
                         <li><i data-lucide="database"></i> Backend</li>
                         <li><i data-lucide="box"></i> 3D &amp; Motion</li>
                     </ul>
-                </aside>
+                    <ul class="hero__stats">
+                        <li><strong>3+</strong><span>ans de code</span></li>
+                        <li><strong>10+</strong><span>technologies</span></li>
+                        <li><strong>2</strong><span>projets livrés</span></li>
+                    </ul>
+                </div>
             </div>
 
             <div class="hero__scroll-hint" aria-hidden="true">
@@ -191,18 +190,6 @@
                 </h2>
 
                 <div class="manifesto__grid">
-                    <div class="manifesto__portrait" data-parallax="0.18">
-                        <div class="manifesto__portrait-frame">
-                            <img src="assets/portrait-2.webp" alt="Medoune SECK" loading="lazy" width="900" height="1200">
-                            <span class="manifesto__portrait-corner manifesto__portrait-corner--tl"></span>
-                            <span class="manifesto__portrait-corner manifesto__portrait-corner--br"></span>
-                        </div>
-                        <div class="manifesto__portrait-caption mono">
-                            <span>Medoune SECK</span>
-                            <span>Dakar, Sénégal</span>
-                        </div>
-                    </div>
-
                     <div class="manifesto__body">
                         <p class="manifesto__lead" data-reveal="fade-up">
                             Je suis Medoune SECK, développeur full-stack et étudiant en informatique
@@ -220,25 +207,25 @@
                             temps réel. Créer des interfaces qui ne se contentent pas d'être
                             fonctionnelles, mais qui marquent.
                         </p>
-
-                        <ul class="manifesto__pillars">
-                            <li data-reveal="fade-up" data-delay="0.3" data-neuron>
-                                <i data-lucide="gauge"></i>
-                                <strong>Performance</strong>
-                                <span>60 fps visés, zéro sacrifice sur mobile.</span>
-                            </li>
-                            <li data-reveal="fade-up" data-delay="0.35" data-neuron>
-                                <i data-lucide="sparkles"></i>
-                                <strong>Craft visuel</strong>
-                                <span>Chaque transition a une intention.</span>
-                            </li>
-                            <li data-reveal="fade-up" data-delay="0.4" data-neuron>
-                                <i data-lucide="shield-check"></i>
-                                <strong>Fiabilité</strong>
-                                <span>Code maintenable, sécurisée, documenté.</span>
-                            </li>
-                        </ul>
                     </div>
+
+                    <ul class="manifesto__pillars">
+                        <li data-neuron data-reveal="fade-up" data-delay="0.3">
+                            <i data-lucide="gauge"></i>
+                            <strong>Performance</strong>
+                            <span>60 fps visés, zéro sacrifice sur mobile.</span>
+                        </li>
+                        <li data-neuron data-reveal="fade-up" data-delay="0.35">
+                            <i data-lucide="sparkles"></i>
+                            <strong>Craft visuel</strong>
+                            <span>Chaque transition a une intention.</span>
+                        </li>
+                        <li data-neuron data-reveal="fade-up" data-delay="0.4">
+                            <i data-lucide="shield-check"></i>
+                            <strong>Fiabilité</strong>
+                            <span>Code maintenable, sécurisée, documenté.</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -370,8 +357,7 @@
 
                     <article class="project" data-neuron data-reveal="fade-up">
                         <a class="project__link" href="https://logiciel-d-archivage-electronique.vercel.app/" target="_blank" rel="noopener">
-                            <div class="project__media" data-parallax="0.12">
-                                <img src="assets/project-dark.webp" alt="Interface du logiciel DARK d'archivage électronique" loading="lazy" width="1600" height="752">
+                            <div class="project__media project__media--schematic" data-schematic="7" data-parallax="0.1">
                                 <span class="project__badge mono">React · Node · Supabase</span>
                             </div>
                             <div class="project__info">
@@ -387,8 +373,7 @@
 
                     <article class="project project--reverse" data-neuron data-reveal="fade-up">
                         <a class="project__link" href="https://medoune.vercel.app/index.html" target="_blank" rel="noopener">
-                            <div class="project__media" data-parallax="0.12">
-                                <img src="assets/project-portfolio.webp" alt="Ancienne version du portfolio personnel" loading="lazy" width="1600" height="755">
+                            <div class="project__media project__media--schematic" data-schematic="19" data-parallax="0.1">
                                 <span class="project__badge mono">HTML · CSS · JS</span>
                             </div>
                             <div class="project__info">

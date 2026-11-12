@@ -52,6 +52,7 @@
         setupContactForm();
         setupRevealOnLoad();
         setupLayoutObserver();
+        buildSchematics();
     }
 
     /* =====================================================================
@@ -212,15 +213,14 @@
         startMessages();
 
         // On n'attend PAS l'événement `load` : il peut tarder à cause des
-        // ressources tierces. On se base sur la texture 3D + les polices,
+        // ressources tierces. On se base sur le cerveau 3D + les polices,
         // avec une durée minimale de marque.
-        const assetsReady = scene ? scene.photoReady : Promise.resolve(false);
-        const brainReady = scene ? scene.buildBrain() : Promise.resolve(false);
+        const assetsReady = scene ? scene.buildBrain() : Promise.resolve(false);
         const fontsReady = (document.fonts && document.fonts.ready)
             ? document.fonts.ready.catch(() => {})
             : Promise.resolve();
 
-        Promise.all([assetsReady, brainReady, fontsReady]).then(() => {
+        Promise.all([assetsReady, fontsReady]).then(() => {
             const elapsed = performance.now();
             const wait = Math.max(0, 1200 - elapsed) / 1000;
             gsap.delayedCall(wait, finish);
@@ -266,6 +266,110 @@
                     if (window.Choreography) Choreography.refreshAnchors();
                 }, 140);
             }, { once: true });
+        });
+    }
+
+    /* =====================================================================
+       SCHEMAS NEURONAUX
+       Aucun visuel photographique : les visuels des projets sont des
+       schemas de reseau neuronal generes a la volee.
+       ===================================================================== */
+    function buildSchematics() {
+        const panels = $$('[data-schematic]');
+        if (!panels.length) return;
+
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+
+        panels.forEach((panel, pi) => {
+            const seed = parseInt(panel.dataset.schematic || '1', 10);
+            const W = 1200, H = 675;
+
+            const svg = document.createElementNS(SVG_NS, 'svg');
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.classList.add('schematic');
+
+            const rnd = (function (a) {
+                return function () {
+                    a |= 0; a = (a + 0x6D2B79F5) | 0;
+                    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+                    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+                };
+            })(seed * 7919 + 13);
+
+            // Trois lobes : meme silhouette que le cerveau 3D
+            const lobes = [
+                { cx: 425, cy: 305, rx: 215, ry: 235, n: 260 },
+                { cx: 775, cy: 305, rx: 215, ry: 235, n: 260 },
+                { cx: 600, cy: 470, rx: 132, ry: 96, n: 120 }
+            ];
+
+            // Points repartis uniformement dans chaque lobe
+            const pts = [];
+            lobes.forEach((lobe) => {
+                for (let i = 0; i < lobe.n; i++) {
+                    const t = rnd();
+                    const th = t * Math.PI * 2;
+                    const r = Math.sqrt(rnd());
+                    // leger retrait de l'axe central : on suggere la fissure
+                    const inset = (lobe.cx < 600 ? -1 : 1) * 14 * (1 - Math.abs(Math.cos(th)) * 0.35);
+                    pts.push([
+                        lobe.cx + Math.cos(th) * r * lobe.rx + inset,
+                        lobe.cy + Math.sin(th) * r * lobe.ry,
+                        rnd()
+                    ]);
+                }
+            });
+
+            const dots = document.createElementNS(SVG_NS, 'g');
+            dots.setAttribute('class', 'schematic__dots');
+            pts.forEach((p) => {
+                const c = document.createElementNS(SVG_NS, 'circle');
+                c.setAttribute('cx', p[0].toFixed(1));
+                c.setAttribute('cy', p[1].toFixed(1));
+                c.setAttribute('r', (1 + p[2] * 1.7).toFixed(2));
+                c.setAttribute('opacity', (0.22 + p[2] * 0.5).toFixed(2));
+                dots.appendChild(c);
+            });
+            svg.appendChild(dots);
+
+            // Connexions uniquement entre points proches
+            const lines = document.createElementNS(SVG_NS, 'g');
+            lines.setAttribute('class', 'schematic__links');
+            const MAXD = 62;
+            for (let i = 0; i < pts.length; i++) {
+                let best = -1, bestD = MAXD * MAXD;
+                for (let k = 0; k < 7; k++) {
+                    const j = Math.floor(rnd() * pts.length);
+                    if (j === i) continue;
+                    const dx = pts[j][0] - pts[i][0];
+                    const dy = pts[j][1] - pts[i][1];
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; best = j; }
+                }
+                if (best < 0) continue;
+                const l = document.createElementNS(SVG_NS, 'line');
+                l.setAttribute('x1', pts[i][0].toFixed(1));
+                l.setAttribute('y1', pts[i][1].toFixed(1));
+                l.setAttribute('x2', pts[best][0].toFixed(1));
+                l.setAttribute('y2', pts[best][1].toFixed(1));
+                lines.appendChild(l);
+            }
+            svg.appendChild(lines);
+
+            // Halo chaud derriere
+            const halo = document.createElementNS(SVG_NS, 'ellipse');
+            halo.setAttribute('cx', '600');
+            halo.setAttribute('cy', '330');
+            halo.setAttribute('rx', '360');
+            halo.setAttribute('ry', '250');
+            halo.setAttribute('class', 'schematic__halo');
+            svg.insertBefore(halo, svg.firstChild);
+
+            panel.insertBefore(svg, panel.firstChild);
+            panel.classList.add('is-schematic');
         });
     }
 

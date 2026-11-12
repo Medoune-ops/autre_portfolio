@@ -144,6 +144,11 @@
             if (scene) {
                 Choreography.init(scene);
                 Choreography.playIntro();
+
+                // Axones : le cerveau se connecte aux infos de la page
+                const targets = $$('[data-neuron]');
+                if (targets.length) scene.registerNeuronTargets(targets);
+
                 // Recalcule la scène quand la mise en page est stabilisée
                 setTimeout(() => { ScrollTrigger.refresh(); scene.resize(); }, 260);
             } else {
@@ -210,11 +215,12 @@
         // ressources tierces. On se base sur la texture 3D + les polices,
         // avec une durée minimale de marque.
         const assetsReady = scene ? scene.photoReady : Promise.resolve(false);
+        const brainReady = scene ? scene.buildBrain() : Promise.resolve(false);
         const fontsReady = (document.fonts && document.fonts.ready)
             ? document.fonts.ready.catch(() => {})
             : Promise.resolve();
 
-        Promise.all([assetsReady, fontsReady]).then(() => {
+        Promise.all([assetsReady, brainReady, fontsReady]).then(() => {
             const elapsed = performance.now();
             const wait = Math.max(0, 1200 - elapsed) / 1000;
             gsap.delayedCall(wait, finish);

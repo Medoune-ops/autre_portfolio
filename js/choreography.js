@@ -17,80 +17,80 @@
        --------------------------------------------------------------------- */
 
     const ACTS_DESKTOP = [
-        { // 0 — ACCUEIL : portrait suspendu en haut-droite, constellation en coquille
+        { // 0 — ACCUEIL : le cerveau s'illumine, portrait suspendu en haut-droite
             photoX: 0.68, photoY: 0.16, photoZ: -0.6,
             photoRotX: 0.02, photoRotY: -0.18, photoRotZ: 0.012,
             photoScale: 0.92, photoOpacity: 1,
             echoOpacity: 0.5, echoSpread: 1,
-            constOpacity: 0.48, constSpread: 1,
-            constX: 0.56, constY: 0.13, constZ: -2,
+            constOpacity: 0.95, constSpread: 1.35,
+            constX: 0.18, constY: 0.1, constZ: -2,
             morphA: 0, morphB: 0,
             dustOpacity: 0.3, haloOpacity: 1, haloScale: 1,
             camX: 0, camY: 0, camZ: 8
         },
-        { // 1 — À PROPOS : la photo recule, la constellation s'ouvre
+        { // 1 — À PROPOS : le cerveau descend, il va se connecter aux piliers
             photoX: 0.74, photoY: 0.06, photoZ: -4.5,
             photoRotX: 0.05, photoRotY: 0.26, photoRotZ: -0.02,
             photoScale: 1.18, photoOpacity: 0.2,
             echoOpacity: 0.14, echoSpread: 1.35,
-            constOpacity: 0.42, constSpread: 1.22,
-            constX: 0.52, constY: -0.05, constZ: -4,
-            morphA: 0, morphB: 0.2,
+            constOpacity: 0.6, constSpread: 1.45,
+            constX: 0.16, constY: -0.34, constZ: -3,
+            morphA: 0, morphB: 0,
             dustOpacity: 0.2, haloOpacity: 0.5, haloScale: 1.25,
             camX: 0, camY: 0, camZ: 9
         },
-        { // 2 — SERVICES : la constellation s'aplatit en anneau
+        { // 2 — SERVICES : le cerveau s'ouvre, les axones partent vers les cartes
             photoX: 0.85, photoY: 0, photoZ: -13,
             photoRotX: 0, photoRotY: 0.45, photoRotZ: 0,
             photoScale: 1.7, photoOpacity: 0,
             echoOpacity: 0, echoSpread: 2,
-            constOpacity: 0.4, constSpread: 1.28,
-            constX: 0, constY: 0, constZ: -5,
-            morphA: 1, morphB: 0,
+            constOpacity: 0.52, constSpread: 1.35,
+            constX: 0.12, constY: -0.46, constZ: -4,
+            morphA: 0, morphB: 0,
             dustOpacity: 0.36, haloOpacity: 0.55, haloScale: 0.9,
             camX: 0, camY: 0, camZ: 9.6
         },
-        { // 3 — STACK : la constellation s'enroule en spirale
+        { // 3 — STACK : le cerveau se resserre, comme une pensée qui boucle
             photoX: 0.85, photoY: 0, photoZ: -15,
             photoRotX: 0, photoRotY: 0, photoRotZ: 0,
             photoScale: 1.7, photoOpacity: 0,
             echoOpacity: 0, echoSpread: 2,
-            constOpacity: 0.38, constSpread: 0.95,
-            constX: 0, constY: 0, constZ: -5,
-            morphA: 0.55, morphB: 0.85,
+            constOpacity: 0.5, constSpread: 1.25,
+            constX: 0.1, constY: -0.4, constZ: -4,
+            morphA: 0, morphB: 0,
             dustOpacity: 0.3, haloOpacity: 0.45, haloScale: 0.8,
             camX: 0, camY: 0, camZ: 8.8
         },
-        { // 4 — PROJETS : la constellation se dilue en champ
+        { // 4 — PROJETS : le cerveau se dilue en champ de points
             photoX: 0.85, photoY: 0, photoZ: -16,
             photoRotX: 0, photoRotY: 0, photoRotZ: 0,
             photoScale: 1.7, photoOpacity: 0,
             echoOpacity: 0, echoSpread: 2,
-            constOpacity: 0.24, constSpread: 1.5,
-            constX: 0, constY: 0, constZ: -5,
-            morphA: 0.1, morphB: 0.08,
+            constOpacity: 0.44, constSpread: 1.6,
+            constX: 0.26, constY: -0.02, constZ: -4,
+            morphA: 0, morphB: 0,
             dustOpacity: 0.22, haloOpacity: 0.3, haloScale: 1.1,
             camX: 0, camY: 0, camZ: 10.5
         },
-        { // 5 — PARCOURS : la constellation forme une colonne
+        { // 5 — PARCOURS : le cerveau se place à droite, il relie les étapes
             photoX: 0.85, photoY: 0, photoZ: -16,
             photoRotX: 0, photoRotY: 0, photoRotZ: 0,
             photoScale: 1.7, photoOpacity: 0,
             echoOpacity: 0, echoSpread: 2,
-            constOpacity: 0.32, constSpread: 0.82,
-            constX: 0, constY: 0, constZ: -5,
-            morphA: 0, morphB: 0.55,
+            constOpacity: 0.56, constSpread: 1.4,
+            constX: 0.5, constY: -0.04, constZ: -4,
+            morphA: 0, morphB: 0,
             dustOpacity: 0.26, haloOpacity: 0.4, haloScale: 0.8,
             camX: 0, camY: 0, camZ: 9
         },
-        { // 6 — CONTACT : retour à la coquille, halo maximal
+        { // 6 — CONTACT : le cerveau s'illumine et se délite en axones
             photoX: 0.85, photoY: 0, photoZ: -16,
             photoRotX: 0, photoRotY: 0, photoRotZ: 0,
             photoScale: 1.7, photoOpacity: 0,
             echoOpacity: 0, echoSpread: 2,
-            constOpacity: 0.55, constSpread: 1.12,
-            constX: 0.18, constY: 0, constZ: -4,
-            morphA: 0, morphB: 0,
+            constOpacity: 0.62, constSpread: 1.6,
+            constX: 0.1, constY: -0.42, constZ: -3,
+            morphA: 0, morphB: 0.55,
             dustOpacity: 0.32, haloOpacity: 1, haloScale: 1.3,
             camX: 0, camY: 0, camZ: 7.6
         }
@@ -99,31 +99,31 @@
     const ACTS_MOBILE = [
         { photoX: 0, photoY: 0.56, photoZ: -1.6, photoRotX: 0.02, photoRotY: -0.14, photoRotZ: 0.01,
           photoScale: 0.55, photoOpacity: 0.95, echoOpacity: 0.4, echoSpread: 1,
-          constOpacity: 0.2, constSpread: 1, constX: 0, constY: 0.42, constZ: -5, morphA: 0, morphB: 0,
+          constOpacity: 0.24, constSpread: 1.5, constX: 0, constY: -0.15, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.16, haloOpacity: 0.6, haloScale: 1, camX: 0, camY: 0, camZ: 8 },
         { photoX: 0, photoY: 0.82, photoZ: -7, photoRotX: 0.05, photoRotY: 0.2, photoRotZ: 0,
           photoScale: 0.95, photoOpacity: 0.14, echoOpacity: 0.1, echoSpread: 1.3,
-          constOpacity: 0.3, constSpread: 1.2, constX: 0, constY: 0.42, constZ: -5, morphA: 0, morphB: 0.2,
+          constOpacity: 0.4, constSpread: 1.6, constX: 0.12, constY: -0.3, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.18, haloOpacity: 0.5, haloScale: 1.2, camX: 0, camY: 0, camZ: 9 },
         { photoX: 0, photoY: 0.82, photoZ: -14, photoRotX: 0, photoRotY: 0.4, photoRotZ: 0,
           photoScale: 1.3, photoOpacity: 0, echoOpacity: 0, echoSpread: 2,
-          constOpacity: 0.28, constSpread: 1.25, constX: 0, constY: 0, constZ: -5, morphA: 1, morphB: 0,
+          constOpacity: 0.34, constSpread: 1.5, constX: 0, constY: -0.5, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.2, haloOpacity: 0.4, haloScale: 0.9, camX: 0, camY: 0, camZ: 9.4 },
         { photoX: 0, photoY: 0.82, photoZ: -15, photoRotX: 0, photoRotY: 0, photoRotZ: 0,
           photoScale: 1.3, photoOpacity: 0, echoOpacity: 0, echoSpread: 2,
-          constOpacity: 0.26, constSpread: 0.95, constX: 0, constY: 0, constZ: -5, morphA: 0.55, morphB: 0.85,
+          constOpacity: 0.34, constSpread: 1.4, constX: 0, constY: -0.45, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.18, haloOpacity: 0.32, haloScale: 0.8, camX: 0, camY: 0, camZ: 8.6 },
         { photoX: 0, photoY: 0.82, photoZ: -16, photoRotX: 0, photoRotY: 0, photoRotZ: 0,
           photoScale: 1.3, photoOpacity: 0, echoOpacity: 0, echoSpread: 2,
-          constOpacity: 0.18, constSpread: 1.45, constX: 0, constY: 0, constZ: -5, morphA: 0.1, morphB: 0.08,
+          constOpacity: 0.28, constSpread: 1.6, constX: 0.22, constY: 0, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.14, haloOpacity: 0.24, haloScale: 1.1, camX: 0, camY: 0, camZ: 10.2 },
         { photoX: 0, photoY: 0.82, photoZ: -16, photoRotX: 0, photoRotY: 0, photoRotZ: 0,
           photoScale: 1.3, photoOpacity: 0, echoOpacity: 0, echoSpread: 2,
-          constOpacity: 0.22, constSpread: 0.82, constX: 0, constY: 0, constZ: -5, morphA: 0, morphB: 0.55,
+          constOpacity: 0.36, constSpread: 1.5, constX: 0.34, constY: 0, constZ: -4, morphA: 0, morphB: 0,
           dustOpacity: 0.16, haloOpacity: 0.3, haloScale: 0.8, camX: 0, camY: 0, camZ: 8.8 },
         { photoX: 0, photoY: 0.82, photoZ: -16, photoRotX: 0, photoRotY: 0, photoRotZ: 0,
           photoScale: 1.3, photoOpacity: 0, echoOpacity: 0, echoSpread: 2,
-          constOpacity: 0.34, constSpread: 1.12, constX: 0, constY: 0, constZ: -5, morphA: 0, morphB: 0,
+          constOpacity: 0.42, constSpread: 1.6, constX: 0, constY: -0.4, constZ: -4, morphA: 0, morphB: 0.55,
           dustOpacity: 0.18, haloOpacity: 0.7, haloScale: 1.3, camX: 0, camY: 0, camZ: 7.8 }
     ];
 

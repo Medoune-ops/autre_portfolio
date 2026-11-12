@@ -1,16 +1,23 @@
 /* =========================================================================
-   scene.js — Scène Three.js : volume de photo 3D + constellation neurale
+   scene.js — Scène Three.js
+   · Cerveau formé de points (surface implicite échantillonnée par rayons)
+   · Réseau neuronal : axones qui partent du cerveau vers les infos
+   · Volume de photo 3D (déformation par bruit, aberration chromatique)
    Expose : window.Scene3D.create(canvas) -> instance
-   L'instance expose .state, un objet de valeurs numériques animées par
-   GSAP (choreography.js) et appliquées à chaque frame.
+   L'instance expose .state, objet de valeurs numériques animées par GSAP
+   (choreography.js) et appliquées à chaque frame.
    ========================================================================= */
 (function () {
     'use strict';
 
     const IS_TOUCH = window.matchMedia('(hover: none)').matches;
     const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const AXIS_X = new THREE.Vector3(1, 0, 0);
+    const AXIS_Y = new THREE.Vector3(0, 1, 0);
 
-    /* ---------- Shader GLSL ---------- */
+    /* =====================================================================
+       SHADERS
+       ===================================================================== */
 
     const NOISE_GLSL = `
         float hash21(vec2 p){
@@ -70,7 +77,6 @@
         void main(){
             vec2 uv = vUv;
 
-            // Traces de glitch lors des scroll rapides
             float g = step(0.985 - uGlitch * 0.12, hash21(vec2(floor(uv.y * 42.0), floor(uTime * 22.0))));
             uv.x += g * uGlitch * 0.035 * (hash21(vec2(floor(uv.y * 42.0), 3.0)) - 0.5);
 
@@ -83,16 +89,13 @@
             float b = texture2D(uTexture, uv - dir * ab).b;
             vec3 col = vec3(r, gch, b);
 
-            // Reflet spéculaire glissant sur le volume
             float sheen = smoothstep(0.55, 1.0, sin((uv.x * 1.4 + uv.y * 0.8 - uTime * 0.18) * 3.14159) * 0.5 + 0.5);
             col += sheen * 0.16 * vec3(0.55, 0.78, 1.0);
 
-            // Liseré lumineux sur les bords
             float edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
             float rim = 1.0 - smoothstep(0.0, 0.028, edge);
             col = mix(col, uAccent, rim * 0.55);
 
-            // Ombrage des bords
             float vign = smoothstep(0.78, 0.22, d2 * 2.4);
             col *= mix(0.62, 1.0, vign);
 
@@ -109,8 +112,8 @@
         void main(){
             vSeed = aSeed;
             vec3 pos = position;
-            pos.z += sin(uTime * 0.75 + aSeed * 24.0) * 0.11;
-            pos.x += cos(uTime * 0.45 + aSeed * 11.0) * 0.07;
+            pos.z += sin(uTime * 0.75 + aSeed * 24.0) * 0.05;
+            pos.x += cos(uTime * 0.45 + aSeed * 11.0) * 0.035;
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
             gl_PointSize = aSize * uPixelRatio * (140.0 / max(-mv.z, 0.001));
             gl_Position = projectionMatrix * mv;
@@ -126,7 +129,6 @@
             vec2 c = gl_PointCoord - 0.5;
             float d = length(c);
             if(d > 0.5) discard;
-            // Noyau net + halo doux : évite les taches floues
             float core = smoothstep(0.5, 0.06, d);
             float a = pow(core, 1.7) * 0.9 + core * 0.1;
             float tw = 0.6 + 0.4 * sin(uTime * 1.7 + vSeed * 31.4);
@@ -134,7 +136,60 @@
         }
     `;
 
-    /* ---------- Fabrique de textures ---------- */
+    /* --- Axone : ligne qui pousse du cerveau vers une cible --- */
+
+    const AXON_VERT = `
+        attribute float aT;
+        attribute float aSeed;
+        attribute float aSide;
+        uniform float uWidth;
+        varying float vT;
+        varying float vSeed;
+        varying float vSide;
+        void main(){
+            vT = aT;
+            vSeed = aSeed;
+            vSide = aSide;
+
+            // Épaisseur du ruban, orientée face à la caméra
+            vec4 mv = modelViewMatrix * vec4(position, 1.0);
+            mv.xy += vec2(0.0, aSide) * uWidth;
+            gl_Position = projectionMatrix * mv;
+        }
+    `;
+
+    const AXON_FRAG = `
+        uniform float uProgress;
+        uniform float uTime;
+        uniform float uOpacity;
+        uniform vec3  uColor;
+        uniform vec3  uHot;
+        varying float vT;
+        varying float vSeed;
+        varying float vSide;
+        void main(){
+            if (vT > uProgress) discard;
+
+            // Bord du ruban plus doux
+            float edge = 1.0 - abs(vSide);
+            float body = smoothstep(0.0, 0.55, edge);
+
+            // Pointe lumineuse qui avance le long du fil
+            float tip = smoothstep(uProgress - 0.09, uProgress, vT);
+
+            // Signal qui circule en boucle sur le fil déployé
+            float travel = fract(uTime * 0.22 + vSeed);
+            float band = exp(-pow((vT - travel) * 9.0, 2.0)) * step(travel, uProgress);
+
+            float alpha = (0.42 + tip * 0.5 + band * 0.3) * body;
+            vec3 col = mix(uColor, uHot, clamp(tip * 0.75 + band * 0.55, 0.0, 1.0));
+            gl_FragColor = vec4(col, alpha * uOpacity);
+        }
+    `;
+
+    /* =====================================================================
+       FABRIQUE DE TEXTURES
+       ===================================================================== */
 
     function makeGlowTexture() {
         const size = 256;
@@ -162,7 +217,7 @@
         g.addColorStop(1, '#1b1030');
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, 512, 683);
-        ctx.fillStyle = 'rgba(120,200,255,.5)';
+        ctx.fillStyle = 'rgba(255,140,60,.75)';
         ctx.font = '600 26px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('MEDOUNE SECK', 256, 340);
@@ -171,53 +226,161 @@
         return tex;
     }
 
-    /* ---------- Géométries de la constellation ---------- */
+    /* =====================================================================
+       CERVEAU — surface implicite échantillonnée par lancer de rayons
+       ===================================================================== */
 
-    function shapeSphere(count) {
-        const arr = new Float32Array(count * 3);
-        const golden = Math.PI * (3 - Math.sqrt(5));
-        for (let i = 0; i < count; i++) {
-            const y = 1 - (i / (count - 1)) * 2;
-            const radius = Math.sqrt(Math.max(0, 1 - y * y));
-            const theta = golden * i;
-            const r = 2.55 + (Math.random() - 0.5) * 0.55;
-            arr[i * 3 + 0] = Math.cos(theta) * radius * r;
-            arr[i * 3 + 1] = y * r * 0.82;
-            arr[i * 3 + 2] = Math.sin(theta) * radius * r * 0.55;
-        }
-        return arr;
+    /* PRNG déterministe : le cerveau est identique à chaque chargement */
+    function mulberry32(a) {
+        return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            let t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
     }
 
-    function shapeRing(count) {
-        const arr = new Float32Array(count * 3);
-        const major = 3.15;
-        const tube = 0.42;
-        for (let i = 0; i < count; i++) {
-            const u = (i / count) * Math.PI * 2 * 7;
-            const v = (i % 13) / 13 * Math.PI * 2;
-            const cx = Math.cos(u) * major;
-            const cy = Math.sin(u) * major * 0.62;
-            arr[i * 3 + 0] = cx + Math.cos(v) * tube;
-            arr[i * 3 + 1] = cy + Math.sin(v) * tube * 0.7;
-            arr[i * 3 + 2] = Math.sin(u) * major * 0.34 + Math.cos(v) * tube;
-        }
-        return arr;
+    function hash3(x, y, z) {
+        let h = Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(z, 1274126177);
+        h = Math.imul(h ^ (h >>> 13), 1274126177);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
     }
 
-    function shapeSpiral(count) {
-        const arr = new Float32Array(count * 3);
-        for (let i = 0; i < count; i++) {
-            const t = i / count;
-            const angle = t * Math.PI * 2 * 11;
-            const radius = 0.35 + t * 2.6;
-            arr[i * 3 + 0] = Math.cos(angle) * radius * 0.78;
-            arr[i * 3 + 1] = (t - 0.5) * 5.6;
-            arr[i * 3 + 2] = Math.sin(angle) * radius * 0.6 - 1.2;
-        }
-        return arr;
+    function vnoise3(x, y, z) {
+        const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+        const fx = x - ix, fy = y - iy, fz = z - iz;
+        const ux = fx * fx * (3 - 2 * fx);
+        const uy = fy * fy * (3 - 2 * fy);
+        const uz = fz * fz * (3 - 2 * fz);
+        const c00 = hash3(ix, iy, iz) * (1 - ux) + hash3(ix + 1, iy, iz) * ux;
+        const c10 = hash3(ix, iy + 1, iz) * (1 - ux) + hash3(ix + 1, iy + 1, iz) * ux;
+        const c01 = hash3(ix, iy, iz + 1) * (1 - ux) + hash3(ix + 1, iy, iz + 1) * ux;
+        const c11 = hash3(ix, iy + 1, iz + 1) * (1 - ux) + hash3(ix + 1, iy + 1, iz + 1) * ux;
+        const c0 = c00 * (1 - uy) + c10 * uy;
+        const c1 = c01 * (1 - uy) + c11 * uy;
+        return c0 * (1 - uz) + c1 * uz;
     }
 
-    /* ---------- Scène ---------- */
+    function fbm3(x, y, z, oct) {
+        let v = 0, a = 0.5, f = 1;
+        for (let i = 0; i < (oct || 3); i++) {
+            v += a * vnoise3(x * f, y * f, z * f);
+            f *= 2.07; a *= 0.5;
+        }
+        return v;
+    }
+
+    function sdEllipsoid(px, py, pz, rx, ry, rz) {
+        const ax = px / rx, ay = py / ry, az = pz / rz;
+        const k0 = Math.sqrt(ax * ax + ay * ay + az * az);
+        const bx = px / (rx * rx), by = py / (ry * ry), bz = pz / (rz * rz);
+        const k1 = Math.sqrt(bx * bx + by * by + bz * bz) || 1e-6;
+        return k0 * (k0 - 1) / k1;
+    }
+
+    function smin(a, b, k) {
+        const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / k));
+        return b * (1 - h) + a * h - k * h * (1 - h);
+    }
+
+    /* Signed distance field du cerveau — version de base (sans bruit) */
+    function brainSDFBase(x, y, z) {
+        // Deux hémisphères
+        const l = sdEllipsoid(x - 0.54, y - 0.08, z, 0.66, 0.84, 0.76);
+        const r = sdEllipsoid(x + 0.54, y - 0.08, z, 0.66, 0.84, 0.76);
+        // Cervelet : calé sous les lobes pour rester lisible de face
+        const cb = sdEllipsoid(x, y + 0.62, z + 0.34, 0.58, 0.32, 0.38);
+        // Tronc cérébral
+        const bs = sdEllipsoid(x, y + 0.98, z + 0.04, 0.14, 0.32, 0.13);
+
+        let d = smin(l, r, 0.24);
+        d = smin(d, cb, 0.30);
+        d = smin(d, bs, 0.18);
+
+        // Fissure longitudinale : fente verticale au centre
+        const fx = Math.abs(x) - 0.09;
+        const fz = Math.max(-0.20 - z, z - 1.1);
+        const fy = -0.30 - y;
+        d = Math.max(d, -Math.max(fx, Math.max(fz, fy)));
+
+        return d;
+    }
+
+    /* Version bruitée : les circonvolutions sont creusées dans la surface */
+    function brainSDF(x, y, z) {
+        const d = brainSDFBase(x, y, z);
+        const n = (fbm3(x * 4.4, y * 4.4, z * 4.4, 3) - 0.5) * 2;
+        // Le bruit ne s'applique qu'à proximité de la surface
+        const w = Math.max(0, 1 - Math.abs(d) / 0.25);
+        return d + 0.055 * n * w;
+    }
+
+    /* Échantillonnage de la surface : rejet par bande autour de l'isosurface,
+       puis projection sur la surface via le gradient du SDF. */
+    function buildBrainSurface(count) {
+        const rnd = mulberry32(20261112);
+        const points = [];
+
+        const BX = 1.45, BY_MIN = -1.7, BY_MAX = 1.05, BZ = 1.05;
+        const BAND = 0.055;
+
+        let guard = 0;
+        while (points.length < count * 3 && guard < count * 400) {
+            guard++;
+            const x = (rnd() * 2 - 1) * BX;
+            const y = BY_MIN + rnd() * (BY_MAX - BY_MIN);
+            const z = (rnd() * 2 - 1) * BZ;
+
+            const d = brainSDF(x, y, z);
+            if (Math.abs(d) > BAND) continue;
+
+            // Filtre de sécurité : on rejette les points trop loin de la
+            // forme (l'approximation du SDF n'est fiable que près de la surface)
+            const dBase = brainSDFBase(x, y, z);
+            if (Math.abs(dBase) > 0.16) continue;
+
+            // Projection sur la surface (gradient par différences finies)
+            const e = 0.012;
+            const gx = brainSDF(x + e, y, z) - brainSDF(x - e, y, z);
+            const gy = brainSDF(x, y + e, z) - brainSDF(x, y - e, z);
+            const gz = brainSDF(x, y, z + e) - brainSDF(x, y, z - e);
+            const gl = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
+
+            let px = x - d * (gx / gl);
+            let py = y - d * (gy / gl);
+            let pz = z - d * (gz / gl);
+
+            // Seconde passe : plus propre sur les plis
+            const d2 = brainSDF(px, py, pz);
+            const g2x = brainSDF(px + e, py, pz) - brainSDF(px - e, py, pz);
+            const g2y = brainSDF(px, py + e, pz) - brainSDF(px, py - e, pz);
+            const g2z = brainSDF(px, py, pz + e) - brainSDF(px, py, pz - e);
+            const g2l = Math.sqrt(g2x * g2x + g2y * g2y + g2z * g2z) || 1;
+            px -= d2 * (g2x / g2l);
+            py -= d2 * (g2y / g2l);
+            pz -= d2 * (g2z / g2l);
+
+            points.push(px, py, pz);
+        }
+
+        // Mélange pour homogénéiser la distribution
+        const count3 = points.length / 3;
+        for (let i = count3 - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            for (let k = 0; k < 3; k++) {
+                const tmp = points[i * 3 + k];
+                points[i * 3 + k] = points[j * 3 + k];
+                points[j * 3 + k] = tmp;
+            }
+        }
+
+        // On garde exactement le nombre voulu
+        return new Float32Array(points.slice(0, count * 3));
+    }
+
+    /* =====================================================================
+       SCÈNE
+       ===================================================================== */
 
     class PortfolioScene {
         constructor(canvas) {
@@ -232,18 +395,20 @@
             this.glitchTarget = 0;
             this.ready = false;
             this.disposed = false;
+            this.neurons = [];
+            this.neuronObserver = null;
 
             /* --- État animé (piloté par GSAP) ---
                photoX / photoY sont NORMALISÉS : 0 = centre de l'écran,
                ±1 = bord de l'écran. Le placement reste donc identique
                sur mobile, tablette et desktop. */
             this.state = {
-                photoX: 0.56, photoY: 0.0, photoZ: 0,
-                photoRotX: 0, photoRotY: -0.16, photoRotZ: 0,
-                photoScale: 1, photoOpacity: 1,
+                photoX: 0.68, photoY: 0.16, photoZ: -0.6,
+                photoRotX: 0.02, photoRotY: -0.18, photoRotZ: 0.012,
+                photoScale: 0.92, photoOpacity: 1,
                 echoOpacity: 0.34, echoSpread: 1,
                 constOpacity: 0.85, constSpread: 1,
-                constX: 0.36, constY: 0, constZ: -1.5,
+                constX: 0.1, constY: -0.05, constZ: -2,
                 morphA: 0, morphB: 0,
                 dustOpacity: 0.4, haloOpacity: 0.9, haloScale: 1,
                 camX: 0, camY: 0, camZ: 8,
@@ -253,7 +418,6 @@
             this._initRenderer();
             this._initScene();
             this._initPhoto();
-            this._initConstellation();
             this._initDust();
             this._initHalo();
             this._bindEvents();
@@ -325,13 +489,11 @@
                 });
                 const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.55, 3.4, 1, 1), mat);
                 mesh.position.z = -0.35 * i;
-                mesh.position.x = -0.05 * i;
-                mesh.position.y = -0.04 * i;
                 this.photoGroup.add(mesh);
                 this.echoes.push(mesh);
             }
 
-            /* Contour lumineux (wireframe) */
+            /* Contour lumineux */
             const edges = new THREE.EdgesGeometry(new THREE.PlaneGeometry(2.72, 3.57));
             this.frame = new THREE.LineSegments(
                 edges,
@@ -370,36 +532,35 @@
             });
         }
 
-        /* ---------- Constellation ---------- */
-        _initConstellation() {
-            this._buildConstellation();
+        /* ---------- Cerveau en points ---------- */
+        buildBrain() {
+            if (this.brainReady) return this.brainReady;
+            this.brainReady = new Promise((resolve) => {
+                // Laisse le navigateur peindre le préloader avant le calcul
+                setTimeout(() => {
+                    this._initBrain();
+                    resolve(true);
+                }, 0);
+            });
+            return this.brainReady;
         }
 
-        _buildConstellation() {
-            // Nettoyage de l'ancienne constellation
-            if (this.constellation) {
-                this.root.remove(this.constellation);
-                this.constellation.geometry.dispose();
-                this.constMat.dispose();
-                this.root.remove(this.links);
-                this.links.geometry.dispose();
-                this.links.material.dispose();
-            }
+        _initBrain() {
+            const count = this.isMobile ? 380 : 760;
 
-            const count = this.isMobile ? 340 : 720;
+            this.brainSurface = buildBrainSurface(count);
+            this.shapeA = this.brainSurface;
+            // Forme de repli : le cerveau se dilue dans son propre nuage
+            this.shapeB = this._buildDissolve(count);
 
-            this.shapeA = shapeSphere(count);
-            this.shapeB = shapeRing(count);
-            this.shapeC = shapeSpiral(count);
-
-            const positions = new Float32Array(this.shapeA);
-            const sizes = new Float32Array(count);
-            const seeds = new Float32Array(count);
-            for (let i = 0; i < count; i++) {
-                // Sur fond clair les points doivent rester de fins nœuds :
-                // c'est le réseau de lignes qui porte la forme.
-                sizes[i] = 0.06 + Math.random() * 0.17;
-                seeds[i] = Math.random();
+            const n = this.brainSurface.length / 3;
+            const positions = new Float32Array(this.brainSurface);
+            const sizes = new Float32Array(n);
+            const seeds = new Float32Array(n);
+            const rnd = mulberry32(77123);
+            for (let i = 0; i < n; i++) {
+                sizes[i] = 0.09 + rnd() * 0.22;
+                seeds[i] = rnd();
             }
 
             const geo = new THREE.BufferGeometry();
@@ -424,17 +585,17 @@
             this.constellation = new THREE.Points(geo, this.constMat);
             this.root.add(this.constellation);
 
-            /* Liaisons : topologie figée sur la forme A, les points se déplacent */
-            const links = this._buildLinks(count, 3);
+            /* Liaisons : topologie figée, les points se déplacent ensuite */
+            const links = this._buildLinks(n, 2);
             const linkCount = links.length / 2;
             const linkPos = new Float32Array(linkCount * 6);
             const linkCol = new Float32Array(linkCount * 6);
             const c = new THREE.Color();
+            const rnd2 = mulberry32(4242);
 
             for (let l = 0; l < linkCount; l++) {
-                const a = links[l * 2], b = links[l * 2 + 1];
-                const alpha = 0.1 + Math.random() * 0.14;
-                c.setHSL(0.56 + Math.random() * 0.06, 0.28, 0.42);
+                const alpha = 0.1 + rnd2() * 0.14;
+                c.setHSL(0.56 + rnd2() * 0.06, 0.28, 0.42);
                 linkCol[l * 6 + 0] = c.r * alpha;
                 linkCol[l * 6 + 1] = c.g * alpha;
                 linkCol[l * 6 + 2] = c.b * alpha;
@@ -457,14 +618,31 @@
                     depthWrite: false
                 })
             );
-            this.root.add(this.links);
+            // Enfant du groupe : les liaisons suivent exactement les points
+            this.constellation.add(this.links);
             this.linkIndices = links;
-            this._built = true;
+        }
+
+        /* Dissolution : chaque point s'éloigne du cerveau en conservant sa
+           direction — le cerveau se délie dans un nuage, pas dans une
+           forme sans rapport. */
+        _buildDissolve(count) {
+            const arr = new Float32Array(count * 3);
+            const rnd = mulberry32(555);
+            for (let i = 0; i < count; i++) {
+                const x = this.shapeA[i * 3], y = this.shapeA[i * 3 + 1], z = this.shapeA[i * 3 + 2];
+                const len = Math.hypot(x, y, z) || 1;
+                const k = 1.08 + rnd() * 0.55;
+                arr[i * 3 + 0] = x * k + (rnd() - 0.5) * 0.12;
+                arr[i * 3 + 1] = y * k + (rnd() - 0.5) * 0.12;
+                arr[i * 3 + 2] = z * k + (rnd() - 0.5) * 0.12;
+            }
+            return arr;
         }
 
         _buildLinks(count, perNode) {
             const links = [];
-            const threshold = 1.05;
+            const threshold = 0.4;
             for (let i = 0; i < count; i++) {
                 const xi = this.shapeA[i * 3], yi = this.shapeA[i * 3 + 1], zi = this.shapeA[i * 3 + 2];
                 const found = [];
@@ -538,6 +716,259 @@
             this.root.add(this.core);
         }
 
+        /* =====================================================================
+           AXONES — les fils qui partent du cerveau vers les infos
+           ===================================================================== */
+
+        /**
+         * Déclare les éléments « info » du DOM. Chaque élément reçoit
+         * des axones qui iront du cerveau jusqu'à lui.
+         */
+        registerNeuronTargets(elements) {
+            if (!elements || !elements.length) return;
+            if (!this.constellation) return;
+
+            const SEG = 26;
+            const rnd = mulberry32(9182);
+            const n = this.brainSurface.length / 3;
+
+            // Une seule texture de halo pour tous les axones
+            if (!this.axonGlow) this.axonGlow = makeGlowTexture();
+
+            // Points de départ sur le cerveau (réparties sur toute la surface)
+            const starts = [];
+            for (let k = 0; k < 24; k++) {
+                const idx = Math.floor(rnd() * n) * 3;
+                starts.push(new THREE.Vector3(
+                    this.brainSurface[idx],
+                    this.brainSurface[idx + 1],
+                    this.brainSurface[idx + 2]
+                ));
+            }
+            this.axonStarts = starts;
+
+            elements.forEach((el, ei) => {
+                const bundle = 3;
+                for (let k = 0; k < bundle; k++) {
+                    /* Ruban : 2 sommets par point -> vraie épaisseur */
+                    const vertCount = SEG * 2;
+                    const path = new Float32Array(vertCount * 3);
+                    const aT = new Float32Array(vertCount);
+                    const aSeed = new Float32Array(vertCount);
+                    const aSide = new Float32Array(vertCount);
+                    const seed = rnd();
+
+                    const index = [];
+                    for (let i = 0; i < SEG; i++) {
+                        aT[i * 2] = aT[i * 2 + 1] = i / (SEG - 1);
+                        aSeed[i * 2] = aSeed[i * 2 + 1] = seed;
+                        aSide[i * 2] = -1;
+                        aSide[i * 2 + 1] = 1;
+                        if (i < SEG - 1) {
+                            const a = i * 2, b = i * 2 + 1, c = i * 2 + 2, d = i * 2 + 3;
+                            index.push(a, b, c, b, d, c);
+                        }
+                    }
+
+                    const geo = new THREE.BufferGeometry();
+                    geo.setAttribute('position', new THREE.BufferAttribute(path, 3));
+                    geo.setAttribute('aT', new THREE.BufferAttribute(aT, 1));
+                    geo.setAttribute('aSeed', new THREE.BufferAttribute(aSeed, 1));
+                    geo.setAttribute('aSide', new THREE.BufferAttribute(aSide, 1));
+                    geo.setIndex(index);
+
+                    const mat = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uProgress: { value: 0 },
+                            uTime:     { value: 0 },
+                            uOpacity:  { value: 1 },
+                            uWidth:    { value: 0.0032 },
+                            uColor:    { value: new THREE.Color(0x7d3008) },
+                            uHot:      { value: new THREE.Color(0xff6711) }
+                        },
+                        vertexShader: AXON_VERT,
+                        fragmentShader: AXON_FRAG,
+                        transparent: true,
+                        depthWrite: false,
+                        side: THREE.DoubleSide,
+                        blending: THREE.NormalBlending
+                    });
+
+                    const line = new THREE.Mesh(geo, mat);
+                    line.frustumCulled = false;
+                    this.root.add(line);
+
+                    /* Tête lumineuse qui avance sur le fil
+                       (texture partagée : 1 seule pour tous les axones) */
+                    const tip = new THREE.Sprite(new THREE.SpriteMaterial({
+                        map: this.axonGlow,
+                        color: 0xff7a2e,
+                        transparent: true,
+                        opacity: 0,
+                        depthWrite: false,
+                        depthTest: false
+                    }));
+                    tip.scale.setScalar(0.34);
+                    this.root.add(tip);
+
+                    this.neurons.push({
+                        el,
+                        line,
+                        geo,
+                        path,
+                        pts: new Float32Array(SEG * 3),
+                        tip,
+                        mat,
+                        state: { progress: 0 },
+                        start: starts[(ei * bundle + k) % starts.length].clone(),
+                        origin: new THREE.Vector3(),
+                        ctrl: new THREE.Vector3(),
+                        target: new THREE.Vector3(),
+                        jitter: (rnd() - 0.5) * 0.3
+                    });
+                }
+            });
+
+            /* Les axones se déclenchent quand l'info entre dans l'écran */
+            if (window.IntersectionObserver) {
+                this.neuronObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        const set = this.neurons.filter((a) => a.el === entry.target);
+                        const on = entry.isIntersecting;
+                        set.forEach((a) => {
+                            if (on) {
+                                gsap.to(a.state, { progress: 1, duration: 0.85, ease: 'power3.out', overwrite: 'auto' });
+                            } else {
+                                gsap.to(a.state, { progress: 0, duration: 0.45, ease: 'power2.in', overwrite: 'auto' });
+                            }
+                        });
+                    });
+                }, { threshold: 0.3, rootMargin: '-8% 0px -8% 0px' });
+
+                elements.forEach((el) => this.neuronObserver.observe(el));
+            }
+        }
+
+        /* Position écran -> monde, à la profondeur du cerveau.
+           L'axone vise un point précis de l'info (son titre), puis se
+           poursuit jusqu'au bord de son conteneur : le fil reste visible
+           au lieu de disparaître sous la carte. */
+        _elementWorldPos(el, out) {
+            const vw = window.innerWidth, vh = window.innerHeight;
+
+            // Position écran du cerveau
+            const bx = (this.state.constX + 1) * 0.5 * vw;
+            const by = (1 - this.state.constY) * 0.5 * vh;
+
+            // Ancre : le titre / label significatif de l'info
+            const anchorEl = el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el;
+            const a = anchorEl.getBoundingClientRect();
+            const c = el.getBoundingClientRect();
+
+            const ax = a.left + a.width * 0.5;
+            const ay = a.top + a.height * 0.5;
+
+            // Rayon cerveau -> ancre, prolongé jusqu'au bord du conteneur
+            let dx = ax - bx, dy = ay - by;
+            const len = Math.hypot(dx, dy) || 1;
+            dx /= len; dy /= len;
+
+            let px = ax, py = ay;
+            if (Math.abs(dx) > 1e-5) {
+                const tx = dx > 0 ? (c.right - ax) / dx : (c.left - ax) / dx;
+                const ty = Math.abs(dy) > 1e-5 ? (dy > 0 ? (c.bottom - ay) / dy : (c.top - ay) / dy) : Infinity;
+                const tt = Math.max(0, Math.min(tx, ty));
+                px = ax + dx * tt;
+                py = ay + dy * tt;
+            }
+
+            const sx = px / vw;
+            const sy = py / vh;
+            const dist = Math.max(0.5, this.camera.position.z - this.state.constZ);
+            const halfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * dist;
+            const halfW = halfH * this.camera.aspect;
+            out.set((sx * 2 - 1) * halfW, -(sy * 2 - 1) * halfH, this.state.constZ);
+            return out;
+        }
+
+        /* Rebuild des paths d'axones + animation */
+        _updateNeurons(t) {
+            if (!this.neurons.length) return;
+            const s = this.state;
+            const SEG = 26;
+
+            for (let n = 0; n < this.neurons.length; n++) {
+                const axon = this.neurons[n];
+                const p = axon.state.progress;
+                axon.mat.uniforms.uTime.value = t;
+                axon.mat.uniforms.uProgress.value = p;
+
+                if (p <= 0.001) {
+                    axon.tip.material.opacity = 0;
+                    continue;
+                }
+
+                // Cible = bord le plus proche de l'info dans le DOM
+                this._elementWorldPos(axon.el, axon.target);
+
+                // Point de départ : surface du cerveau, côté cible.
+                // On repasse des coordonnées locales du groupe vers le monde.
+                const scale = s.constSpread * this.constScale;
+                const origin = axon.origin.copy(axon.start).multiplyScalar(scale);
+                origin.applyAxisAngle(AXIS_Y, this.constellation.rotation.y);
+                origin.applyAxisAngle(AXIS_X, this.constellation.rotation.x);
+                origin.add(this.constellation.position);
+
+                // Point de contrôle : le fil gonfle vers l'extérieur du cerveau
+                const mid = axon.ctrl.copy(origin).add(axon.target).multiplyScalar(0.5);
+                const dist = origin.distanceTo(axon.target);
+                const outward = mid.clone().normalize();
+                mid.addScaledVector(outward, dist * 0.2 + axon.jitter);
+                mid.z += axon.jitter * 0.4;
+
+                // Courbe de Bézier quadratique, légèrement bruitée
+                const arr = axon.path;
+                const pts = axon.pts;
+                for (let i = 0; i < SEG; i++) {
+                    const u = i / (SEG - 1);
+                    const iu = 1 - u;
+                    const bx = iu * iu * origin.x + 2 * iu * u * mid.x + u * u * axon.target.x;
+                    const by = iu * iu * origin.y + 2 * iu * u * mid.y + u * u * axon.target.y;
+                    const bz = iu * iu * origin.z + 2 * iu * u * mid.z + u * u * axon.target.z;
+                    const wob = Math.sin(u * 9 + axon.jitter * 20) * 0.03 * dist;
+                    pts[i * 3 + 0] = bx + wob * 0.4;
+                    pts[i * 3 + 1] = by + wob;
+                    pts[i * 3 + 2] = bz;
+                }
+
+                // Dérive du ruban : 2 sommets par point, décalés perpendiculairement
+                for (let i = 0; i < SEG; i++) {
+                    const ip = Math.max(0, i - 1) * 3;
+                    const inx = Math.min(SEG - 1, i + 1) * 3;
+                    let tx = pts[inx] - pts[ip];
+                    let ty = pts[inx + 1] - pts[ip + 1];
+                    const tl = Math.hypot(tx, ty) || 1;
+                    tx /= tl; ty /= tl;
+                    const nx = -ty, ny = tx;
+
+                    const w = 0.0095;
+                    arr[(i * 2) * 3 + 0] = pts[i * 3 + 0] + nx * w;
+                    arr[(i * 2) * 3 + 1] = pts[i * 3 + 1] + ny * w;
+                    arr[(i * 2) * 3 + 2] = pts[i * 3 + 2];
+                    arr[(i * 2 + 1) * 3 + 0] = pts[i * 3 + 0] - nx * w;
+                    arr[(i * 2 + 1) * 3 + 1] = pts[i * 3 + 1] - ny * w;
+                    arr[(i * 2 + 1) * 3 + 2] = pts[i * 3 + 2];
+                }
+                axon.geo.attributes.position.needsUpdate = true;
+
+                // Tête lumineuse
+                const hi = Math.min(SEG - 1, Math.max(0, Math.floor(p * (SEG - 1))));
+                axon.tip.position.set(axon.pts[hi * 3], axon.pts[hi * 3 + 1], axon.pts[hi * 3 + 2]);
+                axon.tip.material.opacity = 0.85 * Math.min(1, p * 2);
+                axon.tip.scale.setScalar(0.22 + 0.14 * Math.sin(t * 4 + n));
+            }
+        }
+
         /* ---------- Événements ---------- */
         _bindEvents() {
             this._onPointerMove = (e) => {
@@ -553,8 +984,6 @@
         resize() {
             const w = window.innerWidth;
             const h = window.innerHeight;
-            const wasMobile = this.isMobile;
-            this.isMobile = w < 860;
             this.camera.aspect = w / h;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(w, h, false);
@@ -564,34 +993,26 @@
             this.dustMat.uniforms.uPixelRatio.value = this.pixelRatio;
 
             // La constellation s'adapte au format : elle respire sur desktop,
-            // s'intègre dans l'étroit sur mobile. Facteur volontairement
-            // faible — le réseau doit rester un fond, pas un sujet.
+            // s'intègre dans l'étroit sur mobile.
             const aspect = w / h;
-            this.constScale = Math.min(0.62, Math.max(0.4, aspect / 2.5));
+            this.constScale = Math.min(0.66, Math.max(0.42, aspect / 2.4));
             this.dustScale = Math.min(0.9, Math.max(0.5, aspect / 1.9));
-
-            // Changement de format : la densité de particules doit suivre
-            if (wasMobile !== this.isMobile) {
-                this._buildConstellation();
-            }
         }
 
-        /* ---------- Mise à jour des positions de la constellation ---------- */
+        /* ---------- Mise à jour des positions du cerveau ---------- */
         _updateConstellation() {
             const s = this.state;
             const pos = this.constellation.geometry.attributes.position.array;
-            const A = this.shapeA, B = this.shapeB, C = this.shapeC;
-            const mA = s.morphA, mB = s.morphB;
+            const A = this.shapeA, B = this.shapeB;
+            // Courbe non linéaire : le cerveau reste intact longtemps,
+            // puis se délite d'un coup au contact.
+            const mB = Math.pow(s.morphB, 1.9);
             const spread = s.constSpread * this.constScale;
 
             for (let i = 0; i < pos.length; i += 3) {
-                // A -> B (mA), puis (A->B) -> C (mB)
-                const abx = A[i] + (B[i] - A[i]) * mA;
-                const aby = A[i + 1] + (B[i + 1] - A[i + 1]) * mA;
-                const abz = A[i + 2] + (B[i + 2] - A[i + 2]) * mA;
-                pos[i]     = (abx + (C[i] - abx) * mB) * spread;
-                pos[i + 1] = (aby + (C[i + 1] - aby) * mB) * spread;
-                pos[i + 2] = (abz + (C[i + 2] - abz) * mB) * spread;
+                pos[i]     = (A[i]     + (B[i]     - A[i])     * mB) * spread;
+                pos[i + 1] = (A[i + 1] + (B[i + 1] - A[i + 1]) * mB) * spread;
+                pos[i + 2] = (A[i + 2] + (B[i + 2] - A[i + 2]) * mB) * spread;
             }
             this.constellation.geometry.attributes.position.needsUpdate = true;
 
@@ -616,7 +1037,7 @@
             this.pointerSmooth.x += (this.pointer.x - this.pointerSmooth.x) * 0.055;
             this.pointerSmooth.y += (this.pointer.y - this.pointerSmooth.y) * 0.055;
 
-            /* Photo — position normalisée : photoX/photoY valent -1..1 */
+            /* Photo */
             const photoDist = Math.max(0.5, this.camera.position.z - s.photoZ);
             const halfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * photoDist;
             const halfW = halfH * this.camera.aspect;
@@ -650,16 +1071,25 @@
             this.core.material.opacity = 0.14 * s.haloOpacity;
             this.core.scale.setScalar(s.haloScale * (1 + Math.sin(t * 0.9) * 0.045));
 
-            /* Constellation — décalée à droite pour ne pas concurrencer le texte */
-            this.constMat.uniforms.uTime.value = t;
-            this.constMat.uniforms.uOpacity.value = s.constOpacity;
-            this.links.material.opacity = s.constOpacity;
-            this.constellation.rotation.y = t * 0.035 + this.pointerSmooth.x * 0.08;
-            this.constellation.rotation.x = this.pointerSmooth.y * 0.05;
-            this.constellation.position.x = s.constX * halfW;
-            this.constellation.position.y = s.constY * halfH;
-            this.constellation.position.z = s.constZ;
-            this._updateConstellation();
+            /* Cerveau */
+            if (this.constellation) {
+                this.constMat.uniforms.uTime.value = t;
+                this.constMat.uniforms.uOpacity.value = s.constOpacity;
+                this.links.material.opacity = s.constOpacity;
+                this.constellation.rotation.y = Math.sin(t * 0.1) * 0.13 + this.pointerSmooth.x * 0.1;
+                this.constellation.rotation.x = Math.sin(t * 0.08) * 0.05 + this.pointerSmooth.y * 0.05;
+
+                const brainDist = Math.max(0.5, this.camera.position.z - s.constZ);
+                const bHalfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * brainDist;
+                const bHalfW = bHalfH * this.camera.aspect;
+                this.constellation.position.x = s.constX * bHalfW;
+                this.constellation.position.y = s.constY * bHalfH;
+                this.constellation.position.z = s.constZ;
+                this._updateConstellation();
+            }
+
+            /* Axones */
+            this._updateNeurons(t);
 
             /* Poussière */
             this.dustMat.uniforms.uTime.value = t;
@@ -684,6 +1114,7 @@
             this.disposed = true;
             window.removeEventListener('pointermove', this._onPointerMove);
             window.removeEventListener('resize', this._onResize);
+            if (this.neuronObserver) this.neuronObserver.disconnect();
             this.renderer.dispose();
         }
     }

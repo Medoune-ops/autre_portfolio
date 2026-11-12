@@ -20,53 +20,55 @@
     const POINT_VERT = `
         attribute float aSize;
         attribute float aSeed;
+        attribute float aHeat;
         uniform float uTime;
         uniform float uPixelRatio;
         uniform float uGlitch;
         varying float vSeed;
-        varying float vDepth;
+        varying float vHeat;
         void main(){
             vSeed = aSeed;
+            vHeat = aHeat;
             vec3 pos = position;
 
             // Respiration tres legere de la surface
             float breathe = sin(uTime * 0.8 + aSeed * 6.2831) * 0.006;
             pos += normalize(pos + 0.0001) * breathe;
 
-            // Glitch : le cerveau se decale par bandes quand on scroll vite
+            // Glitch : decalage par bandes quand on scroll vite
             float band = floor(pos.y * 26.0 + uTime * 9.0);
             float g = step(0.86, fract(sin(band * 12.9898) * 43758.5453));
             pos.x += g * uGlitch * 0.055 * (fract(sin(band * 78.233) * 43758.5453) - 0.5);
             pos.z += g * uGlitch * 0.03;
 
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-            vDepth = -mv.z;
-            gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001));
+            // Les points du coeur sont plus gros : la masse respire
+            gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001)) * (0.75 + aHeat * 0.75);
             gl_Position = projectionMatrix * mv;
         }
     `;
 
     const POINT_FRAG = `
-        uniform vec3 uColor;
+        uniform vec3 uCold;
         uniform vec3 uHot;
         uniform float uOpacity;
         uniform float uTime;
         varying float vSeed;
-        varying float vDepth;
+        varying float vHeat;
         void main(){
             vec2 c = gl_PointCoord - 0.5;
             float d = length(c);
             if(d > 0.5) discard;
 
-            float core = smoothstep(0.5, 0.08, d);
-            float a = pow(core, 1.6);
+            float core = smoothstep(0.5, 0.06, d);
+            float a = pow(core, 1.35);
 
-            // Les points proches de l'axe (centre du cerveau) sont plus chauds
-            float heat = 1.0 - smoothstep(0.2, 1.4, abs(vDepth - 6.0));
-            vec3 col = mix(uColor, uHot, heat * 0.35);
+            // Le coeur incandescent, les bords froids
+            float heat = pow(vHeat, 3.2);
+            vec3 col = mix(uCold, uHot, heat);
 
-            float tw = 0.62 + 0.38 * sin(uTime * 1.6 + vSeed * 31.4);
-            gl_FragColor = vec4(col, a * uOpacity * tw);
+            float tw = 0.72 + 0.28 * sin(uTime * 1.6 + vSeed * 31.4);
+            gl_FragColor = vec4(col, a * uOpacity * tw * (0.62 + heat * 0.38));
         }
     `;
 
@@ -180,6 +182,17 @@
         return v;
     }
 
+    /* Bruit « en cretes » : donne des circonvolutions, pas des bosses */
+    function fbmRidged(x, y, z, oct) {
+        let v = 0, a = 0.5, f = 1;
+        for (let i = 0; i < (oct || 3); i++) {
+            const n = vnoise3(x * f, y * f, z * f);
+            v += a * (1 - Math.abs(2 * n - 1));
+            f *= 2.07; a *= 0.5;
+        }
+        return v;
+    }
+
     function sdEllipsoid(px, py, pz, rx, ry, rz) {
         const ax = px / rx, ay = py / ry, az = pz / rz;
         const k0 = Math.sqrt(ax * ax + ay * ay + az * az);
@@ -193,38 +206,64 @@
         return b * (1 - h) + a * h - k * h * (1 - h);
     }
 
-    /* Signed distance field du cerveau (forme de base) */
+    /* Signed distance field du cerveau — anatomique
+       Repere : x = lateral, y = haut, z = avant (la camera regarde vers -z)
+       Le cerveau est symetrique : on raisonne sur |x|. */
     function brainSDF(x, y, z) {
-        const l = sdEllipsoid(x - 0.54, y - 0.08, z, 0.66, 0.84, 0.76);
-        const r = sdEllipsoid(x + 0.54, y - 0.08, z, 0.66, 0.84, 0.76);
-        const cb = sdEllipsoid(x, y + 0.62, z + 0.34, 0.58, 0.32, 0.38);
-        const bs = sdEllipsoid(x, y + 0.98, z + 0.04, 0.14, 0.32, 0.13);
+        const ax = Math.abs(x);
 
-        let d = smin(l, r, 0.24);
-        d = smin(d, cb, 0.30);
-        d = smin(d, bs, 0.18);
+        /* --- Cervelet (arriere-bas) --- */
+        const cb = sdEllipsoid(x, y + 0.50, z + 0.50, 0.44, 0.29, 0.29);
 
-        // Fissure longitudinale
-        const fx = Math.abs(x) - 0.09;
-        const fz = Math.max(-0.20 - z, z - 1.1);
+        /* --- Tronc cerebral (descend sous le cerveau) --- */
+        const bs = sdEllipsoid(x, y + 0.76, z + 0.08, 0.125, 0.38, 0.115);
+
+        /* --- Cerveau : quatre lobes par hemisphere --- */
+        const frontal    = sdEllipsoid(ax - 0.40, y - 0.20, z - 0.30, 0.44, 0.43, 0.44);
+        const parietal   = sdEllipsoid(ax - 0.40, y - 0.34, z + 0.20, 0.43, 0.41, 0.40);
+        const occipital = sdEllipsoid(ax - 0.33, y - 0.02, z + 0.54, 0.33, 0.35, 0.29);
+        const temporal   = sdEllipsoid(ax - 0.47, y + 0.26, z - 0.02, 0.41, 0.26, 0.43);
+
+        let cerebrum = smin(frontal, parietal, 0.26);
+        cerebrum = smin(cerebrum, occipital, 0.24);
+        cerebrum = smin(cerebrum, temporal, 0.20);
+
+        let d = smin(cerebrum, cb, 0.20);
+        d = smin(d, bs, 0.14);
+
+        /* --- Fissure longitudinale (separatrice des hemispheres) --- */
+        const wobble = 0.022 * Math.sin(z * 3.4 + 1.2);
+        const fx = Math.abs(x - wobble) - 0.055;
+        const fz = Math.max(-0.86 - z, z - 1.0);
         const fy = -0.30 - y;
         d = Math.max(d, -Math.max(fx, Math.max(fz, fy)));
+
+        /* --- Sillon de Sylvius : separe le lobe temporal du reste --- */
+        const plane = y - (-0.02 + 0.34 * z);
+        const gx = Math.max(0.29 - ax, ax - 1.3);
+        const gz = Math.max(-0.42 - z, z - 0.52);
+        const syl = Math.max(Math.abs(plane) - 0.05, Math.max(gx, gz));
+        d = Math.max(d, -syl);
 
         return d;
     }
 
-    /* Échantillonnage : rejet sur le SDF de base (rapide), puis projection
-       sur la surface via le gradient, puis plis par bruit fractal. */
+    /* Echantillonnage de la surface.
+       On part d'un point ALEATOIRE A L'INTERIEUR du cerveau et on le
+       projette sur la surface par iterations de Newton (projection le long
+       de la normale du SDF). Bien plus rapide que du rejet, et la surface
+       est couverte uniformement.
+       Retourne aussi la "chaleur" de chaque point (0 au bord, 1 au coeur). */
     function buildBrainSurface(count) {
         const rnd = mulberry32(20261112);
         const pts = [];
+        const heat = [];
 
-        const BX = 1.45, BY_MIN = -1.7, BY_MAX = 1.05, BZ = 1.05;
-        const BAND = 0.035;
-        const e = 0.010;
+        const BX = 1.2, BY_MIN = -1.2, BY_MAX = 0.85, BZ = 0.95;
+        const e = 0.006;
 
         let guard = 0;
-        const maxGuard = count * 260;
+        const maxGuard = count * 40;
 
         while (pts.length < count * 3 && guard < maxGuard) {
             guard++;
@@ -232,32 +271,54 @@
             const y = BY_MIN + rnd() * (BY_MAX - BY_MIN);
             const z = (rnd() * 2 - 1) * BZ;
 
-            const d = brainSDF(x, y, z);
-            if (d > BAND || d < -BAND) continue;
+            // Le point de depart doit etre a l'interieur
+            if (brainSDF(x, y, z) > 0) continue;
 
-            // Gradient -> normale
-            const gx = brainSDF(x + e, y, z) - brainSDF(x - e, y, z);
-            const gy = brainSDF(x, y + e, z) - brainSDF(x, y - e, z);
-            const gz = brainSDF(x, y, z + e) - brainSDF(x, y, z - e);
+            // Newton : projection sur l'isosurface
+            let px = x, py = y, pz = z;
+            for (let k = 0; k < 6; k++) {
+                const d = brainSDF(px, py, pz);
+                if (Math.abs(d) < 0.003) break;
+                const gx = brainSDF(px + e, py, pz) - brainSDF(px - e, py, pz);
+                const gy = brainSDF(px, py + e, pz) - brainSDF(px, py - e, pz);
+                const gz = brainSDF(px, py, pz + e) - brainSDF(px, py, pz - e);
+                const gl = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
+                const s = d * 0.9;
+                px -= s * gx / gl;
+                py -= s * gy / gl;
+                pz -= s * gz / gl;
+            }
+
+            // Normale finale
+            const gx = brainSDF(px + e, py, pz) - brainSDF(px - e, py, pz);
+            const gy = brainSDF(px, py + e, pz) - brainSDF(px, py - e, pz);
+            const gz = brainSDF(px, py, pz + e) - brainSDF(px, py, pz - e);
             const gl = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
             const nx = gx / gl, ny = gy / gl, nz = gz / gl;
 
-            // Point sur la surface
-            let px = x - d * nx;
-            let py = y - d * ny;
-            let pz = z - d * nz;
-
-            // Circonvolutions : deplacement le long de la normale
-            const n = (fbm3(px * 5.2, py * 5.2, pz * 5.2, 3) - 0.5) * 2;
-            const amp = 0.042;
-            px += nx * n * amp;
-            py += ny * n * amp;
-            pz += nz * n * amp;
+            // Cervelet : fines stries (folia). Cerveau : circonvolutions.
+            const isCerebellum = py < -0.26 && pz < -0.28;
+            let n, amp;
+            if (isCerebellum) {
+                n = Math.sin(py * 58 + pz * 11) * 0.5 + 0.5;
+                amp = 0.014;
+            } else {
+                n = fbmRidged(px * 4.4, py * 4.4, pz * 4.4, 3);
+                amp = 0.052;
+            }
+            px += nx * (n - 0.5) * amp * 2;
+            py += ny * (n - 0.5) * amp * 2;
+            pz += nz * (n - 0.5) * amp * 2;
 
             pts.push(px, py, pz);
+
+            // Chaleur : distance au coeur du cerveau
+            const dx = px, dy = py + 0.05, dz = pz - 0.16;
+            const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            heat.push(clamp01(1 - (dist - 0.28) / 0.58));
         }
 
-        // Melange
+        // Melange (points et chaleur ensemble)
         const n3 = pts.length / 3;
         for (let i = n3 - 1; i > 0; i--) {
             const j = Math.floor(rnd() * (i + 1));
@@ -266,17 +327,27 @@
                 pts[i * 3 + k] = pts[j * 3 + k];
                 pts[j * 3 + k] = tmp;
             }
+            const th = heat[i]; heat[i] = heat[j]; heat[j] = th;
         }
 
-        return new Float32Array(pts.slice(0, count * 3));
+        return {
+            positions: new Float32Array(pts.slice(0, count * 3)),
+            heat: new Float32Array(heat.slice(0, count))
+        };
     }
 
-    /* Voisinage : grille spatiale (le cerveau a des milliers de points) */
-    function buildLinks(points, count, perNode, threshold) {
+    function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+    /* Voisinage : grille spatiale (le cerveau a des dizaines de milliers
+       de points, un balayage O(n^2) serait interminable). */
+    function buildLinks(points, count, perNode, threshold, subset) {
         const cell = threshold;
         const grid = new Map();
         const key = (a, b, c) => a + '|' + b + '|' + c;
 
+        const nodes = subset || null;
+        const list = nodes || null;
+        void list;
         for (let i = 0; i < count; i++) {
             const cx = Math.floor(points[i * 3] / cell);
             const cy = Math.floor(points[i * 3 + 1] / cell);
@@ -290,8 +361,17 @@
         const links = [];
         const found = [];
 
-        for (let i = 0; i < count; i++) {
-            const xi = points[i * 3], yi = points[i * 3 + 1], zi = points[i * 3 + 2];
+        // Masque : quels points sont concernes par le maillage
+        let mask = null;
+        if (subset) {
+            mask = new Uint8Array(count);
+            for (let i = 0; i < subset.length; i++) mask[subset[i]] = 1;
+        }
+
+        for (let a = 0; a < count; a++) {
+            if (mask && !mask[a]) continue;
+
+            const xi = points[a * 3], yi = points[a * 3 + 1], zi = points[a * 3 + 2];
             const cx = Math.floor(xi / cell);
             const cy = Math.floor(yi / cell);
             const cz = Math.floor(zi / cell);
@@ -304,7 +384,7 @@
                         if (!bucket) continue;
                         for (let b = 0; b < bucket.length; b++) {
                             const j = bucket[b];
-                            if (j === i) continue;
+                            if (j === a) continue;
                             const ddx = points[j * 3] - xi;
                             const ddy = points[j * 3 + 1] - yi;
                             const ddz = points[j * 3 + 2] - zi;
@@ -315,9 +395,9 @@
                 }
             }
 
-            if (found.length > 1) found.sort((a, b) => a[0] - b[0]);
+            if (found.length > 1) found.sort((p, q) => p[0] - q[0]);
             const take = Math.min(perNode, found.length);
-            for (let k = 0; k < take; k++) links.push(i, found[k][1]);
+            for (let k = 0; k < take; k++) links.push(a, found[k][1]);
         }
 
         return links;
@@ -396,26 +476,30 @@
         }
 
         _initBrain() {
-            const count = this.isMobile ? 2200 : 6000;
+            const count = this.isMobile ? 9000 : 26000;
 
-            this.brainSurface = buildBrainSurface(count);
-            this.shapeA = this.brainSurface;
+            const brain = buildBrainSurface(count);
+            this.brainSurface = brain.positions;
+            this.shapeA = brain.positions;
             this.shapeB = this._buildDissolve(count);
 
             const n = this.brainSurface.length / 3;
             const positions = new Float32Array(this.brainSurface);
             const sizes = new Float32Array(n);
             const seeds = new Float32Array(n);
+            const heats = new Float32Array(n);
             const rnd = mulberry32(77123);
             for (let i = 0; i < n; i++) {
-                sizes[i] = 0.055 + rnd() * 0.13;
+                sizes[i] = 0.045 + rnd() * 0.075;
                 seeds[i] = rnd();
+                heats[i] = brain.heat[i] || 0;
             }
 
             const geo = new THREE.BufferGeometry();
             geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
             geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
+            geo.setAttribute('aHeat', new THREE.BufferAttribute(heats, 1));
 
             this.constMat = new THREE.ShaderMaterial({
                 uniforms: {
@@ -423,8 +507,8 @@
                     uOpacity:     { value: 0.95 },
                     uPixelRatio:  { value: this.pixelRatio },
                     uGlitch:      { value: 0 },
-                    uColor:       { value: new THREE.Color(0x2b4055) },
-                    uHot:         { value: new THREE.Color(0xff7a2e) }
+                    uCold:        { value: new THREE.Color(0x3f5568) },
+                    uHot:         { value: new THREE.Color(0xf07c2c) }
                 },
                 vertexShader: POINT_VERT,
                 fragmentShader: POINT_FRAG,
@@ -436,28 +520,41 @@
             this.constellation = new THREE.Points(geo, this.constMat);
             this.root.add(this.constellation);
 
-            /* Reseau : liaisons entre voisins proches (grille spatiale) */
-            const links = buildLinks(this.brainSurface, n, 2, 0.13);
+            /* Reseau : un voile de liaisons entre voisins proches.
+               On ne lie qu'un sous-ensemble de points : avec 26 000 points,
+               la densite fait deja la forme, le maillage ne doit qu'accentuer.
+               Il doit rester tres discret, sinon on lit un fil de fer
+               plutot qu'un cerveau. */
+            const stride = Math.max(1, Math.round(n / 3500));
+            const subset = [];
+            for (let i = 0; i < n; i += stride) subset.push(i);
+            const links = buildLinks(this.brainSurface, n, 2, 0.11, subset);
+
             const linkCount = links.length / 2;
+            // Couleur en RVBA : Three.js n'utilise l'alpha d'une couleur de
+            // sommet que si l'attribut est en 4 composantes. Sinon l'alpha
+            // encode dans le RGB rend les lignes noires et opaques.
             const linkPos = new Float32Array(linkCount * 6);
-            const linkCol = new Float32Array(linkCount * 6);
+            const linkCol = new Float32Array(linkCount * 8);
             const c = new THREE.Color();
             const rnd2 = mulberry32(4242);
 
             for (let l = 0; l < linkCount; l++) {
-                const alpha = 0.1 + rnd2() * 0.16;
-                c.setHSL(0.56 + rnd2() * 0.06, 0.26, 0.40);
-                linkCol[l * 6 + 0] = c.r * alpha;
-                linkCol[l * 6 + 1] = c.g * alpha;
-                linkCol[l * 6 + 2] = c.b * alpha;
-                linkCol[l * 6 + 3] = c.r * alpha * 0.55;
-                linkCol[l * 6 + 4] = c.g * alpha * 0.55;
-                linkCol[l * 6 + 5] = c.b * alpha * 0.55;
+                const alpha = 0.1 + rnd2() * 0.13;
+                c.setHSL(0.55 + rnd2() * 0.05, 0.34, 0.42);
+                linkCol[l * 8 + 0] = c.r;
+                linkCol[l * 8 + 1] = c.g;
+                linkCol[l * 8 + 2] = c.b;
+                linkCol[l * 8 + 3] = alpha;
+                linkCol[l * 8 + 4] = c.r;
+                linkCol[l * 8 + 5] = c.g;
+                linkCol[l * 8 + 6] = c.b;
+                linkCol[l * 8 + 7] = alpha * 0.55;
             }
 
             const linkGeo = new THREE.BufferGeometry();
             linkGeo.setAttribute('position', new THREE.BufferAttribute(linkPos, 3));
-            linkGeo.setAttribute('color', new THREE.BufferAttribute(linkCol, 3));
+            linkGeo.setAttribute('color', new THREE.BufferAttribute(linkCol, 4));
 
             this.links = new THREE.LineSegments(
                 linkGeo,
@@ -505,6 +602,7 @@
             geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
             geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
             geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
+            geo.setAttribute('aHeat', new THREE.BufferAttribute(new Float32Array(count), 1));
 
             this.dustMat = new THREE.ShaderMaterial({
                 uniforms: {
@@ -512,8 +610,8 @@
                     uOpacity:    { value: 0.35 },
                     uPixelRatio: { value: this.pixelRatio },
                     uGlitch:     { value: 0 },
-                    uColor:      { value: new THREE.Color(0x8a9bad) },
-                    uHot:        { value: new THREE.Color(0xff9a5c) }
+                    uCold:       { value: new THREE.Color(0xb9bfc7) },
+                    uHot:        { value: new THREE.Color(0xffb27a) }
                 },
                 vertexShader: POINT_VERT,
                 fragmentShader: POINT_FRAG,
@@ -834,8 +932,10 @@
                 this.constMat.uniforms.uGlitch.value = s.glitch;
                 this.links.material.opacity = s.constOpacity * this.intro.opacity;
 
-                this.constellation.rotation.y = Math.sin(t * 0.1) * 0.16 + this.pointerSmooth.x * 0.12;
-                this.constellation.rotation.x = Math.sin(t * 0.075) * 0.06 + this.pointerSmooth.y * 0.06;
+                // Vue 3/4 : c'est l'angle qui fait lire un cerveau
+                // plutot qu'une forme symetrique de face.
+                this.constellation.rotation.y = -0.52 + Math.sin(t * 0.1) * 0.13 + this.pointerSmooth.x * 0.12;
+                this.constellation.rotation.x = 0.13 + Math.sin(t * 0.075) * 0.05 + this.pointerSmooth.y * 0.06;
 
                 const brainDist = Math.max(0.5, this.camera.position.z - s.constZ);
                 const bHalfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * brainDist;

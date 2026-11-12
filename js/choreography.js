@@ -18,8 +18,8 @@
 
     const ACTS_DESKTOP = [
         { // 0 — ACCUEIL : le cerveau occupe l'écran, texte en bas (style MDX)
-            constOpacity: 1, constSpread: 1.45,
-            constX: 0, constY: 0.38, constZ: -1,
+            constOpacity: 1, constSpread: 1.62,
+            constX: 0.02, constY: 0.36, constZ: -1,
             morphB: 0,
             dustOpacity: 0.3, glowOpacity: 1, glowScale: 1.1,
             camX: 0, camY: 0, camZ: 8

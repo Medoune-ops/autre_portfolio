@@ -18,49 +18,49 @@
 
     const ACTS_DESKTOP = [
         { // 0 — ACCUEIL : le cerveau occupe l'écran, texte en bas (style MDX)
-            constOpacity: 1, constSpread: 1.62,
-            constX: 0.02, constY: 0.36, constZ: -1,
+            constOpacity: 1, constSpread: 1.95,
+            constX: 0.02, constY: 0.34, constZ: -0.8,
             morphB: 0,
-            dustOpacity: 0.3, glowOpacity: 1, glowScale: 1.1,
+            dustOpacity: 0.3, glowOpacity: 1, glowScale: 1.2,
             camX: 0, camY: 0, camZ: 8
         },
         { // 1 — À PROPOS : le cerveau descend, il se connecte aux piliers
-            constOpacity: 0.85, constSpread: 1.5,
+            constOpacity: 0.85, constSpread: 1.7,
             constX: 0.06, constY: -0.22, constZ: -3,
             morphB: 0,
             dustOpacity: 0.22, glowOpacity: 0.7, glowScale: 0.9,
             camX: 0, camY: 0, camZ: 9
         },
         { // 2 — SERVICES : le cerveau s'ouvre, les axones montent vers les cartes
-            constOpacity: 0.7, constSpread: 1.4,
+            constOpacity: 0.7, constSpread: 1.6,
             constX: 0.06, constY: -0.4, constZ: -4,
             morphB: 0,
             dustOpacity: 0.3, glowOpacity: 0.6, glowScale: 0.8,
             camX: 0, camY: 0, camZ: 9.6
         },
         { // 3 — STACK : le cerveau se resserre, une pensée qui boucle
-            constOpacity: 0.72, constSpread: 1.3,
+            constOpacity: 0.72, constSpread: 1.5,
             constX: 0.08, constY: -0.36, constZ: -4,
             morphB: 0,
             dustOpacity: 0.26, glowOpacity: 0.55, glowScale: 0.75,
             camX: 0, camY: 0, camZ: 8.8
         },
         { // 4 — PROJETS : le cerveau se dilue en champ de points
-            constOpacity: 0.55, constSpread: 1.6,
+            constOpacity: 0.55, constSpread: 1.8,
             constX: 0.22, constY: 0.06, constZ: -4,
             morphB: 0,
             dustOpacity: 0.2, glowOpacity: 0.45, glowScale: 0.9,
             camX: 0, camY: 0, camZ: 10.5
         },
         { // 5 — PARCOURS : le cerveau se place à droite, il relie les étapes
-            constOpacity: 0.7, constSpread: 1.5,
+            constOpacity: 0.7, constSpread: 1.7,
             constX: 0.46, constY: 0.04, constZ: -4,
             morphB: 0,
             dustOpacity: 0.22, glowOpacity: 0.5, glowScale: 0.85,
             camX: 0, camY: 0, camZ: 9
         },
         { // 6 — CONTACT : le cerveau s'illumine et se délite en axones
-            constOpacity: 0.8, constSpread: 1.8,
+            constOpacity: 0.8, constSpread: 2,
             constX: 0.04, constY: -0.3, constZ: -3,
             morphB: 0.55,
             dustOpacity: 0.26, glowOpacity: 0.8, glowScale: 1,
@@ -69,10 +69,10 @@
     ];
 
     const ACTS_MOBILE = [
-        { constOpacity: 0.5, constSpread: 1.8,
-          constX: 0, constY: 0.6, constZ: -3, morphB: 0,
+        { constOpacity: 0.55, constSpread: 1.9,
+          constX: 0, constY: 0.62, constZ: -2.4, morphB: 0,
           dustOpacity: 0.16, glowOpacity: 0.5, glowScale: 0.7, camX: 0, camY: 0, camZ: 8 },
-        { constOpacity: 0.46, constSpread: 1.7,
+        { constOpacity: 0.46, constSpread: 1.8,
           constX: 0.1, constY: -0.25, constZ: -3, morphB: 0,
           dustOpacity: 0.18, glowOpacity: 0.45, glowScale: 0.7, camX: 0, camY: 0, camZ: 9 },
         { constOpacity: 0.42, constSpread: 1.8,

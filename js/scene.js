@@ -60,8 +60,10 @@
             float d = length(c);
             if(d > 0.5) discard;
 
-            float core = smoothstep(0.5, 0.06, d);
-            float a = pow(core, 1.35);
+            float core = smoothstep(0.5, 0.30, d);
+            // Disque plein a bord net : les points se touchent et la
+            // silhouette devient une masse, pas de la poussiere.
+            float a = pow(core, 0.55);
 
             // Le coeur incandescent, les bords froids
             float heat = pow(vHeat, 3.2);
@@ -303,8 +305,9 @@
                 n = Math.sin(py * 58 + pz * 11) * 0.5 + 0.5;
                 amp = 0.014;
             } else {
-                n = fbmRidged(px * 4.4, py * 4.4, pz * 4.4, 3);
-                amp = 0.052;
+                // Plis plus larges : une silhouette nette, pas du bruit fin
+                n = fbmRidged(px * 3.1, py * 3.1, pz * 3.1, 3);
+                amp = 0.055;
             }
             px += nx * (n - 0.5) * amp * 2;
             py += ny * (n - 0.5) * amp * 2;
@@ -476,7 +479,7 @@
         }
 
         _initBrain() {
-            const count = this.isMobile ? 9000 : 26000;
+            const count = this.isMobile ? 14000 : 42000;
 
             const brain = buildBrainSurface(count);
             this.brainSurface = brain.positions;
@@ -490,7 +493,9 @@
             const heats = new Float32Array(n);
             const rnd = mulberry32(77123);
             for (let i = 0; i < n; i++) {
-                sizes[i] = 0.045 + rnd() * 0.075;
+                // Taille tres homogene : la silhouette doit etre nette,
+                // pas poussiereuse.
+                sizes[i] = 0.058 + rnd() * 0.06;
                 seeds[i] = rnd();
                 heats[i] = brain.heat[i] || 0;
             }
@@ -525,7 +530,7 @@
                la densite fait deja la forme, le maillage ne doit qu'accentuer.
                Il doit rester tres discret, sinon on lit un fil de fer
                plutot qu'un cerveau. */
-            const stride = Math.max(1, Math.round(n / 3500));
+            const stride = Math.max(1, Math.round(n / 4500));
             const subset = [];
             for (let i = 0; i < n; i += stride) subset.push(i);
             const links = buildLinks(this.brainSurface, n, 2, 0.11, subset);

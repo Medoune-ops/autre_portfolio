@@ -7,7 +7,11 @@
     <meta name="description" content="Medoune SECK — Développeur Full-Stack. Expériences web 3D, interfaces interactives et logiciels sur mesure.">
     <title>Medoune SECK — Développeur Full-Stack</title>
 
-    <!-- Typographies : display éditorial + sans géométrique + mono -->
+    <!-- La classe "js" conditionne tout ce qui masque le contenu par defaut :
+         sans JavaScript, la page reste entierement lisible. -->
+    <script>document.documentElement.classList.add('js');</script>
+
+    <!-- Typographies : display editorial + sans geometrique + mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -19,6 +23,15 @@
 </head>
 <body class="is-loading">
 
+    <noscript>
+        <style>
+            html.js body.is-loading { overflow: auto !important; }
+            html.js [data-reveal="fade-up"] { opacity: 1 !important; transform: none !important; }
+            .preloader { display: none !important; }
+            #gl-canvas { display: none !important; }
+        </style>
+    </noscript>
+
     <!-- ============ PRELOADER ============ -->
     <div class="preloader" id="preloader" role="status" aria-live="polite">
         <div class="preloader__top">
@@ -27,7 +40,9 @@
         </div>
 
         <div class="preloader__bottom">
-            <div class="preloader__messages" id="preloader-messages">
+            <!-- Les messages rotatifs sont purement decoratifs : c'est le
+                 texte "Chargement..." ci-dessous qui est annonce. -->
+            <div class="preloader__messages" id="preloader-messages" aria-hidden="true">
                 <span class="preloader__msg is-active">L'expérience se prépare</span>
                 <span class="preloader__msg">Les particules se mettent en place</span>
                 <span class="preloader__msg">Un instant, le temps de tout charger</span>
@@ -36,8 +51,9 @@
             </div>
 
             <div class="preloader__meta">
-                <span class="preloader__count" id="loader-count">00</span>
-                <div class="preloader__bar"><span id="loader-bar"></span></div>
+                <span class="preloader__count" id="loader-count" aria-hidden="true">00</span>
+                <div class="preloader__bar" aria-hidden="true"><span id="loader-bar"></span></div>
+                <span class="sr-only">Chargement du portfolio en cours.</span>
             </div>
         </div>
 
@@ -68,6 +84,8 @@
     </div>
 
     <!-- ============ NAVIGATION ============ -->
+    <a class="skip-link" href="#main">Aller au contenu principal</a>
+
     <header class="navbar" id="navbar">
         <nav class="container navbar__inner">
             <a href="#accueil" class="logo" data-magnetic>
@@ -152,7 +170,7 @@
 
                 <div class="hero__right" data-reveal="fade-up" data-delay="0.25">
                     <p class="hero__right-text">
-                        Que ce soit une interface, un logiciel métier ou une scène temps réel,
+                        Que ce soit une interface, un logiciel métier ou une scène en temps réel,
                         je livre des expériences qui ne se contentent pas d'être fonctionnelles —
                         elles <em>se ressentent</em>.
                     </p>
@@ -164,7 +182,7 @@
                     </ul>
                     <ul class="hero__stats">
                         <li><strong>3+</strong><span>ans de code</span></li>
-                        <li><strong>10+</strong><span>technologies</span></li>
+                        <li><strong>18+</strong><span>technologies</span></li>
                         <li><strong>2</strong><span>projets livrés</span></li>
                     </ul>
                 </div>
@@ -193,7 +211,7 @@
                     <div class="manifesto__body">
                         <p class="manifesto__lead" data-reveal="fade-up">
                             Je suis Medoune SECK, développeur full-stack et étudiant en informatique
-                            spécialisé Web, Mobile &amp; Gaming. J'aime les projets où la technique
+                            spécialisé en développement Web, Mobile &amp; Gaming. J'aime les projets où la technique
                             et le design ne sont pas deux choses séparées, mais une seule.
                         </p>
                         <p data-reveal="fade-up" data-delay="0.1">
@@ -223,7 +241,7 @@
                         <li data-neuron data-reveal="fade-up" data-delay="0.4">
                             <i data-lucide="shield-check"></i>
                             <strong>Fiabilité</strong>
-                            <span>Code maintenable, sécurisée, documenté.</span>
+                            <span>Code maintenable, sécurisé, documenté.</span>
                         </li>
                     </ul>
                 </div>
@@ -243,7 +261,7 @@
                         <span class="service-card__idx mono">01</span>
                         <div class="service-card__icon"><i data-lucide="code-2"></i></div>
                         <h3>Développement Web</h3>
-                        <p>Sites vitrines, web apps et e-commerces. HTML/CSS/JS, React, Tailwind — responsive, accessibles, optimisés SEO.</p>
+                        <p>Sites vitrines, applications web et boutiques en ligne. HTML/CSS/JS, React, Tailwind — responsives, accessibles, optimisés pour le SEO.</p>
                         <ul class="service-card__tags mono">
                             <li>React</li><li>Tailwind</li><li>Next.js</li>
                         </ul>
@@ -313,10 +331,10 @@
                         <ul class="stack__list">
                             <li><span class="stack__dot"></span>HTML5 / CSS3</li>
                             <li><span class="stack__dot"></span>JavaScript / TypeScript</li>
-                            <li><span class="stack__dot"></span>React.js / Next.js</li>
+                            <li><span class="stack__dot"></span>React / Next.js</li>
                             <li><span class="stack__dot"></span>Tailwind CSS</li>
                             <li><span class="stack__dot"></span>Three.js / WebGL</li>
-                            <li><span class="stack__dot"></span>GSAP / Motion</li>
+                            <li><span class="stack__dot"></span>GSAP / Motion One</li>
                         </ul>
                     </div>
                     <div class="stack__col" data-neuron data-reveal="fade-up" data-delay="0.1">
@@ -380,7 +398,7 @@
                                 <span class="project__idx mono">02</span>
                                 <div>
                                     <h3>Portfolio — v1</h3>
-                                    <p>Ma première vitrine en ligne : un one-page dark, typé et animé. Version 2 en cours de construction, avec scènes 3D et narration au scroll.</p>
+                                    <p>Ma première vitrine en ligne : une page unique sombre, typée et animée. Version 2 en cours de construction, avec scènes 3D et narration au scroll.</p>
                                     <span class="project__link-label">Visiter le projet <i data-lucide="arrow-up-right"></i></span>
                                 </div>
                             </div>
@@ -404,11 +422,11 @@
 
                     <div class="timeline__item" data-neuron data-reveal="fade-up">
                         <span class="timeline__node" aria-hidden="true"></span>
-                        <div class="timeline__date mono">2025 → Aujourd'hui</div>
+                        <div class="timeline__date mono">2025 → aujourd'hui</div>
                         <div class="timeline__body">
                             <h3>Licence 3 — Informatique</h3>
                             <span class="timeline__org">Université UNCHK</span>
-                            <p>Spécialisation Web, Mobile &amp; Gaming. Consolidation des bases en algorithmique, bases de données et génie logiciel, avec une ouverture forte vers le temps réel et le graphisme.</p>
+                            <p>Spécialisation en développement Web, Mobile &amp; Gaming. Consolidation des bases en algorithmique, en bases de données et en génie logiciel, avec une ouverture forte vers le temps réel et le graphisme.</p>
                         </div>
                     </div>
 
@@ -418,7 +436,7 @@
                         <div class="timeline__body">
                             <h3>Licence — Informatique</h3>
                             <span class="timeline__org">Univers Professionnel</span>
-                            <p>Formation généraliste en informatique : programmation, réseaux, gestion de projets. Obtention de la licence avec Mention Bien.</p>
+                            <p>Formation généraliste en informatique : programmation, réseaux, gestion de projet. Obtention de la licence avec mention bien.</p>
                         </div>
                     </div>
                 </div>
@@ -436,7 +454,7 @@
                         Parlons de votre projet
                     </h2>
                     <p class="contact__lead" data-reveal="fade-up">
-                        Une idée, un besoin, une envie de sortir du template ?
+                        Une idée, un besoin, une envie de sortir des modèles ?
                         Écrivez-moi, je réponds vite.
                     </p>
 
@@ -469,20 +487,26 @@
                     <form class="contact-form" id="contact-form" novalidate>
                         <div class="form-group">
                             <label for="name">Nom complet</label>
-                            <input type="text" id="name" name="name" placeholder="Votre nom" autocomplete="name" required>
-                            <span class="form-group__error" data-error-for="name"></span>
+                            <input type="text" id="name" name="name" placeholder="Votre nom" autocomplete="name"
+                                   required aria-required="true" aria-describedby="error-name">
+                            <span class="form-group__error" id="error-name" data-error-for="name"
+                                  role="alert" aria-live="polite"></span>
                         </div>
 
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input type="email" id="email" name="email" placeholder="vous@exemple.com" autocomplete="email" required>
-                            <span class="form-group__error" data-error-for="email"></span>
+                            <input type="email" id="email" name="email" placeholder="vous@exemple.com" autocomplete="email"
+                                   required aria-required="true" aria-describedby="error-email">
+                            <span class="form-group__error" id="error-email" data-error-for="email"
+                                  role="alert" aria-live="polite"></span>
                         </div>
 
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="5" placeholder="Comment puis-je vous aider ?" required></textarea>
-                            <span class="form-group__error" data-error-for="message"></span>
+                            <textarea id="message" name="message" rows="5" placeholder="Comment puis-je vous aider ?"
+                                      required aria-required="true" aria-describedby="error-message"></textarea>
+                            <span class="form-group__error" id="error-message" data-error-for="message"
+                                  role="alert" aria-live="polite"></span>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block" data-neuron data-magnetic>

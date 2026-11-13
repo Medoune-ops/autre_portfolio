@@ -18,8 +18,8 @@
 
     const ACTS_DESKTOP = [
         { // 0 — ACCUEIL : le cerveau occupe l'écran, texte en bas (style MDX)
-            constOpacity: 1, constSpread: 1.95,
-            constX: 0.02, constY: 0.34, constZ: -0.8,
+            constOpacity: 1, constSpread: 2.6,
+            constX: 0.02, constY: 0.42, constZ: -0.8,
             morphB: 0,
             dustOpacity: 0.3, glowOpacity: 1, glowScale: 1.2,
             camX: 0, camY: 0, camZ: 8
@@ -449,6 +449,7 @@
         },
 
         _applyProgress(p) {
+            if (!this.scene) return;
             const acts = this.acts;
             const a = this.anchors;
             if (!a.length) return;
@@ -472,11 +473,15 @@
 
         /* --- Ouverture : le hero se met en scène --- */
         playIntro() {
-            if (REDUCED) {
+            // Sans scene 3D (reduced-motion, WebGL indisponible), on se
+            // contente de rendre le texte visible.
+            if (REDUCED || !this.scene) {
                 gsap.set('.split-word__inner, .split-line__inner', { yPercent: 0 });
                 gsap.set('[data-reveal]', { opacity: 1, y: 0 });
-                this.scene.intro.scale = 1;
-                this.scene.intro.opacity = 1;
+                if (this.scene) {
+                    this.scene.intro.scale = 1;
+                    this.scene.intro.opacity = 1;
+                }
                 return;
             }
 

@@ -22,17 +22,30 @@
         // Icônes
         if (window.lucide) lucide.createIcons();
 
+        // GSAP est optionnel : sans lui (CDN bloque, reseau coupe), le site
+        // doit rester parfaitement lisible et utilisable. On retire alors le
+        // preloader et on revele tout le contenu.
+        const HAS_GSAP = !!window.gsap;
+        if (!HAS_GSAP) {
+            document.documentElement.classList.add('no-gsap');
+            document.body.classList.remove('is-loading');
+            const pre = document.getElementById('preloader');
+            if (pre) pre.remove();
+        }
+
         // Découpe du texte AVANT le préloader : le hero est déjà masqué
         // quand le rideau s'ouvre, pas de flash.
-        if (window.Choreography) Choreography.prepareText();
+        if (HAS_GSAP && window.Choreography) Choreography.prepareText();
 
         // Scroll fluide + ScrollTrigger
-        setupSmoothScroll();
-        gsap.registerPlugin(ScrollTrigger);
+        if (HAS_GSAP) {
+            setupSmoothScroll();
+            gsap.registerPlugin(ScrollTrigger);
+        }
 
         // Scène 3D
         const canvas = $('#gl-canvas');
-        if (canvas && window.Scene3D && !REDUCED) {
+        if (canvas && window.Scene3D && !REDUCED && HAS_GSAP) {
             try {
                 scene = window.Scene3D.create(canvas);
                 window.__scene = scene;
@@ -53,6 +66,10 @@
         setupRevealOnLoad();
         setupLayoutObserver();
         buildSchematics();
+
+        // L'annee courante, pas une valeur codee en dur
+        const yearEl = document.getElementById('current-year');
+        if (yearEl) yearEl.textContent = String(new Date().getFullYear());
     }
 
     /* =====================================================================
@@ -60,7 +77,8 @@
        ===================================================================== */
     function setupSmoothScroll() {
         if (REDUCED || !window.Lenis) {
-            document.documentElement.style.scrollBehavior = 'smooth';
+            // 'smooth' contredit reduced-motion : on impose 'auto'.
+            document.documentElement.style.scrollBehavior = 'auto';
             return;
         }
 
@@ -91,8 +109,18 @@
        BOUCLE DE RENDU 3D
        ===================================================================== */
     function startRenderLoop() {
-        gsap.ticker.add(() => {
-            if (scene) scene.render();
+        // requestAnimationFrame : meme rendu que gsap.ticker, et le
+        // navigateur met la boucle en pause tout seul quand l'onglet passe
+        // en arriere-plan (pas de consommation de batterie inutile).
+        let raf = 0;
+        const loop = () => {
+            if (scene && !document.hidden) scene.render();
+            raf = requestAnimationFrame(loop);
+        };
+        raf = requestAnimationFrame(loop);
+        window.addEventListener('pagehide', () => {
+            if (raf) cancelAnimationFrame(raf);
+            if (scene) scene.dispose();
         });
     }
 
@@ -138,17 +166,38 @@
         const finish = () => {
             if (done) return;
             done = true;
+            try {
+                finishWork();
+            } catch (err) {
+                // Filet de securite : le rideau doit se lever quoi qu'il
+                // arrive, sinon la page reste bloquee derriere le preloader.
+                console.warn('Finalisation partielle :', err);
+                if (window.gsap) gsap.set(preloader, { display: 'none' });
+                else preloader.style.display = 'none';
+                document.body.classList.remove('is-loading');
+                document.body.classList.add('loaded');
+            }
+        };
+
+        const finishWork = () => {
             stopMessages();
             document.body.classList.remove('is-loading');
             document.body.classList.add('scene-ready');
 
-            if (scene) {
+            if (window.Choreography) {
                 Choreography.init(scene);
                 Choreography.playIntro();
+            }
 
-                // Axones : le cerveau se connecte aux infos de la page
-                const targets = $$('[data-neuron]');
-                if (targets.length) scene.registerNeuronTargets(targets);
+            if (scene) {
+
+                // Axones : le cerveau se connecte aux infos de la page.
+                // On attend la construction :.registerNeuronTargets ignore
+                // silencieusement un cerveau pas encore pret.
+                scene.buildBrain().then(() => {
+                    const targets = $$('[data-neuron]');
+                    if (targets.length) scene.registerNeuronTargets(targets);
+                });
 
                 // Recalcule la scène quand la mise en page est stabilisée
                 setTimeout(() => { ScrollTrigger.refresh(); scene.resize(); }, 260);
@@ -249,7 +298,7 @@
             lastHeight = h;
             clearTimeout(timer);
             timer = setTimeout(() => {
-                ScrollTrigger.refresh();
+                if (window.ScrollTrigger) ScrollTrigger.refresh();
                 if (window.Choreography) Choreography.refreshAnchors();
             }, 140);
         });
@@ -262,7 +311,7 @@
             img.addEventListener('load', () => {
                 clearTimeout(timer);
                 timer = setTimeout(() => {
-                    ScrollTrigger.refresh();
+                    if (window.ScrollTrigger) ScrollTrigger.refresh();
                     if (window.Choreography) Choreography.refreshAnchors();
                 }, 140);
             }, { once: true });
@@ -335,27 +384,32 @@
             });
             svg.appendChild(dots);
 
-            // Connexions uniquement entre points proches
+            // Connexions denses entre points proches : le maillage doit
+            // dessiner des plis, pas un graphe aleatoire.
             const lines = document.createElementNS(SVG_NS, 'g');
             lines.setAttribute('class', 'schematic__links');
-            const MAXD = 62;
+            const MAXD = 52;
+            const near = [];
             for (let i = 0; i < pts.length; i++) {
-                let best = -1, bestD = MAXD * MAXD;
-                for (let k = 0; k < 7; k++) {
+                near.length = 0;
+                for (let k = 0; k < 14; k++) {
                     const j = Math.floor(rnd() * pts.length);
                     if (j === i) continue;
                     const dx = pts[j][0] - pts[i][0];
                     const dy = pts[j][1] - pts[i][1];
                     const d = dx * dx + dy * dy;
-                    if (d < bestD) { bestD = d; best = j; }
+                    if (d < MAXD * MAXD) near.push([d, j]);
                 }
-                if (best < 0) continue;
-                const l = document.createElementNS(SVG_NS, 'line');
-                l.setAttribute('x1', pts[i][0].toFixed(1));
-                l.setAttribute('y1', pts[i][1].toFixed(1));
-                l.setAttribute('x2', pts[best][0].toFixed(1));
-                l.setAttribute('y2', pts[best][1].toFixed(1));
-                lines.appendChild(l);
+                near.sort((a, b) => a[0] - b[0]);
+                for (let k = 0; k < Math.min(2, near.length); k++) {
+                    const j = near[k][1];
+                    const l = document.createElementNS(SVG_NS, 'line');
+                    l.setAttribute('x1', pts[i][0].toFixed(1));
+                    l.setAttribute('y1', pts[i][1].toFixed(1));
+                    l.setAttribute('x2', pts[j][0].toFixed(1));
+                    l.setAttribute('y2', pts[j][1].toFixed(1));
+                    lines.appendChild(l);
+                }
             }
             svg.appendChild(lines);
 
@@ -385,19 +439,42 @@
         const links = $$('.mobile-nav-links a');
         links.forEach((l, i) => l.style.setProperty('--i', i));
 
+        // Le fond est rendu inerte quand le menu est ouvert : il ne doit
+        // plus etre atteignable au clavier ni lu par un lecteur d'ecran.
+        const BACKDROP = ['main', '.navbar', '.footer'];
+        const setBackdropInert = (on) => {
+            BACKDROP.forEach((sel) => {
+                const el = sel === 'main' ? document.querySelector('main') : document.querySelector(sel);
+                if (!el) return;
+                if (on) el.setAttribute('inert', '');
+                else el.removeAttribute('inert');
+            });
+        };
+
+        const FOCUSABLE = 'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])';
+        let lastFocus = null;
+
         const open = () => {
+            lastFocus = document.activeElement;
             menu.classList.add('is-open');
             menu.setAttribute('aria-hidden', 'false');
             btn.setAttribute('aria-expanded', 'true');
             document.body.classList.add('no-scroll');
+            setBackdropInert(true);
             if (lenis) lenis.stop();
+            // Le focus entre dans le menu
+            setTimeout(() => close?.focus(), 60);
         };
         const shut = () => {
             menu.classList.remove('is-open');
             menu.setAttribute('aria-hidden', 'true');
             btn.setAttribute('aria-expanded', 'false');
             document.body.classList.remove('no-scroll');
+            setBackdropInert(false);
             if (lenis) lenis.start();
+            // Le focus revient a l'element d'origine
+            if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+            else btn.focus();
         };
 
         btn.addEventListener('click', open);
@@ -406,18 +483,36 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && menu.classList.contains('is-open')) shut();
         });
+
+        // Piege de focus : Tab ne doit jamais sortir du menu ouvert
+        menu.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            const items = Array.from(menu.querySelectorAll(FOCUSABLE))
+                .filter((el) => el.offsetParent !== null);
+            if (!items.length) return;
+            const first = items[0];
+            const last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        });
     }
 
     /* =====================================================================
        CURSEUR PERSONNALISÉ
        ===================================================================== */
     function setupCursor() {
-        if (!HOVER_OK || REDUCED) return;
+        if (!HOVER_OK || REDUCED || !window.gsap) return;
 
         const cursor = $('#cursor');
+        if (!cursor) return;
         const dot = $('.cursor__dot', cursor);
         const ring = $('.cursor__ring', cursor);
-        if (!cursor) return;
+        if (!dot || !ring) return;
 
         document.body.classList.add('has-cursor');
 
@@ -513,7 +608,9 @@
        ===================================================================== */
     function setupRevealOnLoad() {
         if (scene) return;
-        gsap.set('[data-reveal]', { opacity: 1, y: 0 });
+        if (window.gsap) gsap.set('[data-reveal]', { opacity: 1, y: 0 });
+        else document.querySelectorAll('[data-reveal]')
+            .forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; });
     }
 
     /* =====================================================================
@@ -529,6 +626,7 @@
             const slot = form.querySelector(`[data-error-for="${name}"]`);
             const group = input?.closest('.form-group');
             group?.classList.add('is-invalid');
+            input?.setAttribute('aria-invalid', 'true');
             if (slot) {
                 slot.textContent = message;
                 slot.classList.add('is-visible');
@@ -539,7 +637,11 @@
             const input = form.querySelector(`#${name}`);
             const slot = form.querySelector(`[data-error-for="${name}"]`);
             input?.closest('.form-group')?.classList.remove('is-invalid');
-            if (slot) slot.classList.remove('is-visible');
+            input?.removeAttribute('aria-invalid');
+            if (slot) {
+                slot.textContent = '';
+                slot.classList.remove('is-visible');
+            }
         };
 
         ['name', 'email', 'message'].forEach((n) => {
@@ -559,7 +661,11 @@
 
             if (!ok) {
                 status.textContent = 'Merci de corriger les champs signalés.';
-                status.className = 'contact-form__note is-error';
+                status.classList.remove('is-success', 'is-error');
+                status.classList.add('is-error');
+                // Le focus va directement au premier champ fautif
+                const firstBad = form.querySelector('[aria-invalid="true"]');
+                if (firstBad) firstBad.focus();
                 return;
             }
 
@@ -567,8 +673,9 @@
             const body = encodeURIComponent(`${message}\n\n—\n${name}\n${email}`);
             window.location.href = `mailto:smedoune16@gmail.com?subject=${subject}&body=${body}`;
 
-            status.textContent = 'Votre client mail est ouvert. Répondez directement à smedoune16@gmail.com si besoin.';
-            status.className = 'contact-form__note is-success';
+            status.textContent = 'Votre application de messagerie est ouverte. Répondez directement à smedoune16@gmail.com si besoin.';
+            status.classList.remove('is-success', 'is-error');
+            status.classList.add('is-success');
             form.reset();
         });
     }

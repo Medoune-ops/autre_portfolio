@@ -13,6 +13,13 @@
     const AXIS_X = new THREE.Vector3(1, 0, 0);
     const AXIS_Y = new THREE.Vector3(0, 1, 0);
 
+    /* --- Routage PCB des axones --- */
+    const AXON_SEG = 26;             // points de chemin par axone (2 sommets chacun)
+    const AXON_MAX_NODES = 8;        // sommets max d'une route
+    const AXON_MAX_CORNERS = 4;      // coudes max par axone (donc vias max)
+    const TRACE_HALF_W = 1.6;         // demi-largeur du trait, en pixels CSS
+    const VIA_SIZE = 12;              // diametre d'un via, en pixels CSS
+
     /* =====================================================================
        SHADERS
        ===================================================================== */
@@ -21,14 +28,17 @@
         attribute float aSize;
         attribute float aSeed;
         attribute float aHeat;
+        attribute float aGyri;
         uniform float uTime;
         uniform float uPixelRatio;
         uniform float uGlitch;
         varying float vSeed;
         varying float vHeat;
+        varying float vGyri;
         void main(){
             vSeed = aSeed;
             vHeat = aHeat;
+            vGyri = aGyri;
             vec3 pos = position;
 
             // Respiration tres legere de la surface
@@ -42,7 +52,6 @@
             pos.z += g * uGlitch * 0.03;
 
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-            // Les points du coeur sont plus gros : la masse respire
             gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001)) * (0.75 + aHeat * 0.75);
             gl_Position = projectionMatrix * mv;
         }
@@ -55,32 +64,37 @@
         uniform float uTime;
         varying float vSeed;
         varying float vHeat;
+        varying float vGyri;
         void main(){
             vec2 c = gl_PointCoord - 0.5;
             float d = length(c);
             if(d > 0.5) discard;
 
             float core = smoothstep(0.5, 0.30, d);
-            // Disque plein a bord net : les points se touchent et la
-            // silhouette devient une masse, pas de la poussiere.
             float a = pow(core, 0.55);
 
-            // Le coeur incandescent, les bords froids
-            float heat = pow(vHeat, 3.2);
+            // La lumiere court dans les sillons entre les plis :
+            // gyri bas = creux = sillon incandescent.
+            float seam = smoothstep(0.44, 0.14, vGyri);
+
+            // Coeur incandescent + sillons
+            float heat = max(pow(vHeat, 2.6), seam * 0.92);
             vec3 col = mix(uCold, uHot, heat);
 
-            float tw = 0.72 + 0.28 * sin(uTime * 1.6 + vSeed * 31.4);
-            gl_FragColor = vec4(col, a * uOpacity * tw * (0.62 + heat * 0.38));
+            float tw = 0.74 + 0.26 * sin(uTime * 1.6 + vSeed * 31.4);
+            gl_FragColor = vec4(col, a * uOpacity * tw * (0.6 + heat * 0.4));
         }
     `;
 
-    /* --- Axone : ruban qui pousse du cerveau vers une cible --- */
+    /* --- Axone : trace de circuit imprime qui pousse du cerveau vers
+           une cible. La largeur du ruban est deja cuite dans la geometrie
+           (elle est calculee EN ESPACE ECRAN), le shader ne fait plus que
+           l'eclairage. --- */
 
     const AXON_VERT = `
         attribute float aT;
         attribute float aSeed;
         attribute float aSide;
-        uniform float uWidth;
         varying float vT;
         varying float vSeed;
         varying float vSide;
@@ -88,9 +102,7 @@
             vT = aT;
             vSeed = aSeed;
             vSide = aSide;
-            vec4 mv = modelViewMatrix * vec4(position, 1.0);
-            mv.xy += vec2(0.0, aSide) * uWidth;
-            gl_Position = projectionMatrix * mv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `;
 
@@ -106,17 +118,67 @@
         void main(){
             if (vT > uProgress) discard;
 
+            // Section du ruban : bords adoucis, coeur lumineux
             float edge = 1.0 - abs(vSide);
-            float body = smoothstep(0.0, 0.55, edge);
+            float body = smoothstep(0.0, 0.60, edge);
+            float core = smoothstep(0.52, 1.0, edge);
 
-            float tip = smoothstep(uProgress - 0.09, uProgress, vT);
+            // Tete du trace : la pointe lumineuse qui pousse
+            float head = smoothstep(uProgress - 0.06, uProgress, vT);
+            float spark = smoothstep(uProgress - 0.016, uProgress, vT);
 
+            // Signal qui circule le long de la trace
             float travel = fract(uTime * 0.22 + vSeed);
-            float band = exp(-pow((vT - travel) * 9.0, 2.0)) * step(travel, uProgress);
+            float band = exp(-pow((vT - travel) * 8.0, 2.0)) * step(travel, uProgress);
 
-            float alpha = (0.45 + tip * 0.5 + band * 0.3) * body;
-            vec3 col = mix(uColor, uHot, clamp(tip * 0.75 + band * 0.55, 0.0, 1.0));
-            gl_FragColor = vec4(col, alpha * uOpacity);
+            float alpha = (0.40 + core * 0.34 + head * 0.45 + band * 0.28) * body;
+            vec3 col = mix(uColor, uHot, clamp(head * 0.85 + band * 0.5 + core * 0.34, 0.0, 1.0));
+            col += uHot * spark * 0.30;
+            gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0) * uOpacity);
+        }
+    `;
+
+    /* --- Via : petit cercle creux pose sur les coudes du routage.
+           Tous les vias de la scene tiennent dans UN SEUL objet Points
+           (un seul draw call). --- */
+
+    const VIA_VERT = `
+        attribute float aT;
+        attribute float aProg;
+        attribute float aSeed;
+        uniform float uPixelRatio;
+        uniform float uSize;
+        varying float vOn;
+        varying float vSeed;
+        void main(){
+            vSeed = aSeed;
+            // Le via n'apparait que lorsque la tete du fil l'a atteint
+            vOn = smoothstep(aT - 0.05, aT + 0.01, aProg);
+            gl_PointSize = uSize * uPixelRatio;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const VIA_FRAG = `
+        uniform float uTime;
+        uniform float uOpacity;
+        uniform vec3  uColor;
+        uniform vec3  uHot;
+        varying float vOn;
+        varying float vSeed;
+        void main(){
+            if (vOn <= 0.003) discard;
+            vec2 c = gl_PointCoord - 0.5;
+            float d = length(c) * 2.0;
+            if (d > 1.0) discard;
+
+            // Anneau creux : le centre est perce, ce n'est pas un point plein
+            float ring = smoothstep(0.46, 0.60, d) * (1.0 - smoothstep(0.80, 0.96, d));
+
+            float pulse = 0.78 + 0.22 * sin(uTime * 2.2 + vSeed * 6.2831);
+            float a = ring * vOn * pulse * 0.95;
+            vec3 col = mix(uColor, uHot, ring * 0.9);
+            gl_FragColor = vec4(col, a * uOpacity);
         }
     `;
 
@@ -195,6 +257,19 @@
         return v;
     }
 
+    /* Circonvolutions sinueuses, style corail / cerveau.
+       Le bruit simple donne des bosses. C'est le DOMAIN WARPING (deformation
+       du domaine par un premier bruit) qui transforme les bosses en plis
+       qui serpettent, comme sur les references. */
+    function gyriNoise(x, y, z) {
+        const w1 = fbm3(x * 1.7, y * 1.7, z * 1.7, 2);
+        const w2 = fbm3(x * 1.7 + 4.7, y * 1.7 - 2.3, z * 1.7 + 1.9, 2);
+        const wx = x + w1 * 1.15;
+        const wy = y + w2 * 1.15;
+        const wz = z + (w1 - w2) * 0.85;
+        return fbmRidged(wx * 3.3, wy * 3.3, wz * 3.3, 2);
+    }
+
     function sdEllipsoid(px, py, pz, rx, ry, rz) {
         const ax = px / rx, ay = py / ry, az = pz / rz;
         const k0 = Math.sqrt(ax * ax + ay * ay + az * az);
@@ -208,43 +283,61 @@
         return b * (1 - h) + a * h - k * h * (1 - h);
     }
 
+    function smoothstep(a, b, x) {
+        const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
+        return t * t * (3 - 2 * t);
+    }
+
     /* Signed distance field du cerveau — anatomique
        Repere : x = lateral, y = haut, z = avant (la camera regarde vers -z)
-       Le cerveau est symetrique : on raisonne sur |x|. */
+
+       Point cle : la masse cerebrale est UN SEUL volume oblong, plus long
+       d'avant en arriere, aminci aux deux poles. Les deux hemispheres ne
+       sont pas deux ellipsoides separes (cela laissait un vide central et
+       donnait l'aspect de deux boules) : ils sont unis, et c'est la
+       fissure longitudinale qui les separe par un sillon etroit. */
     function brainSDF(x, y, z) {
         const ax = Math.abs(x);
 
-        /* --- Cervelet (arriere-bas) --- */
-        const cb = sdEllipsoid(x, y + 0.50, z + 0.50, 0.44, 0.29, 0.29);
+        const sFront = smoothstep(0.10, 0.92, z);   // 0 arriere, 1 avant
+        const sBack  = smoothstep(-0.20, -0.88, z);  // 1 a l'arriere
 
-        /* --- Tronc cerebral (descend sous le cerveau) --- */
-        const bs = sdEllipsoid(x, y + 0.76, z + 0.08, 0.125, 0.38, 0.115);
+        /* --- Cervelet, cale sous l'occipital --- */
+        const cb = sdEllipsoid(x, y + 0.38, z + 0.56, 0.34, 0.21, 0.23);
 
-        /* --- Cerveau : quatre lobes par hemisphere --- */
-        const frontal    = sdEllipsoid(ax - 0.40, y - 0.20, z - 0.30, 0.44, 0.43, 0.44);
-        const parietal   = sdEllipsoid(ax - 0.40, y - 0.34, z + 0.20, 0.43, 0.41, 0.40);
-        const occipital = sdEllipsoid(ax - 0.33, y - 0.02, z + 0.54, 0.33, 0.35, 0.29);
-        const temporal   = sdEllipsoid(ax - 0.47, y + 0.26, z - 0.02, 0.41, 0.26, 0.43);
+        /* --- Tronc cerebral --- */
+        const bs = sdEllipsoid(x, y + 0.58, z + 0.08, 0.095, 0.28, 0.09);
 
-        let cerebrum = smin(frontal, parietal, 0.26);
-        cerebrum = smin(cerebrum, occipital, 0.24);
-        cerebrum = smin(cerebrum, temporal, 0.20);
+        /* --- Masse cerebrale : un seul volume oblong --- */
+        const taperF = 1 - 0.30 * sFront;
+        const taperB = 1 - 0.24 * sBack;
+        const rx = 0.60 * taperF * taperB;
+        const ry = 0.46 * (1 - 0.17 * sFront);
+        const rz = 0.78;
+        const drop = -0.19 * sFront - 0.07 * sBack;   // le pole frontal s'abaisse
+        const main = sdEllipsoid(x, y - 0.05 - drop, z, rx, ry, rz);
 
-        let d = smin(cerebrum, cb, 0.20);
-        d = smin(d, bs, 0.14);
+        /* --- Lobe temporal : lobe distinct, suspendu sous la partie avant.
+               Il existe des deux cotes (d'ou |x|). --- */
+        const temporal = sdEllipsoid(ax - 0.34, y + 0.24, z - 0.16, 0.28, 0.20, 0.42);
 
-        /* --- Fissure longitudinale (separatrice des hemispheres) --- */
-        const wobble = 0.022 * Math.sin(z * 3.4 + 1.2);
-        const fx = Math.abs(x - wobble) - 0.055;
-        const fz = Math.max(-0.86 - z, z - 1.0);
+        let cerebrum = smin(main, temporal, 0.11);
+
+        let d = smin(cerebrum, cb, 0.13);
+        d = smin(d, bs, 0.10);
+
+        /* --- Fissure longitudinale : un sillon etroit, legerement sinueux --- */
+        const wobble = 0.018 * Math.sin(z * 3.2 + 1.2);
+        const fx = Math.abs(x - wobble) - 0.05;
+        const fz = Math.max(-0.74 - z, z - 0.86);
         const fy = -0.30 - y;
         d = Math.max(d, -Math.max(fx, Math.max(fz, fy)));
 
         /* --- Sillon de Sylvius : separe le lobe temporal du reste --- */
-        const plane = y - (-0.02 + 0.34 * z);
-        const gx = Math.max(0.29 - ax, ax - 1.3);
-        const gz = Math.max(-0.42 - z, z - 0.52);
-        const syl = Math.max(Math.abs(plane) - 0.05, Math.max(gx, gz));
+        const plane = y - (-0.10 + 0.32 * z);
+        const gx = Math.max(0.26 - ax, ax - 1.3);
+        const gz = Math.max(-0.44 - z, z - 0.46);
+        const syl = Math.max(Math.abs(plane) - 0.04, Math.max(gx, gz));
         d = Math.max(d, -syl);
 
         return d;
@@ -260,6 +353,7 @@
         const rnd = mulberry32(20261112);
         const pts = [];
         const heat = [];
+        const gyri = [];
 
         const BX = 1.2, BY_MIN = -1.2, BY_MAX = 0.85, BZ = 0.95;
         const e = 0.006;
@@ -298,22 +392,22 @@
             const gl = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
             const nx = gx / gl, ny = gy / gl, nz = gz / gl;
 
-            // Cervelet : fines stries (folia). Cerveau : circonvolutions.
+            // Cervelet : fines stries (folia). Cerveau : plis sinueux.
             const isCerebellum = py < -0.26 && pz < -0.28;
             let n, amp;
             if (isCerebellum) {
                 n = Math.sin(py * 58 + pz * 11) * 0.5 + 0.5;
                 amp = 0.014;
             } else {
-                // Plis plus larges : une silhouette nette, pas du bruit fin
-                n = fbmRidged(px * 3.1, py * 3.1, pz * 3.1, 3);
-                amp = 0.055;
+                n = gyriNoise(px, py, pz);
+                amp = 0.075;
             }
             px += nx * (n - 0.5) * amp * 2;
             py += ny * (n - 0.5) * amp * 2;
             pz += nz * (n - 0.5) * amp * 2;
 
             pts.push(px, py, pz);
+            gyri.push(n);
 
             // Chaleur : distance au coeur du cerveau
             const dx = px, dy = py + 0.05, dz = pz - 0.16;
@@ -331,11 +425,13 @@
                 pts[j * 3 + k] = tmp;
             }
             const th = heat[i]; heat[i] = heat[j]; heat[j] = th;
+            const tg = gyri[i]; gyri[i] = gyri[j]; gyri[j] = tg;
         }
 
         return {
             positions: new Float32Array(pts.slice(0, count * 3)),
-            heat: new Float32Array(heat.slice(0, count))
+            heat: new Float32Array(heat.slice(0, count)),
+            gyri: new Float32Array(gyri.slice(0, count))
         };
     }
 
@@ -425,6 +521,12 @@
             this.neurons = [];
             this.neuronObserver = null;
 
+            /* --- Tampons de travail (aucune allocation par frame) --- */
+            this._vp = new THREE.Matrix4();     // view-projection
+            this._w = new Float32Array(2);      // point monde temporaire
+            this._p2 = new Float32Array(2);     // point ecran temporaire
+            this._v3 = new THREE.Vector3();     // point monde temporaire
+
             /* --- Etat anime (pilote par GSAP) ---
                constX / constY normalises : 0 = centre ecran, +-1 = bord */
             this.state = {
@@ -491,6 +593,7 @@
             const sizes = new Float32Array(n);
             const seeds = new Float32Array(n);
             const heats = new Float32Array(n);
+            const gyris = new Float32Array(n);
             const rnd = mulberry32(77123);
             for (let i = 0; i < n; i++) {
                 // Taille tres homogene : la silhouette doit etre nette,
@@ -498,6 +601,7 @@
                 sizes[i] = 0.058 + rnd() * 0.06;
                 seeds[i] = rnd();
                 heats[i] = brain.heat[i] || 0;
+                gyris[i] = brain.gyri[i] !== undefined ? brain.gyri[i] : 0.5;
             }
 
             const geo = new THREE.BufferGeometry();
@@ -505,6 +609,7 @@
             geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
             geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
             geo.setAttribute('aHeat', new THREE.BufferAttribute(heats, 1));
+            geo.setAttribute('aGyri', new THREE.BufferAttribute(gyris, 1));
 
             this.constMat = new THREE.ShaderMaterial({
                 uniforms: {
@@ -608,6 +713,7 @@
             geo.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
             geo.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
             geo.setAttribute('aHeat', new THREE.BufferAttribute(new Float32Array(count), 1));
+            geo.setAttribute('aGyri', new THREE.BufferAttribute(new Float32Array(count).fill(0.5), 1));
 
             this.dustMat = new THREE.ShaderMaterial({
                 uniforms: {
@@ -645,14 +751,22 @@
         }
 
         /* =====================================================================
-           AXONES
+           AXONES — TRACES DE CIRCUIT IMPRIME (ROUTAGE PCB)
+           Le chemin est calcule EN ESPACE ECRAN (pixels) : c'est la seule
+           facon d'obtenir des angles a 45 deg nets a l'ecran, quelle que
+           soit la position de la camera. La conversion ecran -> monde se
+           fait par projection homographique inverse sur le plan z = constZ :
+           comme la projection est une homographie (elle conserve les
+           droites), la polyligne monde se reprojette exactement sur la
+           polyligne ecran dessinee. Les coudes portent un via (cercle
+           creux) ; tous les vias tiennent dans un seul objet Points.
            ===================================================================== */
 
         registerNeuronTargets(elements) {
             if (!elements || !elements.length) return;
             if (!this.constellation) return;
 
-            const SEG = 26;
+            const SEG = AXON_SEG;
             const rnd = mulberry32(9182);
             const n = this.brainSurface.length / 3;
 
@@ -668,6 +782,44 @@
             this.axonStarts = starts;
 
             if (!this.axonGlow) this.axonGlow = makeGlowTexture();
+
+            /* ---------- VIAS : UN SEUL objet Points pour toute la scene ---------- */
+            const maxVias = elements.length * 3 * AXON_MAX_CORNERS;
+            const viaGeo = new THREE.BufferGeometry();
+            const viaPos = new Float32Array(maxVias * 3);
+            const viaT = new Float32Array(maxVias);
+            const viaProg = new Float32Array(maxVias);
+            const viaSeed = new Float32Array(maxVias);
+            for (let i = 0; i < maxVias; i++) viaSeed[i] = rnd();
+            viaGeo.setAttribute('position', new THREE.BufferAttribute(viaPos, 3).setUsage(THREE.DynamicDrawUsage));
+            viaGeo.setAttribute('aT', new THREE.BufferAttribute(viaT, 1).setUsage(THREE.DynamicDrawUsage));
+            viaGeo.setAttribute('aProg', new THREE.BufferAttribute(viaProg, 1).setUsage(THREE.DynamicDrawUsage));
+            viaGeo.setAttribute('aSeed', new THREE.BufferAttribute(viaSeed, 1));
+            viaGeo.setDrawRange(0, 0);
+
+            const viaMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    uTime:       { value: 0 },
+                    uOpacity:    { value: 1 },
+                    uSize:       { value: VIA_SIZE },
+                    uPixelRatio: { value: this.pixelRatio },
+                    uColor:      { value: new THREE.Color(0x9c3c0a) },
+                    uHot:        { value: new THREE.Color(0xffa25c) }
+                },
+                vertexShader: VIA_VERT,
+                fragmentShader: VIA_FRAG,
+                transparent: true,
+                depthWrite: false,
+                depthTest: false,
+                blending: THREE.NormalBlending
+            });
+
+            this.viaGeo = viaGeo;
+            this.viaMat = viaMat;
+            this.vias = new THREE.Points(viaGeo, viaMat);
+            this.vias.frustumCulled = false;
+            this.vias.renderOrder = 3;
+            this.root.add(this.vias);
 
             elements.forEach((el, ei) => {
                 const bundle = 3;
@@ -703,8 +855,7 @@
                             uProgress: { value: 0 },
                             uTime:     { value: 0 },
                             uOpacity:  { value: 1 },
-                            uWidth:    { value: 0.0032 },
-                            uColor:    { value: new THREE.Color(0x7d3008) },
+                            uColor:    { value: new THREE.Color(0x9c3c0a) },
                             uHot:      { value: new THREE.Color(0xff6711) }
                         },
                         vertexShader: AXON_VERT,
@@ -717,6 +868,7 @@
 
                     const line = new THREE.Mesh(geo, mat);
                     line.frustumCulled = false;
+                    line.renderOrder = 2;
                     this.root.add(line);
 
                     const tip = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -727,19 +879,37 @@
                         depthWrite: false,
                         depthTest: false
                     }));
-                    tip.scale.setScalar(0.34);
+                    tip.scale.setScalar(0.22);
+                    tip.renderOrder = 4;
                     this.root.add(tip);
+
+                    /* --- Donnees de routage PCB (fixees une fois pour toutes,
+                           pour que le trace ne tremble pas d'une frame a l'autre) --- */
+                    const r1 = rnd();
+                    /* variant 0 = schema « etage » (3 coudes),
+                       variant 1 = schema « simple » (2 coudes, via en course) */
+                    const variant = r1 < 0.24 ? 1 : 0;
 
                     this.neurons.push({
                         el, line, geo, path,
-                        pts: new Float32Array(SEG * 3),
                         tip, mat,
                         state: { progress: 0 },
                         start: starts[(ei * bundle + k) % starts.length].clone(),
-                        origin: new THREE.Vector3(),
-                        ctrl: new THREE.Vector3(),
-                        target: new THREE.Vector3(),
-                        jitter: (rnd() - 0.5) * 0.3
+                        jitter: (rnd() - 0.5) * 0.3,
+                        /* Ancre dans le DOM (mise en cache : pas de
+                           querySelector par frame) */
+                        anchor: el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el,
+                        /* --- Routage --- */
+                        variant: variant,
+                        frac: new Float32Array([0.30 + rnd() * 0.40, 0.30 + rnd() * 0.60]),
+                        axisPref: rnd() < 0.5 ? 0 : 1,
+                        rx: new Float32Array(AXON_MAX_NODES),
+                        ry: new Float32Array(AXON_MAX_NODES),
+                        cum: new Float32Array(AXON_MAX_NODES + 1),
+                        m: new Float32Array(AXON_MAX_NODES),
+                        nSeg: 0,
+                        total: 1,
+                        sx: 0, sy: 0, tx: 0, ty: 0
                     });
                 }
             });
@@ -763,15 +933,15 @@
             }
         }
 
-        /* Position ecran -> monde. L'axone vise un point precis de l'info
-           (son titre) puis se poursuit jusqu'au bord de son conteneur. */
-        _elementWorldPos(el, out) {
+        /* Point de contact ECRAN (pixels CSS) : l'axone vise un point precis
+           de l'info (son titre) puis se poursuit jusqu'au bord de son
+           conteneur, le long du rayon cerveau -> titre. */
+        _targetScreenPos(el, anchorEl, out) {
             const vw = window.innerWidth, vh = window.innerHeight;
 
             const bx = (this.state.constX + 1) * 0.5 * vw;
             const by = (1 - this.state.constY) * 0.5 * vh;
 
-            const anchorEl = el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el;
             const a = anchorEl.getBoundingClientRect();
             const c = el.getBoundingClientRect();
 
@@ -779,7 +949,7 @@
             const ay = a.top + a.height * 0.5;
 
             let dx = ax - bx, dy = ay - by;
-            const len = Math.hypot(dx, dy) || 1;
+            const len = Math.sqrt(dx * dx + dy * dy) || 1;
             dx /= len; dy /= len;
 
             let px = ax, py = ay;
@@ -791,8 +961,18 @@
                 py = ay + dy * tt;
             }
 
-            const sx = px / vw;
-            const sy = py / vh;
+            out[0] = px;
+            out[1] = py;
+            return out;
+        }
+
+        /* Position ecran -> monde (conservee pour compatibilite) */
+        _elementWorldPos(el, out) {
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const anchorEl = el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el;
+            this._targetScreenPos(el, anchorEl, this._p2);
+            const sx = this._p2[0] / vw;
+            const sy = this._p2[1] / vh;
             const dist = Math.max(0.5, this.camera.position.z - this.state.constZ);
             const halfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * dist;
             const halfW = halfH * this.camera.aspect;
@@ -800,74 +980,314 @@
             return out;
         }
 
+        /* ---------------------------------------------------------------------
+           ECRAN -> MONDE
+           Projection homographique inverse sur le plan z = constZ.
+           Because une projection est une homographie (elle conserve les
+           droites), la polyligne monde se reprojette exactement sur la
+           polyligne ecran calculee : les angles a 45 deg restent a 45 deg
+           a l'ecran, quelle que soit la camera.
+           --------------------------------------------------------------------- */
+        _setupScreenMap(zp) {
+            const e = this._vp.elements;
+            const m0 = e[0], m1 = e[4], m2 = e[8], m3 = e[12];
+            const m4 = e[1], m5 = e[5], m6 = e[9], m7 = e[13];
+            const m12 = e[3], m13 = e[7], m14 = e[11], m15 = e[15];
+
+            const c1 = m2 * zp + m3;
+            const c3 = m6 * zp + m7;
+            const c4 = m14 * zp + m15;
+
+            this._su = 2 / window.innerWidth;
+            this._sv = 2 / window.innerHeight;
+
+            this._d0 = m4 * m13 - m12 * m5;
+            this._d1 = m12 * m1 - m0 * m13;
+            this._d2 = m0 * m5 - m4 * m1;
+
+            this._x0 = c4 * m5 - c3 * m13;
+            this._x1 = c1 * m13 - c4 * m1;
+            this._x2 = c3 * m1 - c1 * m5;
+
+            this._y0 = m12 * c3 - m4 * c4;
+            this._y1 = m0 * c4 - m12 * c1;
+            this._y2 = m4 * c1 - m0 * c3;
+        }
+
+        _screenToWorld(px, py) {
+            const u = px * this._su - 1;
+            const v = 1 - py * this._sv;
+            const inv = 1 / (this._d0 * u + this._d1 * v + this._d2);
+            const w = this._w;
+            w[0] = (this._x0 * u + this._x1 * v + this._x2) * inv;
+            w[1] = (this._y0 * u + this._y1 * v + this._y2) * inv;
+        }
+
+        /* ---------------------------------------------------------------------
+           ROUTAGE PCB
+           Trace la polyligne du fil EN PIXELS. Le schema est celui d'un
+           routage de carte electronique :
+             - une diagonale a 45 deg pour sortir,
+             - une course droite,
+             - une diagonale a 45 deg,
+             - une course droite jusqu'a la cible.
+           Comme les diagonales et les courses droites alternent, chaque
+           coude est a 45 deg : jamais d'angle droit strict.
+           La construction est exacte : la route atterrit precisement sur
+           la cible, et chaque segment garde une longueur minimale.
+           Renvoie le nombre de coudes (= nombre de vias).
+           --------------------------------------------------------------------- */
+        _routePCB(axon) {
+            const RX = axon.rx, RY = axon.ry;
+            const sx = axon.sx, sy = axon.sy, tx = axon.tx, ty = axon.ty;
+            const dx = tx - sx, dy = ty - sy;
+            const ax = dx < 0 ? -1 : 1;
+            const ay = dy < 0 ? -1 : 1;
+            const adx = Math.abs(dx), ady = Math.abs(dy);
+            const minAbs = Math.min(adx, ady);
+            const maxAbs = Math.max(adx, ady);
+            let i = 0;
+            RX[0] = sx; RY[0] = sy;
+
+            /* Cible quasi alignee : une seule course droite */
+            if (minAbs < 4 || maxAbs < 8) {
+                RX[1] = tx; RY[1] = ty;
+                axon.nSeg = 1;
+                this._measure(axon);
+                return 0;
+            }
+
+            const MIN = this._minLen;
+            let D, midAxis = -1;
+
+            if (axon.variant === 0 && minAbs > MIN + 12) {
+                /* Schema « etage » : diagonale, course, diagonale, course.
+                   D = longueur totale des deux diagonales ; on la borne
+                   pour qu'il reste de la course droite des deux cotes. */
+                D = (minAbs - MIN) * axon.frac[1];
+                midAxis = axon.axisPref;
+            } else {
+                /* Schema « simple » : une diagonale (frappee en deux, donc
+                   un via en pleine course) puis une course droite. */
+                D = minAbs;
+                midAxis = -1;
+            }
+
+            let cx = sx, cy = sy;
+
+            /* --- Repartition des deux diagonales --- */
+            let d1, d2;
+            if (midAxis >= 0) {
+                /* Schema « etage » : les deux diagonales sont partagees par
+                   la course intermediaire ; elles sont donc toutes les
+                   deux non nulles. */
+                d1 = D * axon.frac[0];
+                d2 = D - d1;
+            } else if (D >= 40) {
+                /* Schema « simple » : une diagonale fendue en deux, donc un
+                   via pose en pleine course (routage de carte reelle). */
+                d1 = D * axon.frac[0];
+                d2 = D - d1;
+            } else {
+                d1 = D;
+                d2 = 0;
+            }
+
+            /* --- Diagonale 1 : 45 deg, vers la cible --- */
+            cx += ax * d1; cy += ay * d1;
+            RX[++i] = cx; RY[i] = cy;
+
+            /* --- Course intermediaire (axe horizontal ou vertical) --- */
+            if (midAxis >= 0) {
+                const lenA = (midAxis === 0 ? adx : ady) - D;
+                const sgnA = midAxis === 0 ? ax : ay;
+                if (midAxis === 0) cx += sgnA * lenA; else cy += sgnA * lenA;
+                RX[++i] = cx; RY[i] = cy;
+            }
+
+            /* --- Diagonale 2 : meme direction que la premiere --- */
+            if (d2 > 0) {
+                cx += ax * d2; cy += ay * d2;
+                RX[++i] = cx; RY[i] = cy;
+            }
+
+            /* --- Course finale : la cible exacte --- */
+            RX[++i] = tx; RY[i] = ty;
+
+            axon.nSeg = i;
+            this._measure(axon);
+            return i - 1;   // nombre de coudes
+        }
+
+        /* Longueurs cumulees + repartition des intervalles d'echantillonnage.
+           Les coudes doivent tomber exactement sur un point echantillonne,
+           sinon ils seraient arrondis (le trace resterait « lisse »). */
+        _measure(axon) {
+            const RX = axon.rx, RY = axon.ry, CUM = axon.cum, M = axon.m;
+            const nSeg = axon.nSeg;
+            let total = 0;
+            CUM[0] = 0;
+            for (let k = 1; k <= nSeg; k++) {
+                const dx = RX[k] - RX[k - 1], dy = RY[k] - RY[k - 1];
+                total += Math.sqrt(dx * dx + dy * dy);
+                CUM[k] = total;
+            }
+            axon.total = total;
+
+            const budget = AXON_SEG - 1;
+            let used = 0;
+            for (let k = 0; k < nSeg; k++) {
+                let m = Math.round(budget * (CUM[k + 1] - CUM[k]) / total);
+                if (m < 1) m = 1;
+                M[k] = m; used += m;
+            }
+            while (used > budget) {
+                let bi = -1, bl = -1;
+                for (let k = 0; k < nSeg; k++) {
+                    const l = CUM[k + 1] - CUM[k];
+                    if (M[k] > 1 && l > bl) { bl = l; bi = k; }
+                }
+                if (bi < 0) break;
+                M[bi]--; used--;
+            }
+            while (used < budget) {
+                let bi = 0, bl = -1;
+                for (let k = 0; k < nSeg; k++) {
+                    const l = CUM[k + 1] - CUM[k];
+                    if (l > bl) { bl = l; bi = k; }
+                }
+                M[bi]++; used++;
+            }
+        }
+
         _updateNeurons(t) {
             if (!this.neurons.length) return;
             const s = this.state;
-            const SEG = 26;
+            const SEG = AXON_SEG;
+
+            /* --- Camera et matrice de projection a jour --- */
+            this.camera.updateMatrixWorld();
+            this._vp.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
+
+            const zp = s.constZ;
+            this._setupScreenMap(zp);
+
+            const vw = window.innerWidth, vh = window.innerHeight;
+            /* Longueur minimale d'un segment de routage (adapter a l'ecran) */
+            this._minLen = Math.max(18, Math.min(40, Math.min(vw, vh) * 0.035));
+
+            /* --- Vias : un seul tampon pour toute la scene --- */
+            const viaGeo = this.viaGeo;
+            const viaPos = viaGeo.attributes.position.array;
+            const viaT = viaGeo.attributes.aT.array;
+            const viaProg = viaGeo.attributes.aProg.array;
+            const maxVias = viaPos.length / 3;
+            let viaN = 0;
+            this.viaMat.uniforms.uTime.value = t;
 
             for (let n = 0; n < this.neurons.length; n++) {
                 const axon = this.neurons[n];
                 const p = axon.state.progress;
                 axon.mat.uniforms.uTime.value = t;
-                axon.mat.uniforms.uProgress.value = p;
+                axon.mat.uniforms.uProgress.value = p > 0.002 ? p : -0.05;
 
-                if (p <= 0.001) {
+                if (p <= 0.002) {
                     axon.tip.material.opacity = 0;
                     continue;
                 }
 
-                this._elementWorldPos(axon.el, axon.target);
+                /* --- Depart : point du cerveau projete a l'ecran --- */
+                const c = this.constellation;
+                const sc = s.constSpread * this.constScale * this.intro.scale;
+                const v = this._v3;
+                v.set(axon.start.x * sc, axon.start.y * sc, axon.start.z * sc);
+                v.applyAxisAngle(AXIS_Y, c.rotation.y);
+                v.applyAxisAngle(AXIS_X, c.rotation.x);
+                v.add(c.position);
+                const e = this._vp.elements;
+                const cw = e[3] * v.x + e[7] * v.y + e[11] * v.z + e[15];
+                const cx = e[0] * v.x + e[4] * v.y + e[8] * v.z + e[12];
+                const cy = e[1] * v.x + e[5] * v.y + e[9] * v.z + e[13];
+                const iw = 1 / cw;
+                axon.sx = (cx * iw * 0.5 + 0.5) * vw;
+                axon.sy = (0.5 - cy * iw * 0.5) * vh;
 
-                const scale = s.constSpread * this.constScale;
-                const origin = axon.origin.copy(axon.start).multiplyScalar(scale);
-                origin.applyAxisAngle(AXIS_Y, this.constellation.rotation.y);
-                origin.applyAxisAngle(AXIS_X, this.constellation.rotation.x);
-                origin.add(this.constellation.position);
+                /* --- Cible : bord du conteneur de l'info --- */
+                this._targetScreenPos(axon.el, axon.anchor, this._p2);
+                axon.tx = this._p2[0];
+                axon.ty = this._p2[1];
 
-                const mid = axon.ctrl.copy(origin).add(axon.target).multiplyScalar(0.5);
-                const dist = origin.distanceTo(axon.target);
-                const outward = mid.clone().normalize();
-                mid.addScaledVector(outward, dist * 0.2 + axon.jitter);
-                mid.z += axon.jitter * 0.4;
+                /* --- Route PCB --- */
+                this._routePCB(axon);
 
+                /* --- Echantillonnage + ecriture du ruban --- */
+                const RX = axon.rx, RY = axon.ry, CUM = axon.cum, M = axon.m;
                 const arr = axon.path;
-                const pts = axon.pts;
-                for (let i = 0; i < SEG; i++) {
-                    const u = i / (SEG - 1);
-                    const iu = 1 - u;
-                    const bx = iu * iu * origin.x + 2 * iu * u * mid.x + u * u * axon.target.x;
-                    const by = iu * iu * origin.y + 2 * iu * u * mid.y + u * u * axon.target.y;
-                    const bz = iu * iu * origin.z + 2 * iu * u * mid.z + u * u * axon.target.z;
-                    const wob = Math.sin(u * 9 + axon.jitter * 20) * 0.03 * dist;
-                    pts[i * 3 + 0] = bx + wob * 0.4;
-                    pts[i * 3 + 1] = by + wob;
-                    pts[i * 3 + 2] = bz;
+                const aTArr = axon.geo.attributes.aT.array;
+                const nSeg = axon.nSeg, total = axon.total;
+                let si = 0, lnx = 0, lny = 0;
+
+                for (let k = 0; k < nSeg; k++) {
+                    const x0 = RX[k], y0 = RY[k];
+                    const ex = RX[k + 1] - x0, ey = RY[k + 1] - y0;
+                    const len = Math.sqrt(ex * ex + ey * ey) || 1e-4;
+                    const nx = -ey / len, ny = ex / len;
+                    lnx = nx; lny = ny;
+                    const m = M[k];
+                    const base = CUM[k];
+                    for (let j = 0; j < m; j++) {
+                        const f = j / m;
+                        const px = x0 + ex * f, py = y0 + ey * f;
+                        const o = si * 6;
+                        this._screenToWorld(px + nx * TRACE_HALF_W, py + ny * TRACE_HALF_W);
+                        arr[o] = this._w[0]; arr[o + 1] = this._w[1]; arr[o + 2] = zp;
+                        this._screenToWorld(px - nx * TRACE_HALF_W, py - ny * TRACE_HALF_W);
+                        arr[o + 3] = this._w[0]; arr[o + 4] = this._w[1]; arr[o + 5] = zp;
+                        aTArr[si * 2] = aTArr[si * 2 + 1] = (base + len * f) / total;
+                        si++;
+                    }
                 }
-
-                const w = 0.0095;
-                for (let i = 0; i < SEG; i++) {
-                    const ip = Math.max(0, i - 1) * 3;
-                    const inx = Math.min(SEG - 1, i + 1) * 3;
-                    let tx = pts[inx] - pts[ip];
-                    let ty = pts[inx + 1] - pts[ip + 1];
-                    const tl = Math.hypot(tx, ty) || 1;
-                    tx /= tl; ty /= tl;
-                    const nx = -ty, ny = tx;
-
-                    arr[(i * 2) * 3 + 0] = pts[i * 3 + 0] + nx * w;
-                    arr[(i * 2) * 3 + 1] = pts[i * 3 + 1] + ny * w;
-                    arr[(i * 2) * 3 + 2] = pts[i * 3 + 2];
-                    arr[(i * 2 + 1) * 3 + 0] = pts[i * 3 + 0] - nx * w;
-                    arr[(i * 2 + 1) * 3 + 1] = pts[i * 3 + 1] - ny * w;
-                    arr[(i * 2 + 1) * 3 + 2] = pts[i * 3 + 2];
+                /* Dernier point : la cible exacte, largeur pleine */
+                {
+                    const o = si * 6;
+                    this._screenToWorld(RX[nSeg] + lnx * TRACE_HALF_W, RY[nSeg] + lny * TRACE_HALF_W);
+                    arr[o] = this._w[0]; arr[o + 1] = this._w[1]; arr[o + 2] = zp;
+                    this._screenToWorld(RX[nSeg] - lnx * TRACE_HALF_W, RY[nSeg] - lny * TRACE_HALF_W);
+                    arr[o + 3] = this._w[0]; arr[o + 4] = this._w[1]; arr[o + 5] = zp;
+                    aTArr[si * 2] = aTArr[si * 2 + 1] = 1;
+                    si++;
                 }
                 axon.geo.attributes.position.needsUpdate = true;
+                axon.geo.attributes.aT.needsUpdate = true;
 
-                const hi = Math.min(SEG - 1, Math.max(0, Math.floor(p * (SEG - 1))));
-                axon.tip.position.set(axon.pts[hi * 3], axon.pts[hi * 3 + 1], axon.pts[hi * 3 + 2]);
+                /* --- Vias sur les coudes --- */
+                for (let k = 1; k < nSeg && viaN < maxVias; k++) {
+                    this._screenToWorld(RX[k], RY[k]);
+                    viaPos[viaN * 3] = this._w[0];
+                    viaPos[viaN * 3 + 1] = this._w[1];
+                    viaPos[viaN * 3 + 2] = zp;
+                    viaT[viaN] = CUM[k] / total;
+                    viaProg[viaN] = p;
+                    viaN++;
+                }
+
+                /* --- Tete lumineuse, placee sur le chemin --- */
+                const sArc = p * total;
+                let k = 0;
+                while (k < nSeg - 1 && CUM[k + 1] < sArc) k++;
+                const segLen = CUM[k + 1] - CUM[k];
+                const f = segLen > 0 ? Math.min(1, Math.max(0, (sArc - CUM[k]) / segLen)) : 0;
+                this._screenToWorld(RX[k] + (RX[k + 1] - RX[k]) * f, RY[k] + (RY[k + 1] - RY[k]) * f);
+                axon.tip.position.set(this._w[0], this._w[1], zp);
                 axon.tip.material.opacity = 0.85 * Math.min(1, p * 2);
-                axon.tip.scale.setScalar(0.22 + 0.14 * Math.sin(t * 4 + n));
+                axon.tip.scale.setScalar(0.16 + 0.10 * Math.sin(t * 4 + n));
             }
+
+            /* --- Un seul upload pour tous les vias --- */
+            viaGeo.setDrawRange(0, viaN);
+            viaGeo.attributes.position.needsUpdate = true;
+            viaGeo.attributes.aT.needsUpdate = true;
+            viaGeo.attributes.aProg.needsUpdate = true;
         }
 
         /* ---------- Evenements ---------- */
@@ -891,6 +1311,7 @@
             this.renderer.setPixelRatio(this.pixelRatio);
             this.constMat.uniforms.uPixelRatio.value = this.pixelRatio;
             this.dustMat.uniforms.uPixelRatio.value = this.pixelRatio;
+            if (this.viaMat) this.viaMat.uniforms.uPixelRatio.value = this.pixelRatio;
 
             const aspect = w / h;
             this.constScale = Math.min(1.15, Math.max(0.55, aspect / 1.6));
@@ -958,6 +1379,14 @@
                 this.glow.material.opacity = 0.5 * s.glowOpacity * this.intro.opacity;
             }
 
+            /* --- Camera : elle doit etre a jour AVANT le calcul des
+                   axones, dont le routage est calcule en espace ecran. --- */
+            this.camera.position.x += (s.camX + this.pointerSmooth.x * 0.32 - this.camera.position.x) * 0.06;
+            this.camera.position.y += (s.camY + this.pointerSmooth.y * 0.22 - this.camera.position.y) * 0.06;
+            this.camera.position.z += (s.camZ - this.camera.position.z) * 0.06;
+            this.camera.lookAt(0, 0, 0);
+            this.camera.updateMatrixWorld();
+
             this._updateNeurons(t);
 
             this.dustMat.uniforms.uTime.value = t;
@@ -968,11 +1397,6 @@
 
             s.glitch += (this.glitchTarget - s.glitch) * 0.25;
             this.glitchTarget *= 0.86;
-
-            this.camera.position.x += (s.camX + this.pointerSmooth.x * 0.32 - this.camera.position.x) * 0.06;
-            this.camera.position.y += (s.camY + this.pointerSmooth.y * 0.22 - this.camera.position.y) * 0.06;
-            this.camera.position.z += (s.camZ - this.camera.position.z) * 0.06;
-            this.camera.lookAt(0, 0, 0);
 
             this.renderer.render(this.scene, this.camera);
         }

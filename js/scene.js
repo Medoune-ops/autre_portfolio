@@ -36,6 +36,7 @@
         varying float vSeed;
         varying float vHeat;
         varying float vGyri;
+        varying float vDepth;
         void main(){
             vSeed = aSeed;
             vHeat = aHeat;
@@ -53,11 +54,29 @@
             pos.z += g * uGlitch * 0.03;
 
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-            // En mode neon les sillons (gyri bas) gonflent pour creer des
-            // fissures lumineuses continues, comme sur les references.
-            float seam = smoothstep(0.44, 0.10, aGyri);
-            float neonBoost = 1.0 + uNeon * seam * 1.1;
-            gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001)) * (0.75 + aHeat * 0.75) * neonBoost;
+            float viewZ = max(-mv.z, 0.001);
+            vDepth = viewZ;
+
+            // Lecture des plis : aGyri bas = fond de sillon (veine),
+            // haut = crete. En neon on veut des sillons qui se fondent
+            // en lignes continues : points plus gros et plus "mous".
+            float valley = 1.0 - smoothstep(0.03, 0.40, aGyri);   // coeur du sillon
+            float seam   = 1.0 - smoothstep(0.20, 0.58, aGyri);   // flanc/sillon
+            float ridge  = smoothstep(0.58, 0.90, aGyri);         // crete
+
+            // Base : silhouette dense mais lisible. Les cretes restent
+            // plus fines pour laisser respirer le volume, les sillons
+            // gonflent et se chevauchent pour former des filaments.
+            float size = aSize * (0.78 + aHeat * 0.35);
+            size *= mix(0.80 + ridge * 0.22, 0.72 + seam * 0.55, uNeon);
+            // Boost tres localise au coeur du pli -> veine continue
+            size *= 1.0 + uNeon * valley * 1.25;
+
+            // Un soupcon de variation pour eviter l'aspect "billes" alignees
+            float jitter = 0.92 + 0.16 * sin(aSeed * 19.7 + uTime * 0.35);
+            size *= mix(1.0, jitter, uNeon * 0.65);
+
+            gl_PointSize = size * uPixelRatio * (150.0 / viewZ);
             gl_Position = projectionMatrix * mv;
         }
     `;
@@ -71,35 +90,68 @@
         varying float vSeed;
         varying float vHeat;
         varying float vGyri;
+        varying float vDepth;
         void main(){
             vec2 c = gl_PointCoord - 0.5;
             float d = length(c);
             if(d > 0.5) discard;
 
-            // Noyau plus doux en mode neon : les points se fondent en halo
-            float core = smoothstep(0.5, uNeon > 0.5 ? 0.05 : 0.30, d);
-            float a = pow(core, uNeon > 0.5 ? 1.2 : 0.55);
+            // Forme du point : disque net en mode clair (lisibilite),
+            // gaussienne tres douce en neon pour que les points fusionnent
+            // en une masse/veines continues plutot qu'en billes distinctes.
+            float coreLight = smoothstep(0.5, 0.28, d);
+            coreLight = pow(coreLight, 0.7);
+            float coreNeon = exp(-d * d * 10.5); // halo large, coeur doux
+            float core = mix(coreLight, coreNeon, uNeon);
+            if(core < 0.002) discard;
 
-            // La lumiere court dans les sillons entre les plis :
-            // gyri bas = creux = sillon incandescent.
-            float seam = smoothstep(0.44, 0.10, vGyri);
+            // Relief : fond de sillon, flanc, crete
+            float valley = 1.0 - smoothstep(0.04, 0.34, vGyri); // veine chaude
+            float seam   = 1.0 - smoothstep(0.18, 0.52, vGyri); // flanc du pli
+            float ridge  = smoothstep(0.55, 0.92, vGyri);       // crete
 
-            // Coeur incandescent + sillons tres lumineux en neon
-            float seamBoost = mix(0.92, 1.35, uNeon);
-            float heat = max(pow(vHeat, 2.2), seam * seamBoost);
-            vec3 col = mix(uCold, uHot, heat);
+            // "Chaleur" visuelle : les sillons portent l'energie, le coeur
+            // anatomique (vHeat) module la densite lumineuse globale.
+            float energy = max(pow(vHeat, 1.6), valley * mix(0.55, 1.18, uNeon));
+            energy = clamp(energy + seam * 0.18 * uNeon, 0.0, 1.35);
 
-            // En mode neon les sillons virent vers le blanc-rose electrique
-            if (uNeon > 0.01) {
-                vec3 neonHot = vec3(1.0, 0.72, 0.98);
-                col = mix(col, neonHot, seam * 0.55 * uNeon);
-                col += neonHot * seam * 0.35 * uNeon;
-            }
+            // Palette neon : cretes bleu-indigo profond -> flancs violet
+            // (uCold) -> sillons magenta/rose (uHot) -> coeur blanc chaud.
+            vec3 ridgeCol = mix(uCold * vec3(0.35, 0.45, 0.85), vec3(0.10, 0.16, 0.55), 0.55);
+            vec3 flankCol = mix(uCold, vec3(0.45, 0.30, 0.95), 0.35);
+            vec3 seamCol  = mix(uHot, vec3(1.00, 0.40, 0.78), 0.45);
+            vec3 hotCore  = vec3(1.00, 0.86, 0.97);
 
-            float tw = 0.74 + 0.26 * sin(uTime * 1.6 + vSeed * 31.4);
-            float alpha = a * uOpacity * tw * (0.6 + heat * 0.45);
-            alpha *= mix(1.0, 0.85, uNeon);
-            gl_FragColor = vec4(col, alpha);
+            vec3 neonCol = mix(flankCol, ridgeCol, ridge * 0.85);
+            neonCol = mix(neonCol, seamCol, smoothstep(0.15, 0.95, seam));
+            neonCol = mix(neonCol, hotCore, valley * (0.55 + 0.35 * energy));
+            // Les cretes restent sombres/profondes pour faire ressortir les veines
+            neonCol *= mix(0.62, 1.0, 1.0 - ridge);
+
+            // Palette mode clair : garde la logique ardoise -> orange existante
+            vec3 lightCol = mix(uCold, uHot, clamp(pow(vHeat, 1.8) * 0.85 + seam * 0.45, 0.0, 1.0));
+            lightCol *= 0.85 + 0.15 * (1.0 - d * 1.3);
+
+            vec3 col = mix(lightCol, neonCol, uNeon);
+
+            // Profondeur : leger fog/assombrissement vers l'arriere pour le relief
+            float depthCue = clamp((vDepth - 6.0) / 6.5, 0.0, 1.0);
+            col = mix(col, col * vec3(0.55, 0.60, 0.95), depthCue * 0.35 * uNeon);
+            col *= 1.0 - depthCue * 0.18;
+
+            // Scintillement subtil, plus calme sur les sillons lumineux
+            float tw = 0.84 + 0.16 * sin(uTime * 1.25 + vSeed * 31.4);
+            tw = mix(tw, 0.92 + 0.08 * sin(uTime * 1.0 + vSeed * 17.0), valley);
+
+            // Alpha : en neon on privilegie l'accumulation douce (additif)
+            float alphaLight = coreLight * uOpacity * tw * (0.55 + energy * 0.35);
+            float alphaNeon  = coreNeon  * uOpacity * tw * (0.10 + (1.0 - ridge) * 0.10 + seam * 0.12 + valley * 0.18);
+            float alpha = mix(alphaLight, alphaNeon, uNeon);
+
+            // Petite lueur additive au coeur des sillons (sans ecraser le volume)
+            col += uNeon * seamCol * valley * coreNeon * 0.22;
+
+            gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
         }
     `;
 
@@ -283,16 +335,58 @@
     }
 
     /* Circonvolutions sinueuses, style corail / cerveau.
-       Le bruit simple donne des bosses. C'est le DOMAIN WARPING (deformation
-       du domaine par un premier bruit) qui transforme les bosses en plis
-       qui serpettent, comme sur les references. */
+       Domain warping multi-échelle + ridged fbm orienté :
+       - warps successifs transforment des bosses en plis continus qui serpentent
+       - anisotropie légère selon la région pour des flux de gyri cohérents
+       - sorties dans [0,1] : 0 = fond de sillon, 1 = crête du gyrus */
     function gyriNoise(x, y, z) {
-        const w1 = fbm3(x * 1.7, y * 1.7, z * 1.7, 2);
-        const w2 = fbm3(x * 1.7 + 4.7, y * 1.7 - 2.3, z * 1.7 + 1.9, 2);
-        const wx = x + w1 * 1.15;
-        const wy = y + w2 * 1.15;
-        const wz = z + (w1 - w2) * 0.85;
-        return fbmRidged(wx * 3.3, wy * 3.3, wz * 3.3, 2);
+        // Warp basse fréquence : grandes ondulations des circonvolutions
+        const w1a = fbm3(x * 1.25 + 0.7, y * 1.25 - 1.3, z * 1.25 + 2.1, 3);
+        const w1b = fbm3(x * 1.25 - 3.4, y * 1.25 + 2.8, z * 1.25 - 0.6, 3);
+        const w1c = fbm3(x * 1.25 + 5.2, y * 1.25 + 0.4, z * 1.25 + 4.9, 3);
+        let qx = x + (w1a - 0.5) * 0.55;
+        let qy = y + (w1b - 0.5) * 0.55;
+        let qz = z + (w1c - 0.5) * 0.55;
+
+        // Warp intermédiaire : sinuosité locale des plis
+        const w2a = fbm3(qx * 2.6 + 1.7, qy * 2.6 + 3.1, qz * 2.6 - 2.4, 2);
+        const w2b = fbm3(qx * 2.6 - 2.9, qy * 2.6 - 0.8, qz * 2.6 + 1.6, 2);
+        qx += (w2a - 0.5) * 0.32;
+        qy += (w2b - 0.5) * 0.32;
+        qz += (w2a - w2b) * 0.22;
+
+        // Orientation / anisotropie : plis plus allongés selon la région
+        const front = smoothstep(-0.1, 0.85, z);        // lobe frontal
+        const lateral = smoothstep(0.18, 0.72, Math.abs(x));
+        const sx = 3.6 + front * 0.6 - lateral * 0.25;  // étirement latéral/antéro-postérieur
+        const sy = 3.9 + lateral * 0.35;
+        const sz = 3.4 - front * 0.35 + lateral * 0.15;
+
+        // Ridged fbm multi-échelle : crêtes continues
+        let n = 0, a = 0.58, f = 1.0, norm = 0;
+        for (let i = 0; i < 4; i++) {
+            const rx = qx * sx * f;
+            const ry = qy * sy * f;
+            const rz = qz * sz * f;
+            const v = vnoise3(rx, ry, rz);
+            let ridge = 1.0 - Math.abs(2.0 * v - 1.0);  // crête au centre
+            ridge = ridge * ridge * (3.0 - 2.0 * ridge); // accentue les crêtes/sillons
+            // léger glissement directionnel pour éviter un motif trop isotrope
+            qx += (v - 0.5) * 0.08;
+            qy += (vnoise3(rx + 7.1, ry, rz) - 0.5) * 0.08;
+            qz += (vnoise3(rx, ry + 3.7, rz) - 0.5) * 0.08;
+            n += a * ridge;
+            norm += a;
+            f *= 1.95;
+            a *= 0.52;
+        }
+        n = n / (norm || 1);
+
+        // Micro-détail fin pour casser les regularités sans granularité
+        const fine = fbmRidged(qx * 8.5 + 2.3, qy * 8.5 - 1.1, qz * 8.5 + 0.7, 2);
+        n = n * 0.82 + fine * 0.18;
+
+        return clamp01(n);
     }
 
     function sdEllipsoid(px, py, pz, rx, ry, rz) {
@@ -316,54 +410,90 @@
     /* Signed distance field du cerveau — anatomique
        Repere : x = lateral, y = haut, z = avant (la camera regarde vers -z)
 
-       Point cle : la masse cerebrale est UN SEUL volume oblong, plus long
-       d'avant en arriere, aminci aux deux poles. Les deux hemispheres ne
-       sont pas deux ellipsoides separes (cela laissait un vide central et
-       donnait l'aspect de deux boules) : ils sont unis, et c'est la
-       fissure longitudinale qui les separe par un sillon etroit. */
+       Masse cerebrale en un volume oblong (hemispheres unis), sculptee par
+       lobes et separee visuellement par une fissure longitudinale profonde.
+       Sillons majeurs (Rolando, Sylvius, pariéto-occipital) suggérés en creux. */
     function brainSDF(x, y, z) {
         const ax = Math.abs(x);
 
-        const sFront = smoothstep(0.10, 0.92, z);   // 0 arriere, 1 avant
-        const sBack  = smoothstep(-0.20, -0.88, z);  // 1 a l'arriere
+        const sFront = smoothstep(0.05, 0.95, z);     // 0 arriere, 1 avant
+        const sBack  = smoothstep(-0.10, -0.92, z);   // 1 tres arriere
+        const sTop   = smoothstep(-0.10, 0.45, y);
 
-        /* --- Cervelet, cale sous l'occipital --- */
-        const cb = sdEllipsoid(x, y + 0.38, z + 0.56, 0.34, 0.21, 0.23);
+        /* --- Cervelet, sous l'occipital, un peu elargi --- */
+        const cbMain = sdEllipsoid(x, y + 0.40, z + 0.58, 0.36, 0.205, 0.245);
+        const cbLat  = sdEllipsoid(ax - 0.20, y + 0.41, z + 0.56, 0.19, 0.17, 0.20);
+        let cb = smin(cbMain, cbLat, 0.10);
 
         /* --- Tronc cerebral --- */
-        const bs = sdEllipsoid(x, y + 0.58, z + 0.08, 0.095, 0.28, 0.09);
+        const bs = sdEllipsoid(x, y + 0.60, z + 0.06, 0.090, 0.30, 0.095);
 
-        /* --- Masse cerebrale : un seul volume oblong --- */
-        const taperF = 1 - 0.30 * sFront;
-        const taperB = 1 - 0.24 * sBack;
-        const rx = 0.60 * taperF * taperB;
-        const ry = 0.46 * (1 - 0.17 * sFront);
-        const rz = 0.78;
-        const drop = -0.19 * sFront - 0.07 * sBack;   // le pole frontal s'abaisse
-        const main = sdEllipsoid(x, y - 0.05 - drop, z, rx, ry, rz);
+        /* --- Masse cerebrale : volume unique, lobe par lobe --- */
+        const taperF = 1.0 - 0.28 * sFront;
+        const taperB = 1.0 - 0.22 * sBack;
+        const rx = 0.62 * taperF * taperB;
+        const ryTop = 0.47 * (1.0 - 0.14 * sFront) * (1.0 - 0.06 * sBack);
+        const rz = 0.80;
+        const drop = -0.20 * sFront - 0.06 * sBack;
+        const flattenBase = -0.04 * smoothstep(0.0, -0.45, y); // base un peu plus plane
+        const main = sdEllipsoid(x, y - 0.04 - drop + flattenBase, z, rx, ryTop, rz);
 
-        /* --- Lobe temporal : lobe distinct, suspendu sous la partie avant.
-               Il existe des deux cotes (d'ou |x|). --- */
-        const temporal = sdEllipsoid(ax - 0.34, y + 0.24, z - 0.16, 0.28, 0.20, 0.42);
+        // Renflement parietal/vertex (calotte superieure plus pleine)
+        const parietal = sdEllipsoid(x, y - 0.18, z - 0.05, 0.56, 0.34, 0.46);
+        // Pole frontal plus bombe
+        const frontal = sdEllipsoid(x, y + 0.02, z - 0.34, 0.50, 0.38, 0.40);
+        // Occipital arrondi
+        const occipital = sdEllipsoid(x, y - 0.02, z + 0.52, 0.50, 0.36, 0.30);
 
-        let cerebrum = smin(main, temporal, 0.11);
+        let cerebrum = smin(main, parietal, 0.16);
+        cerebrum = smin(cerebrum, frontal, 0.14);
+        cerebrum = smin(cerebrum, occipital, 0.14);
 
-        let d = smin(cerebrum, cb, 0.13);
+        /* --- Lobe temporal : distinct, suspendu sous la partie moyenne/avant --- */
+        const temporal = sdEllipsoid(ax - 0.36, y + 0.25, z - 0.12, 0.29, 0.19, 0.46);
+        const temporalAnt = sdEllipsoid(ax - 0.30, y + 0.22, z - 0.38, 0.22, 0.17, 0.26);
+        cerebrum = smin(cerebrum, temporal, 0.10);
+        cerebrum = smin(cerebrum, temporalAnt, 0.11);
+
+        let d = smin(cerebrum, cb, 0.12);
         d = smin(d, bs, 0.10);
 
-        /* --- Fissure longitudinale : un sillon etroit, legerement sinueux --- */
-        const wobble = 0.018 * Math.sin(z * 3.2 + 1.2);
-        const fx = Math.abs(x - wobble) - 0.05;
-        const fz = Math.max(-0.74 - z, z - 0.86);
-        const fy = -0.30 - y;
-        d = Math.max(d, -Math.max(fx, Math.max(fz, fy)));
+        /* --- Fissure longitudinale : canyon profond entre hemispheres --- */
+        const wobX = 0.020 * Math.sin(z * 3.4 + 0.8) + 0.010 * Math.sin(z * 7.1 - y * 2.0);
+        const fx = Math.abs(x - wobX);
+        // gorge large en haut, qui se referme vers la base et les poles
+        const canyonTop = 0.055 + 0.030 * sTop;
+        const canyonEnd = 1.0 - 0.55 * smoothstep(0.55, 0.95, Math.abs(z)) - 0.45 * smoothstep(-0.15, -0.45, y);
+        const canyonHalf = canyonTop * Math.max(0.25, canyonEnd);
+        const fz = Math.max(-0.80 - z, z - 0.90);
+        const fy = -0.42 - y; // respecte le profond (corps calleux / base)
+        const fissure = Math.max(fx - canyonHalf, Math.max(fz, fy));
+        d = Math.max(d, -fissure);
 
-        /* --- Sillon de Sylvius : separe le lobe temporal du reste --- */
-        const plane = y - (-0.10 + 0.32 * z);
-        const gx = Math.max(0.26 - ax, ax - 1.3);
-        const gz = Math.max(-0.44 - z, z - 0.46);
-        const syl = Math.max(Math.abs(plane) - 0.04, Math.max(gx, gz));
+        /* --- Scissure de Sylvius (laterale) : sillon courbe temporal/frontal --- */
+        const sylY = -0.11 + 0.28 * z - 0.05 * z * z + 0.03 * Math.sin(z * 2.2);
+        const sylPlane = Math.abs(y - sylY) - 0.028;
+        const sylX = Math.max(0.20 - ax, ax - 0.78);
+        const sylZ = Math.max(-0.46 - z, z - 0.50);
+        const sylDepth = smoothstep(0.22, 0.45, ax); // plus profond lateralement
+        const syl = Math.max(sylPlane, Math.max(sylX, sylZ)) - 0.012 * sylDepth;
         d = Math.max(d, -syl);
+
+        /* --- Sillon central (de Rolando), oblique dorso-lateral --- */
+        const cz = z - (0.04 + 0.55 * (y - 0.05) + 0.10 * (ax - 0.30));
+        const rolPlane = Math.abs(cz) - 0.022;
+        const rolX = Math.max(0.16 - ax, ax - 0.60);
+        const rolY = Math.max(-0.05 - y, y - 0.42);
+        const rolando = Math.max(rolPlane, Math.max(rolX, rolY));
+        d = Math.max(d, -rolando * 0.9); // rainure douce
+
+        /* --- Sillon pariéto-occipital (encoche postéro-médiane) --- */
+        const poPlane = Math.abs((z + 0.36) - 0.85 * (y - 0.05)) - 0.024;
+        const poX = Math.max(-0.02 - ax, ax - 0.34);
+        const poY = Math.max(0.02 - y, y - 0.44);
+        const poZ = Math.max(-0.62 - z, z + 0.18);
+        const po = Math.max(poPlane, Math.max(poX, Math.max(poY, poZ)));
+        d = Math.max(d, -po);
 
         return d;
     }
@@ -380,11 +510,11 @@
         const heat = [];
         const gyri = [];
 
-        const BX = 1.2, BY_MIN = -1.2, BY_MAX = 0.85, BZ = 0.95;
-        const e = 0.006;
+        const BX = 1.2, BY_MIN = -1.25, BY_MAX = 0.90, BZ = 1.0;
+        const e = 0.0055;
 
         let guard = 0;
-        const maxGuard = count * 40;
+        const maxGuard = count * 45;
 
         while (pts.length < count * 3 && guard < maxGuard) {
             guard++;
@@ -393,18 +523,20 @@
             const z = (rnd() * 2 - 1) * BZ;
 
             // Le point de depart doit etre a l'interieur
-            if (brainSDF(x, y, z) > 0) continue;
+            const d0 = brainSDF(x, y, z);
+            if (d0 > 0) continue;
 
             // Newton : projection sur l'isosurface
             let px = x, py = y, pz = z;
-            for (let k = 0; k < 6; k++) {
-                const d = brainSDF(px, py, pz);
-                if (Math.abs(d) < 0.003) break;
+            let d = d0;
+            for (let k = 0; k < 7; k++) {
+                d = brainSDF(px, py, pz);
+                if (Math.abs(d) < 0.0018) break;
                 const gx = brainSDF(px + e, py, pz) - brainSDF(px - e, py, pz);
                 const gy = brainSDF(px, py + e, pz) - brainSDF(px, py - e, pz);
                 const gz = brainSDF(px, py, pz + e) - brainSDF(px, py, pz - e);
                 const gl = Math.sqrt(gx * gx + gy * gy + gz * gz) || 1;
-                const s = d * 0.9;
+                const s = d * 0.92;
                 px -= s * gx / gl;
                 py -= s * gy / gl;
                 pz -= s * gz / gl;
@@ -418,29 +550,35 @@
             const nx = gx / gl, ny = gy / gl, nz = gz / gl;
 
             // Cervelet : fines stries (folia). Cerveau : plis sinueux.
-            const isCerebellum = py < -0.26 && pz < -0.28;
-            let n, amp;
+            const isCerebellum = py < -0.24 && pz < -0.24;
+            let n, disp;
             if (isCerebellum) {
-                n = Math.sin(py * 58 + pz * 11) * 0.5 + 0.5;
-                amp = 0.014;
+                const fw = fbm3(px * 4.0, py * 3.0, pz * 4.0, 2) - 0.5;
+                const folia = Math.sin((py * 64.0 + pz * 12.0) + fw * 2.2);
+                n = clamp01(folia * 0.5 + 0.5);
+                disp = (n - 0.5) * 0.032; // stries fines mais lisibles
             } else {
                 n = gyriNoise(px, py, pz);
-                amp = 0.062;
+                // leger renforcement des sillons profonds pour les rendre nets
+                const sulcus = 1.0 - n;
+                const shaped = (n - 0.5) * (0.92 + sulcus * 0.18);
+                disp = shaped * 0.144; // amplitude ~0.072 de chaque cote, sans percer
             }
-            px += nx * (n - 0.5) * amp * 2;
-            py += ny * (n - 0.5) * amp * 2;
-            pz += nz * (n - 0.5) * amp * 2;
+
+            px += nx * disp;
+            py += ny * disp;
+            pz += nz * disp;
 
             pts.push(px, py, pz);
             gyri.push(n);
 
             // Chaleur : distance au coeur du cerveau
-            const dx = px, dy = py + 0.05, dz = pz - 0.16;
+            const dx = px, dy = py + 0.04, dz = pz - 0.14;
             const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-            heat.push(clamp01(1 - (dist - 0.28) / 0.58));
+            heat.push(clamp01(1 - (dist - 0.26) / 0.60));
         }
 
-        // Melange (points et chaleur ensemble)
+        // Melange (points, chaleur, gyri ensemble)
         const n3 = pts.length / 3;
         for (let i = n3 - 1; i > 0; i--) {
             const j = Math.floor(rnd() * (i + 1));
@@ -544,15 +682,15 @@
             this.glitchTarget = 0;
 
         /* ---------- Palettes du cerveau ----------
-           theme 1 : neon violet (hero sur fond noir)
+           theme 1 : neon (hero sur fond noir) — crêtes indigo, sillons magenta/rose
            theme 0 : ardoise froide + orange (sections claires) */
-        this.coldA = new THREE.Color(0x5b4ce6);   // violet profond
-        this.hotA  = new THREE.Color(0xe8c6ff);   // seams rose-lilas lumineux
+        this.coldA = new THREE.Color(0x2a2d8f);   // indigo/violet profond (crêtes/flancs)
+        this.hotA  = new THREE.Color(0xff6bd6);   // sillons magenta-rose incandescents
         this.coldB = new THREE.Color(0x3f5568);   // ardoise
         this.hotB  = new THREE.Color(0xff6711);   // orange
         this.dustA = new THREE.Color(0xb8a0ff);
         this.dustB = new THREE.Color(0xb9bfc7);
-        this.glowA = new THREE.Color(0x7c3aed);
+        this.glowA = new THREE.Color(0x8b5cf6);
         this.glowB = new THREE.Color(0xff9a5c);
         this._cold = new THREE.Color();
         this._hot = new THREE.Color();
@@ -643,12 +781,16 @@
             const gyris = new Float32Array(n);
             const rnd = mulberry32(77123);
             for (let i = 0; i < n; i++) {
-                // Taille tres homogene : la silhouette doit etre nette,
-                // pas poussiereuse.
-                sizes[i] = 0.085 + rnd() * 0.075;
+                const g = brain.gyri[i] !== undefined ? brain.gyri[i] : 0.5;
+                const h = brain.heat[i] || 0;
+                // Sillons (g bas) : points plus larges pour fusionner en veines
+                // continues. Cretes (g haut) : plus fins pour sculpter le relief.
+                const valley = 1 - Math.min(1, Math.max(0, (g - 0.03) / 0.37));
+                const base = 0.060 + rnd() * 0.050;
+                sizes[i] = base + valley * 0.075 + h * 0.015;
                 seeds[i] = rnd();
-                heats[i] = brain.heat[i] || 0;
-                gyris[i] = brain.gyri[i] !== undefined ? brain.gyri[i] : 0.5;
+                heats[i] = h;
+                gyris[i] = g;
             }
 
             const geo = new THREE.BufferGeometry();
@@ -661,12 +803,12 @@
             this.constMat = new THREE.ShaderMaterial({
                 uniforms: {
                     uTime:        { value: 0 },
-                    uOpacity:     { value: 0.95 },
+                    uOpacity:     { value: 0.82 }, // l'additif + la densite portent la lumiere
                     uPixelRatio:  { value: this.pixelRatio },
                     uGlitch:      { value: 0 },
                     uNeon:        { value: 1 },
-                    uCold:        { value: new THREE.Color(0x6f5ad2) },
-                    uHot:         { value: new THREE.Color(0xf3e8ff) }
+                    uCold:        { value: new THREE.Color(0x2a2d8f) },
+                    uHot:         { value: new THREE.Color(0xff6bd6) }
                 },
                 vertexShader: POINT_VERT,
                 fragmentShader: POINT_FRAG,
@@ -719,7 +861,7 @@
                 new THREE.LineBasicMaterial({
                     vertexColors: true,
                     transparent: true,
-                    opacity: 0.9,
+                    opacity: 0.22,
                     blending: THREE.NormalBlending,
                     depthWrite: false
                 })
@@ -742,8 +884,8 @@
             const phases = new Float32Array(count);
             const n = this.brainSurface.length / 3;
 
-            const cBase = new THREE.Color(0x7c5cff);
-            const cTip = new THREE.Color(0xf0b8ff);
+            const cBase = new THREE.Color(0x7c3aed);
+            const cTip = new THREE.Color(0xff9de6);
 
             for (let i = 0; i < count; i++) {
                 // Point de depart sur la surface du cerveau
@@ -787,10 +929,10 @@
                     pos[vi + 3] = p1.x; pos[vi + 4] = p1.y; pos[vi + 5] = p1.z;
 
                     const ci = (i * segs + s) * 8;
-                    const a0 = (1 - t0) * (0.18 + rnd() * 0.12);
-                    const a1 = (1 - t1) * (0.18 + rnd() * 0.12);
-                    const col0 = cBase.clone().lerp(cTip, t0 * 0.7);
-                    const col1 = cBase.clone().lerp(cTip, t1 * 0.7);
+                    const a0 = (1 - t0) * (0.10 + rnd() * 0.10);
+                    const a1 = (1 - t1) * (0.10 + rnd() * 0.10);
+                    const col0 = cBase.clone().lerp(cTip, t0 * 0.85);
+                    const col1 = cBase.clone().lerp(cTip, t1 * 0.85);
                     col[ci] = col0.r; col[ci + 1] = col0.g; col[ci + 2] = col0.b; col[ci + 3] = a0;
                     col[ci + 4] = col1.r; col[ci + 5] = col1.g; col[ci + 6] = col1.b; col[ci + 7] = a1;
                 }
@@ -803,7 +945,7 @@
             this.aura = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
                 vertexColors: true,
                 transparent: true,
-                opacity: 0.7,
+                opacity: 0.55,
                 blending: THREE.AdditiveBlending,
                 depthWrite: false
             }));
@@ -874,27 +1016,27 @@
             // Halo principal : chaleur diffuse derriere la masse
             this.glow = new THREE.Sprite(new THREE.SpriteMaterial({
                 map: makeGlowTexture(),
-                color: 0x7c3aed,
+                color: 0x8b5cf6,
                 transparent: true,
-                opacity: 0.6,
+                opacity: 0.55,
                 depthWrite: false,
                 depthTest: false,
                 blending: THREE.AdditiveBlending
             }));
-            this.glow.scale.setScalar(12);
+            this.glow.scale.setScalar(13);
             this.root.add(this.glow);
 
             // Halo secondaire, plus large et plus doux (effet bloom)
             this.glow2 = new THREE.Sprite(new THREE.SpriteMaterial({
                 map: makeGlowTexture(),
-                color: 0xa855f7,
+                color: 0xd946ef,
                 transparent: true,
-                opacity: 0.22,
+                opacity: 0.18,
                 depthWrite: false,
                 depthTest: false,
                 blending: THREE.AdditiveBlending
             }));
-            this.glow2.scale.setScalar(18);
+            this.glow2.scale.setScalar(20);
             this.root.add(this.glow2);
         }
 
@@ -1696,7 +1838,11 @@
                     this.constMat.blending = wantBlend;
                     this.constMat.needsUpdate = true;
                 }
-                this.links.material.opacity = s.constOpacity * this.intro.opacity;
+                // En neon, le maillage interne nuit a la lecture volumétrique :
+                // on le cache et on laisse les sillons lumineux dessiner le relief.
+                const linksOn = th < 0.45;
+                this.links.visible = linksOn;
+                this.links.material.opacity = linksOn ? (0.22 * s.constOpacity * this.intro.opacity) : 0.0;
 
                 // Vue 3/4 : c'est l'angle qui fait lire un cerveau
                 // plutot qu'une forme symetrique de face.
@@ -1715,16 +1861,16 @@
                 this._updateConstellation();
 
                 this.glow.position.set(this.constellation.position.x, this.constellation.position.y, s.constZ - 0.6);
-                this.glow.scale.setScalar((7 + 6 * th) * s.glowScale * this.intro.scale);
-                this.glow.material.opacity = (0.45 + 0.55 * th) * s.glowOpacity * this.intro.opacity;
+                this.glow.scale.setScalar((8 + 7 * th) * s.glowScale * this.intro.scale);
+                this.glow.material.opacity = (0.32 + 0.50 * th) * s.glowOpacity * this.intro.opacity;
                 this._glow.copy(this.glowB).lerp(this.glowA, th);
                 this.glow.material.color.copy(this._glow);
                 this.glow.material.blending = th > 0.4 ? THREE.AdditiveBlending : THREE.NormalBlending;
 
                 if (this.glow2) {
                     this.glow2.position.copy(this.glow.position);
-                    this.glow2.scale.setScalar((14 + 8 * th) * s.glowScale * this.intro.scale);
-                    this.glow2.material.opacity = (0.08 + 0.28 * th) * s.glowOpacity * this.intro.opacity;
+                    this.glow2.scale.setScalar((15 + 10 * th) * s.glowScale * this.intro.scale);
+                    this.glow2.material.opacity = (0.05 + 0.22 * th) * s.glowOpacity * this.intro.opacity;
                     this.glow2.material.color.copy(this._glow);
                     this.glow2.material.blending = th > 0.4 ? THREE.AdditiveBlending : THREE.NormalBlending;
                 }
@@ -1759,7 +1905,7 @@
             // Aura neuronale : visible surtout en mode neon
             if (this.aura) {
                 const thAura = s.brainTheme !== undefined ? s.brainTheme : 0;
-                this.aura.material.opacity = (0.15 + 0.55 * thAura) * this.intro.opacity;
+                this.aura.material.opacity = (0.08 + 0.50 * thAura) * this.intro.opacity;
                 this.aura.material.blending = thAura > 0.3 ? THREE.AdditiveBlending : THREE.NormalBlending;
             }
 

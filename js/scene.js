@@ -32,6 +32,7 @@
         uniform float uTime;
         uniform float uPixelRatio;
         uniform float uGlitch;
+        uniform float uNeon;
         varying float vSeed;
         varying float vHeat;
         varying float vGyri;
@@ -52,7 +53,11 @@
             pos.z += g * uGlitch * 0.03;
 
             vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-            gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001)) * (0.75 + aHeat * 0.75);
+            // En mode neon les sillons (gyri bas) gonflent pour creer des
+            // fissures lumineuses continues, comme sur les references.
+            float seam = smoothstep(0.44, 0.10, aGyri);
+            float neonBoost = 1.0 + uNeon * seam * 1.1;
+            gl_PointSize = aSize * uPixelRatio * (150.0 / max(-mv.z, 0.001)) * (0.75 + aHeat * 0.75) * neonBoost;
             gl_Position = projectionMatrix * mv;
         }
     `;
@@ -62,6 +67,7 @@
         uniform vec3 uHot;
         uniform float uOpacity;
         uniform float uTime;
+        uniform float uNeon;
         varying float vSeed;
         varying float vHeat;
         varying float vGyri;
@@ -70,19 +76,30 @@
             float d = length(c);
             if(d > 0.5) discard;
 
-            float core = smoothstep(0.5, 0.30, d);
-            float a = pow(core, 0.55);
+            // Noyau plus doux en mode neon : les points se fondent en halo
+            float core = smoothstep(0.5, uNeon > 0.5 ? 0.05 : 0.30, d);
+            float a = pow(core, uNeon > 0.5 ? 1.2 : 0.55);
 
             // La lumiere court dans les sillons entre les plis :
             // gyri bas = creux = sillon incandescent.
-            float seam = smoothstep(0.44, 0.14, vGyri);
+            float seam = smoothstep(0.44, 0.10, vGyri);
 
-            // Coeur incandescent + sillons
-            float heat = max(pow(vHeat, 2.6), seam * 0.92);
+            // Coeur incandescent + sillons tres lumineux en neon
+            float seamBoost = mix(0.92, 1.35, uNeon);
+            float heat = max(pow(vHeat, 2.2), seam * seamBoost);
             vec3 col = mix(uCold, uHot, heat);
 
+            // En mode neon les sillons virent vers le blanc-rose electrique
+            if (uNeon > 0.01) {
+                vec3 neonHot = vec3(1.0, 0.72, 0.98);
+                col = mix(col, neonHot, seam * 0.55 * uNeon);
+                col += neonHot * seam * 0.35 * uNeon;
+            }
+
             float tw = 0.74 + 0.26 * sin(uTime * 1.6 + vSeed * 31.4);
-            gl_FragColor = vec4(col, a * uOpacity * tw * (0.6 + heat * 0.4));
+            float alpha = a * uOpacity * tw * (0.6 + heat * 0.45);
+            alpha *= mix(1.0, 0.85, uNeon);
+            gl_FragColor = vec4(col, alpha);
         }
     `;
 
@@ -408,7 +425,7 @@
                 amp = 0.014;
             } else {
                 n = gyriNoise(px, py, pz);
-                amp = 0.075;
+                amp = 0.062;
             }
             px += nx * (n - 0.5) * amp * 2;
             py += ny * (n - 0.5) * amp * 2;
@@ -525,6 +542,23 @@
             this.dustScale = 1;
             this.intro = { scale: 1, opacity: 1 };
             this.glitchTarget = 0;
+
+        /* ---------- Palettes du cerveau ----------
+           theme 1 : neon violet (hero sur fond noir)
+           theme 0 : ardoise froide + orange (sections claires) */
+        this.coldA = new THREE.Color(0x5b4ce6);   // violet profond
+        this.hotA  = new THREE.Color(0xe8c6ff);   // seams rose-lilas lumineux
+        this.coldB = new THREE.Color(0x3f5568);   // ardoise
+        this.hotB  = new THREE.Color(0xff6711);   // orange
+        this.dustA = new THREE.Color(0xb8a0ff);
+        this.dustB = new THREE.Color(0xb9bfc7);
+        this.glowA = new THREE.Color(0x7c3aed);
+        this.glowB = new THREE.Color(0xff9a5c);
+        this._cold = new THREE.Color();
+        this._hot = new THREE.Color();
+        this._dust = new THREE.Color();
+        this._glow = new THREE.Color();
+
             this.disposed = false;
             this.neurons = [];
             this.neuronObserver = null;
@@ -540,6 +574,7 @@
                constX / constY normalises : 0 = centre ecran, +-1 = bord */
             this.state = {
                 constOpacity: 0.95, constSpread: 1,
+                brainTheme: 1,
                 constX: 0, constY: 0.12, constZ: -1.2,
                 morphB: 0,
                 dustOpacity: 0.35, glowOpacity: 1, glowScale: 1,
@@ -590,7 +625,10 @@
         }
 
         _initBrain() {
-            const count = this.isMobile ? 14000 : 42000;
+            // 72 000 points : la densite fait la masse, comme la
+            // spheree de reference. Un seul draw call, le cout CPU reste
+            // dans le budget (le maillage de liens, lui, reste clairseme).
+            const count = this.isMobile ? 22000 : 72000;
 
             const brain = buildBrainSurface(count);
             this.brainSurface = brain.positions;
@@ -607,7 +645,7 @@
             for (let i = 0; i < n; i++) {
                 // Taille tres homogene : la silhouette doit etre nette,
                 // pas poussiereuse.
-                sizes[i] = 0.058 + rnd() * 0.06;
+                sizes[i] = 0.085 + rnd() * 0.075;
                 seeds[i] = rnd();
                 heats[i] = brain.heat[i] || 0;
                 gyris[i] = brain.gyri[i] !== undefined ? brain.gyri[i] : 0.5;
@@ -626,14 +664,15 @@
                     uOpacity:     { value: 0.95 },
                     uPixelRatio:  { value: this.pixelRatio },
                     uGlitch:      { value: 0 },
-                    uCold:        { value: new THREE.Color(0x3f5568) },
-                    uHot:         { value: new THREE.Color(0xf07c2c) }
+                    uNeon:        { value: 1 },
+                    uCold:        { value: new THREE.Color(0x6f5ad2) },
+                    uHot:         { value: new THREE.Color(0xf3e8ff) }
                 },
                 vertexShader: POINT_VERT,
                 fragmentShader: POINT_FRAG,
                 transparent: true,
                 depthWrite: false,
-                blending: THREE.NormalBlending
+                blending: THREE.AdditiveBlending
             });
 
             this.constellation = new THREE.Points(geo, this.constMat);
@@ -644,7 +683,7 @@
                la densite fait deja la forme, le maillage ne doit qu'accentuer.
                Il doit rester tres discret, sinon on lit un fil de fer
                plutot qu'un cerveau. */
-            const stride = Math.max(1, Math.round(n / 4500));
+            const stride = Math.max(1, Math.round(n / 3200));
             const subset = [];
             for (let i = 0; i < n; i += stride) subset.push(i);
             const links = buildLinks(this.brainSurface, n, 2, 0.11, subset);
@@ -687,6 +726,91 @@
             );
             this.constellation.add(this.links);
             this.linkIndices = links;
+
+            this._initAura();
+        }
+
+        /* Filaments decoratifs : tendrils qui irradient de la surface,
+           comme des synapses qui s'allument autour du cerveau (references). */
+        _initAura() {
+            const rnd = mulberry32(3317);
+            const count = this.isMobile ? 180 : 360;
+            const segs = 7; // segments par filament
+            const total = count * segs;
+            const pos = new Float32Array(total * 6);
+            const col = new Float32Array(total * 8);
+            const phases = new Float32Array(count);
+            const n = this.brainSurface.length / 3;
+
+            const cBase = new THREE.Color(0x7c5cff);
+            const cTip = new THREE.Color(0xf0b8ff);
+
+            for (let i = 0; i < count; i++) {
+                // Point de depart sur la surface du cerveau
+                const idx = Math.floor(rnd() * n) * 3;
+                const ox = this.brainSurface[idx];
+                const oy = this.brainSurface[idx + 1];
+                const oz = this.brainSurface[idx + 2];
+                const len = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
+                const nx = ox / len, ny = oy / len, nz = oz / len;
+
+                // Direction : normale + un peu de tangente aleatoire
+                const tx = (rnd() - 0.5) * 1.2;
+                const ty = (rnd() - 0.5) * 1.2;
+                const tz = (rnd() - 0.5) * 1.2;
+                let dx = nx + tx * 0.45, dy = ny + ty * 0.45, dz = nz + tz * 0.45;
+                const dl = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+                dx /= dl; dy /= dl; dz /= dl;
+
+                const filamentLen = 0.18 + rnd() * 0.42;
+                phases[i] = rnd();
+
+                // Courbure legere
+                const cx = (rnd() - 0.5) * 0.5;
+                const cy = (rnd() - 0.5) * 0.5;
+                const cz = (rnd() - 0.5) * 0.5;
+
+                for (let s = 0; s < segs; s++) {
+                    const t0 = s / segs;
+                    const t1 = (s + 1) / segs;
+                    const curve = (t) => {
+                        const bend = Math.sin(t * Math.PI) * 0.12;
+                        return {
+                            x: ox + dx * filamentLen * t + cx * bend,
+                            y: oy + dy * filamentLen * t + cy * bend,
+                            z: oz + dz * filamentLen * t + cz * bend
+                        };
+                    };
+                    const p0 = curve(t0), p1 = curve(t1);
+                    const vi = (i * segs + s) * 6;
+                    pos[vi] = p0.x; pos[vi + 1] = p0.y; pos[vi + 2] = p0.z;
+                    pos[vi + 3] = p1.x; pos[vi + 4] = p1.y; pos[vi + 5] = p1.z;
+
+                    const ci = (i * segs + s) * 8;
+                    const a0 = (1 - t0) * (0.18 + rnd() * 0.12);
+                    const a1 = (1 - t1) * (0.18 + rnd() * 0.12);
+                    const col0 = cBase.clone().lerp(cTip, t0 * 0.7);
+                    const col1 = cBase.clone().lerp(cTip, t1 * 0.7);
+                    col[ci] = col0.r; col[ci + 1] = col0.g; col[ci + 2] = col0.b; col[ci + 3] = a0;
+                    col[ci + 4] = col1.r; col[ci + 5] = col1.g; col[ci + 6] = col1.b; col[ci + 7] = a1;
+                }
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            geo.setAttribute('color', new THREE.BufferAttribute(col, 4));
+
+            this.aura = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.7,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            }));
+            this.aura.frustumCulled = false;
+            this.auraPhases = phases;
+            // L'aura suit le cerveau
+            this.constellation.add(this.aura);
         }
 
         _buildDissolve(count) {
@@ -730,14 +854,15 @@
                     uOpacity:    { value: 0.35 },
                     uPixelRatio: { value: this.pixelRatio },
                     uGlitch:     { value: 0 },
-                    uCold:       { value: new THREE.Color(0xb9bfc7) },
-                    uHot:        { value: new THREE.Color(0xffb27a) }
+                    uNeon:       { value: 1 },
+                    uCold:       { value: new THREE.Color(0xb8a0ff) },
+                    uHot:        { value: new THREE.Color(0xe8c6ff) }
                 },
                 vertexShader: POINT_VERT,
                 fragmentShader: POINT_FRAG,
                 transparent: true,
                 depthWrite: false,
-                blending: THREE.NormalBlending
+                blending: THREE.AdditiveBlending
             });
 
             this.dust = new THREE.Points(geo, this.dustMat);
@@ -746,17 +871,31 @@
 
         /* ---------- Halo derriere le cerveau ---------- */
         _initGlow() {
+            // Halo principal : chaleur diffuse derriere la masse
             this.glow = new THREE.Sprite(new THREE.SpriteMaterial({
                 map: makeGlowTexture(),
-                color: 0xff9a5c,
+                color: 0x7c3aed,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0.6,
                 depthWrite: false,
                 depthTest: false,
-                blending: THREE.NormalBlending
+                blending: THREE.AdditiveBlending
             }));
-            this.glow.scale.setScalar(9);
+            this.glow.scale.setScalar(12);
             this.root.add(this.glow);
+
+            // Halo secondaire, plus large et plus doux (effet bloom)
+            this.glow2 = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: makeGlowTexture(),
+                color: 0xa855f7,
+                transparent: true,
+                opacity: 0.22,
+                depthWrite: false,
+                depthTest: false,
+                blending: THREE.AdditiveBlending
+            }));
+            this.glow2.scale.setScalar(18);
+            this.root.add(this.glow2);
         }
 
         /* =====================================================================
@@ -1542,6 +1681,21 @@
                 this.constMat.uniforms.uTime.value = t;
                 this.constMat.uniforms.uOpacity.value = s.constOpacity * this.intro.opacity;
                 this.constMat.uniforms.uGlitch.value = s.glitch;
+
+                // Palette : interpolation entre le theme neon et le theme clair
+                const th = s.brainTheme !== undefined ? s.brainTheme : 0;
+                this._cold.copy(this.coldB).lerp(this.coldA, th);
+                this._hot.copy(this.hotB).lerp(this.hotA, th);
+                this.constMat.uniforms.uCold.value.copy(this._cold);
+                this.constMat.uniforms.uHot.value.copy(this._hot);
+                this.constMat.uniforms.uNeon.value = th;
+                // Le neon brille en additif, le theme clair reste en normal
+                const wantAdditive = th > 0.45;
+                const wantBlend = wantAdditive ? THREE.AdditiveBlending : THREE.NormalBlending;
+                if (this.constMat.blending !== wantBlend) {
+                    this.constMat.blending = wantBlend;
+                    this.constMat.needsUpdate = true;
+                }
                 this.links.material.opacity = s.constOpacity * this.intro.opacity;
 
                 // Vue 3/4 : c'est l'angle qui fait lire un cerveau
@@ -1561,8 +1715,19 @@
                 this._updateConstellation();
 
                 this.glow.position.set(this.constellation.position.x, this.constellation.position.y, s.constZ - 0.6);
-                this.glow.scale.setScalar(9 * s.glowScale * this.intro.scale);
-                this.glow.material.opacity = 0.5 * s.glowOpacity * this.intro.opacity;
+                this.glow.scale.setScalar((7 + 6 * th) * s.glowScale * this.intro.scale);
+                this.glow.material.opacity = (0.45 + 0.55 * th) * s.glowOpacity * this.intro.opacity;
+                this._glow.copy(this.glowB).lerp(this.glowA, th);
+                this.glow.material.color.copy(this._glow);
+                this.glow.material.blending = th > 0.4 ? THREE.AdditiveBlending : THREE.NormalBlending;
+
+                if (this.glow2) {
+                    this.glow2.position.copy(this.glow.position);
+                    this.glow2.scale.setScalar((14 + 8 * th) * s.glowScale * this.intro.scale);
+                    this.glow2.material.opacity = (0.08 + 0.28 * th) * s.glowOpacity * this.intro.opacity;
+                    this.glow2.material.color.copy(this._glow);
+                    this.glow2.material.blending = th > 0.4 ? THREE.AdditiveBlending : THREE.NormalBlending;
+                }
             }
 
             /* --- Camera : elle doit etre a jour AVANT le calcul des
@@ -1577,9 +1742,26 @@
 
             this.dustMat.uniforms.uTime.value = t;
             this.dustMat.uniforms.uOpacity.value = s.dustOpacity;
+            const th2 = s.brainTheme !== undefined ? s.brainTheme : 0;
+            this._dust.copy(this.dustB).lerp(this.dustA, th2);
+            this.dustMat.uniforms.uCold.value.copy(this._dust);
+            this.dustMat.uniforms.uHot.value.copy(this._dust);
+            this.dustMat.uniforms.uNeon.value = th2;
             this.dustMat.uniforms.uGlitch.value = s.glitch * 0.5;
+            const dustBlend = th2 > 0.4 ? THREE.AdditiveBlending : THREE.NormalBlending;
+            if (this.dustMat.blending !== dustBlend) {
+                this.dustMat.blending = dustBlend;
+                this.dustMat.needsUpdate = true;
+            }
             this.dust.position.x = -this.pointerSmooth.x * 0.7 * this.dustScale;
             this.dust.position.y = -this.pointerSmooth.y * 0.5 * this.dustScale;
+
+            // Aura neuronale : visible surtout en mode neon
+            if (this.aura) {
+                const thAura = s.brainTheme !== undefined ? s.brainTheme : 0;
+                this.aura.material.opacity = (0.15 + 0.55 * thAura) * this.intro.opacity;
+                this.aura.material.blending = thAura > 0.3 ? THREE.AdditiveBlending : THREE.NormalBlending;
+            }
 
             s.glitch += (this.glitchTarget - s.glitch) * 0.25;
             this.glitchTarget *= 0.86;

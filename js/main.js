@@ -550,9 +550,16 @@
         const navbar = $('#navbar');
         if (!navbar) return;
         const onScroll = () => {
-            navbar.classList.toggle('is-scrolled', window.scrollY > 40);
+            const y = window.scrollY;
+            navbar.classList.toggle('is-scrolled', y > 40);
+            // Le hero a un fond sombre : la navbar y reste claire.
+            // Au-dela, on repasse a la version editorial creme.
+            const hero = document.querySelector('#accueil');
+            const heroH = hero ? hero.offsetHeight : window.innerHeight;
+            navbar.classList.toggle('is-dark', y < heroH * 0.62);
         };
         window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
         onScroll();
     }
 

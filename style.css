@@ -191,12 +191,46 @@ canvas { display: block; }
 }
 
 /* ---------- 4. OVERLAYS ATMOSPHÉRIQUES ---------- */
+/* Le fond sombre passe SOUS le canvas : le cerveau doit pouvoir
+   briller par-dessus, et le texte par-dessus du cerveau. */
+.backdrop {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100svh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 58% 52% at 62% 32%, rgba(92, 64, 178, .55), transparent 70%),
+        radial-gradient(ellipse 52% 42% at 26% 72%, rgba(38, 86, 168, .38), transparent 72%),
+        linear-gradient(180deg, #06060c 0%, #0a0a15 48%, #0c0c17 100%);
+}
+.backdrop__glow {
+    position: absolute;
+    left: 62%; top: 32%;
+    width: 62vmin; height: 62vmin;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(152, 118, 255, .26), transparent 68%);
+    filter: blur(26px);
+}
+.backdrop__grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(150, 170, 255, .055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(150, 170, 255, .055) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 68% 58% at 52% 38%, #000 18%, transparent 74%);
+    -webkit-mask-image: radial-gradient(ellipse 68% 58% at 52% 38%, #000 18%, transparent 74%);
+}
+
 #gl-canvas {
     position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
+    z-index: 1;
     pointer-events: none;
     opacity: 0;
     transition: opacity 1.4s var(--ease-out);
@@ -206,7 +240,7 @@ body.scene-ready #gl-canvas { opacity: 1; }
 .fx-aurora {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     pointer-events: none;
     overflow: hidden;
 }
@@ -242,7 +276,7 @@ body.scene-ready #gl-canvas { opacity: 1; }
 .fx-grid {
     position: fixed;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
     pointer-events: none;
     background-image:
         linear-gradient(rgba(17,24,34,.035) 1px, transparent 1px),
@@ -255,7 +289,7 @@ body.scene-ready #gl-canvas { opacity: 1; }
 .fx-grain {
     position: fixed;
     inset: -120%;
-    z-index: 3;
+    z-index: 4;
     pointer-events: none;
     opacity: .035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -641,7 +675,7 @@ body.cursor-hover .cursor__ring {
 .btn-block { width: 100%; }
 
 /* ---------- 11. SECTIONS ---------- */
-main { position: relative; z-index: 2; }
+main { position: relative; z-index: 3; }
 section { position: relative; padding: var(--section-y) 0; }
 
 /* Voile de lisibilité : la 3D reste visible en fond mais ne mange
@@ -670,6 +704,7 @@ section::before {
 
 /* ---------- 12. HERO (le cerveau au centre, le texte en bas — style MDX) ---------- */
 .hero {
+    position: relative;
     min-height: 100svh;
     display: flex;
     align-items: flex-end;
@@ -823,6 +858,50 @@ section::before {
     100% { transform: translateY(250%); }
 }
 
+
+/* ---------- 12b. HERO SOMBRE (references : cerveau neon sur fond noir) ---------- */
+#accueil { color: #f2f0f8; }
+#accueil .hero__title { color: #fbfaff; }
+#accueil .hero__title-accent { color: #c4a6ff; }
+#accueil .hero__description { color: #b6b3c8; }
+#accueil .hero__right-text { color: #b6b3c8; }
+#accueil .hero__right-text em { color: #fbfaff; }
+#accueil .badge {
+    background: rgba(160, 120, 255, .12);
+    border-color: rgba(170, 130, 255, .35);
+    color: #cbb2ff;
+}
+#accueil .hero__pills li {
+    border-color: rgba(190, 180, 255, .28);
+    background: rgba(255, 255, 255, .04);
+    color: #cfcae4;
+}
+#accueil .hero__pills li:hover {
+    border-color: rgba(180, 140, 255, .7);
+    color: #e2d8ff;
+    background: rgba(170, 130, 255, .12);
+}
+#accueil .hero__stats { border-top-color: rgba(190, 180, 255, .18); }
+#accueil .hero__stats strong { color: #fbfaff; }
+#accueil .hero__stats span { color: #8d89a3; }
+#accueil .hero__scroll-hint .mono { color: #8d89a3; }
+#accueil .hero__scroll-line { background: rgba(190, 180, 255, .16); }
+#accueil .btn-primary {
+    background: linear-gradient(120deg, #8b5cf6, #6366f1);
+    color: #fff;
+    box-shadow: 0 14px 40px -16px rgba(139, 92, 246, .8);
+}
+#accueil .btn-primary::before { background: linear-gradient(120deg, #a78bfa, #818cf8); }
+#accueil .btn-outline {
+    border-color: rgba(190, 180, 255, .3);
+    color: #dcd8ee;
+    background: rgba(255, 255, 255, .04);
+}
+#accueil .btn-outline:hover {
+    border-color: rgba(180, 140, 255, .8);
+    color: #fff;
+}
+
 /* ---------- 13. MANIFESTE ---------- */
 .manifesto__statement {
     font-family: var(--font-display);
@@ -951,6 +1030,26 @@ section::before {
     background: rgba(255,255,255,.6);
     transform: translateZ(8px);
 }
+
+
+/* Navbar claire sur le hero sombre */
+.navbar.is-dark { color: #f2f0f8; }
+.navbar.is-dark .logo { color: #fbfaff; }
+.navbar.is-dark .logo span { color: #a78bfa; }
+.navbar.is-dark .nav-links a { color: #b6b3c8; }
+.navbar.is-dark .nav-links a:hover,
+.navbar.is-dark .nav-links a.is-active { color: #fbfaff; }
+.navbar.is-dark .nav-links a::after { background: #a78bfa; }
+.navbar.is-dark.is-scrolled {
+    background: rgba(243, 242, 239, .86);
+    border-bottom-color: var(--border);
+}
+.navbar.is-dark.is-scrolled .logo { color: var(--ink); }
+.navbar.is-dark.is-scrolled .logo span { color: var(--accent); }
+.navbar.is-dark.is-scrolled .nav-links a { color: var(--ink-2); }
+.navbar.is-dark.is-scrolled .nav-links a:hover,
+.navbar.is-dark.is-scrolled .nav-links a.is-active { color: var(--ink); }
+.navbar.is-dark.is-scrolled .nav-links a::after { background: var(--accent); }
 
 /* ---------- 15. STACK + MARQUEE ---------- */
 .marquee {

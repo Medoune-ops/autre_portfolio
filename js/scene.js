@@ -17,8 +17,8 @@
     const AXON_SEG = 26;             // points de chemin par axone (2 sommets chacun)
     const AXON_MAX_NODES = 8;        // sommets max d'une route
     const AXON_MAX_CORNERS = 4;      // coudes max par axone (donc vias max)
-    const TRACE_HALF_W = 1.6;         // demi-largeur du trait, en pixels CSS
-    const VIA_SIZE = 12;              // diametre d'un via, en pixels CSS
+    const TRACE_HALF_W = 1.9;         // demi-largeur du trait, en pixels CSS
+    const VIA_SIZE = 13;              // diametre d'un via, en pixels CSS
 
     /* =====================================================================
        SHADERS
@@ -123,18 +123,22 @@
             float body = smoothstep(0.0, 0.60, edge);
             float core = smoothstep(0.52, 1.0, edge);
 
-            // Tete du trace : la pointe lumineuse qui pousse
-            float head = smoothstep(uProgress - 0.06, uProgress, vT);
-            float spark = smoothstep(uProgress - 0.016, uProgress, vT);
+            // Tete du trace : la pointe lumineuse qui pousse.
+            // Elle est marquee par un noyau blanc tres court, suivi d'une
+            // traine qui s'eteint : on lit ou en est le fil.
+            float spark = smoothstep(uProgress - 0.018, uProgress, vT);
+            float head = smoothstep(uProgress - 0.085, uProgress, vT);
 
             // Signal qui circule le long de la trace
             float travel = fract(uTime * 0.22 + vSeed);
             float band = exp(-pow((vT - travel) * 8.0, 2.0)) * step(travel, uProgress);
 
-            float alpha = (0.40 + core * 0.34 + head * 0.45 + band * 0.28) * body;
-            vec3 col = mix(uColor, uHot, clamp(head * 0.85 + band * 0.5 + core * 0.34, 0.0, 1.0));
-            col += uHot * spark * 0.30;
-            gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0) * uOpacity);
+            float alpha = (0.72 + core * 0.28 + head * 0.40 + band * 0.24) * body;
+            vec3 col = mix(uColor, uHot, clamp(head * 0.9 + band * 0.5 + core * 0.34, 0.0, 1.0));
+            // Noyau blanc a la pointe : c'est ce qui rend la tete nette
+            col = mix(col, vec3(1.0, 0.94, 0.86), spark * 0.85);
+            col += uHot * spark * 0.45;
+            gl_FragColor = vec4(col, clamp(alpha + spark * 0.35, 0.0, 1.0) * uOpacity);
         }
     `;
 
@@ -173,12 +177,16 @@
             if (d > 1.0) discard;
 
             // Anneau creux : le centre est perce, ce n'est pas un point plein
-            float ring = smoothstep(0.46, 0.60, d) * (1.0 - smoothstep(0.80, 0.96, d));
+            float ring = smoothstep(0.40, 0.56, d) * (1.0 - smoothstep(0.82, 0.98, d));
 
-            float pulse = 0.78 + 0.22 * sin(uTime * 2.2 + vSeed * 6.2831);
-            float a = ring * vOn * pulse * 0.95;
-            vec3 col = mix(uColor, uHot, ring * 0.9);
-            gl_FragColor = vec4(col, a * uOpacity);
+            // Le via s'allume quand la tete du fil vient de le passer
+            float fresh = smoothstep(0.0, 0.35, vOn) * (1.0 - smoothstep(0.35, 1.0, vOn));
+
+            float pulse = 0.80 + 0.20 * sin(uTime * 2.2 + vSeed * 6.2831);
+            float a = ring * vOn * pulse * 1.15;
+            vec3 col = mix(uColor, uHot, ring * 0.95);
+            col = mix(col, vec3(1.0, 0.92, 0.82), fresh * 0.6);
+            gl_FragColor = vec4(col, clamp(a + fresh * 0.25, 0.0, 1.0) * uOpacity);
         }
     `;
 
@@ -525,6 +533,7 @@
             this._vp = new THREE.Matrix4();     // view-projection
             this._w = new Float32Array(2);      // point monde temporaire
             this._p2 = new Float32Array(2);     // point ecran temporaire
+            this._p3 = new Float32Array(4);     // point ecran + tangente
             this._v3 = new THREE.Vector3();     // point monde temporaire
 
             /* --- Etat anime (pilote par GSAP) ---
@@ -821,6 +830,18 @@
             this.vias.renderOrder = 3;
             this.root.add(this.vias);
 
+            this._elems = elements;
+            /* Cache des cibles : les 3 axones d'un meme element partagent
+               la meme cible. On ne la calcule donc qu'une fois par element
+               et par frame (getBoundingClientRect force un reflow : c'est
+               le poste le plus cher du frame). */
+            this._tgtX = new Float32Array(elements.length);
+            this._tgtY = new Float32Array(elements.length);
+            this._tgtTX = new Float32Array(elements.length);
+            this._tgtTY = new Float32Array(elements.length);
+            this._tgtStamp = new Int32Array(elements.length).fill(-1);
+            this._frameId = 0;
+
             elements.forEach((el, ei) => {
                 const bundle = 3;
                 for (let k = 0; k < bundle; k++) {
@@ -855,8 +876,8 @@
                             uProgress: { value: 0 },
                             uTime:     { value: 0 },
                             uOpacity:  { value: 1 },
-                            uColor:    { value: new THREE.Color(0x9c3c0a) },
-                            uHot:      { value: new THREE.Color(0xff6711) }
+                            uColor:    { value: new THREE.Color(0x8f3206) },
+                            uHot:      { value: new THREE.Color(0xff5c0d) }
                         },
                         vertexShader: AXON_VERT,
                         fragmentShader: AXON_FRAG,
@@ -885,10 +906,10 @@
 
                     /* --- Donnees de routage PCB (fixees une fois pour toutes,
                            pour que le trace ne tremble pas d'une frame a l'autre) --- */
-                    const r1 = rnd();
-                    /* variant 0 = schema « etage » (3 coudes),
-                       variant 1 = schema « simple » (2 coudes, via en course) */
-                    const variant = r1 < 0.24 ? 1 : 0;
+                    /* schema 0 = « etage » (3 coudes), schema 1 = « croise »
+                       (2 coudes). Le choix definitif depend de la
+                       geometrie de la cible, voir _routePCB. */
+                    const schema = rnd() < 0.34 ? 1 : 0;
 
                     this.neurons.push({
                         el, line, geo, path,
@@ -899,8 +920,16 @@
                         /* Ancre dans le DOM (mise en cache : pas de
                            querySelector par frame) */
                         anchor: el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el,
+                        /* Index de l'element dans la liste : les 3 axones
+                           d'un meme element partagent la meme cible, on ne
+                           la calcule donc qu'une fois par frame. */
+                        elIdx: ei,
+                        /* Decalage le long du bord : les 3 axones d'un
+                           bloc arrivent sur 3 points distincts du bord
+                           (comme des pastilles de connecteur). */
+                        spread: (k - 1) * 22,
                         /* --- Routage --- */
-                        variant: variant,
+                        schema: schema,
                         frac: new Float32Array([0.30 + rnd() * 0.40, 0.30 + rnd() * 0.60]),
                         axisPref: rnd() < 0.5 ? 0 : 1,
                         rx: new Float32Array(AXON_MAX_NODES),
@@ -935,8 +964,11 @@
 
         /* Point de contact ECRAN (pixels CSS) : l'axone vise un point precis
            de l'info (son titre) puis se poursuit jusqu'au bord de son
-           conteneur, le long du rayon cerveau -> titre. */
-        _targetScreenPos(el, anchorEl, out) {
+           conteneur, le long du rayon cerveau -> titre.
+           Ecrit dans `out` : [px, py, tx, ty] ou (tx, ty) est la tangente
+           du bord atteint (pour pouvoir decaler le point d'arrivee le long
+           du bord, sans re-mesurer le DOM). */
+        _targetScreenBase(el, anchorEl, out) {
             const vw = window.innerWidth, vh = window.innerHeight;
 
             const bx = (this.state.constX + 1) * 0.5 * vw;
@@ -953,30 +985,51 @@
             dx /= len; dy /= len;
 
             let px = ax, py = ay;
+            let onVertical = false;
             if (Math.abs(dx) > 1e-5) {
                 const tx = dx > 0 ? (c.right - ax) / dx : (c.left - ax) / dx;
                 const ty = Math.abs(dy) > 1e-5 ? (dy > 0 ? (c.bottom - ay) / dy : (c.top - ay) / dy) : Infinity;
-                const tt = Math.max(0, Math.min(tx, ty));
-                px = ax + dx * tt;
-                py = ay + dy * tt;
+                if (tx <= ty) {
+                    const tt = Math.max(0, tx);
+                    px = ax + dx * tt; py = ay + dy * tt;
+                    onVertical = true;
+                } else {
+                    const tt = Math.max(0, ty);
+                    px = ax + dx * tt; py = ay + dy * tt;
+                }
             }
 
             out[0] = px;
             out[1] = py;
+            /* Tangente du bord atteint : verticale sur un bord vertical,
+               horizontale sur un bord horizontal. */
+            out[2] = onVertical ? 0 : 1;
+            out[3] = onVertical ? 1 : 0;
             return out;
         }
 
-        /* Position ecran -> monde (conservee pour compatibilite) */
+        /* Variante avec decalage le long du bord (point d'arrivee). */
+        _targetScreenPos(el, anchorEl, out, spread) {
+            this._targetScreenBase(el, anchorEl, this._p3);
+            out[0] = this._p3[0] + this._p3[2] * spread;
+            out[1] = this._p3[1] + this._p3[3] * spread;
+            return out;
+        }
+
+        /* Position MONDE de la cible (bord du conteneur de l'info).
+           Utilise la meme conversion ecran -> monde que les axones, pour
+           que les deux donnent exactement le meme point. */
         _elementWorldPos(el, out) {
-            const vw = window.innerWidth, vh = window.innerHeight;
             const anchorEl = el.querySelector('h3, h4, strong, .mono, .service-card__icon, .project__idx') || el;
-            this._targetScreenPos(el, anchorEl, this._p2);
-            const sx = this._p2[0] / vw;
-            const sy = this._p2[1] / vh;
-            const dist = Math.max(0.5, this.camera.position.z - this.state.constZ);
-            const halfH = Math.tan(THREE.MathUtils.degToRad(this.camera.fov) * 0.5) * dist;
-            const halfW = halfH * this.camera.aspect;
-            out.set((sx * 2 - 1) * halfW, -(sy * 2 - 1) * halfH, this.state.constZ);
+            this._targetScreenPos(el, anchorEl, this._p2, 0);
+
+            /* Projection courante, si elle n'a pas encore ete faite. */
+            this.camera.updateMatrixWorld();
+            this._vp.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
+            this._setupScreenMap(this.state.constZ);
+
+            this._screenToWorld(this._p2[0], this._p2[1]);
+            out.set(this._w[0], this._w[1], this.state.constZ);
             return out;
         }
 
@@ -1025,14 +1078,13 @@
 
         /* ---------------------------------------------------------------------
            ROUTAGE PCB
-           Trace la polyligne du fil EN PIXELS. Le schema est celui d'un
-           routage de carte electronique :
-             - une diagonale a 45 deg pour sortir,
-             - une course droite,
-             - une diagonale a 45 deg,
-             - une course droite jusqu'a la cible.
-           Comme les diagonales et les courses droites alternent, chaque
-           coude est a 45 deg : jamais d'angle droit strict.
+           Trace la polyligne du fil EN PIXELS, comme le ferait un routeur
+           de carte electronique :
+             - des courses diagonales a 45 deg,
+             - des courses droites (horizontales ou verticales),
+           en alternance. Comme les deux familles alternent, chaque coude
+           est a 45 deg : jamais d'angle droit strict (un plan orthogonal
+           ne ressemblerait pas a du routage PCB).
            La construction est exacte : la route atterrit precisement sur
            la cible, et chaque segment garde une longueur minimale.
            Renvoie le nombre de coudes (= nombre de vias).
@@ -1043,80 +1095,115 @@
             const dx = tx - sx, dy = ty - sy;
             const ax = dx < 0 ? -1 : 1;
             const ay = dy < 0 ? -1 : 1;
-            const adx = Math.abs(dx), ady = Math.abs(dy);
-            const minAbs = Math.min(adx, ady);
-            const maxAbs = Math.max(adx, ady);
+            const adx = dx < 0 ? -dx : dx;
+            const ady = dy < 0 ? -dy : dy;
+            const mn = adx < ady ? adx : ady;   // plus petit ecart
+            const mx = adx < ady ? ady : adx;   // plus grand ecart
+
+            const MIN = this._minLen;          // course droite minimale
+            const DMIN = this._diagMin;        // diagonale minimale
+
             let i = 0;
             RX[0] = sx; RY[0] = sy;
 
-            /* Cible quasi alignee : une seule course droite */
-            if (minAbs < 4 || maxAbs < 8) {
+            /* --- Cible parfaitement alignee : une seule course droite --- */
+            if (mn < 1) {
                 RX[1] = tx; RY[1] = ty;
                 axon.nSeg = 1;
                 this._measure(axon);
                 return 0;
             }
 
-            const MIN = this._minLen;
-            let D, midAxis = -1;
+            /* --- Schema « etage » : 3 coudes.
+                   diagonale / droite / diagonale / droite.
+                   D = total des deux diagonales ; on le borne pour qu'il
+                   reste une course droite de chaque cote.
+                   Exige : adx - D >= MIN et ady - D >= MIN. --- */
+            const etageOK = mn >= DMIN * 2 + MIN;
+            if (etageOK && axon.schema === 0) {
+                const dmin = DMIN * 2;
+                const dmax = mn - MIN;
+                const D = dmin + (dmax - dmin) * axon.frac[1];
+                const d1 = DMIN + (D - DMIN * 2) * axon.frac[0];
+                const d2 = D - d1;
 
-            if (axon.variant === 0 && minAbs > MIN + 12) {
-                /* Schema « etage » : diagonale, course, diagonale, course.
-                   D = longueur totale des deux diagonales ; on la borne
-                   pour qu'il reste de la course droite des deux cotes. */
-                D = (minAbs - MIN) * axon.frac[1];
-                midAxis = axon.axisPref;
-            } else {
-                /* Schema « simple » : une diagonale (frappee en deux, donc
-                   un via en pleine course) puis une course droite. */
-                D = minAbs;
-                midAxis = -1;
+                /* La premiere course droite est horizontale ou verticale :
+                   c'est ce qui fait varier le dessin des traces. */
+                const hFirst = axon.axisPref === 0;
+                const L1 = hFirst ? adx - D : ady - D;
+                const L2 = hFirst ? ady - D : adx - D;
+
+                let cx = sx + ax * d1, cy = sy + ay * d1;
+                RX[++i] = cx; RY[i] = cy;               // coude 1
+                if (hFirst) cx += ax * L1; else cy += ay * L1;
+                RX[++i] = cx; RY[i] = cy;               // coude 2
+                cx += ax * d2; cy += ay * d2;
+                RX[++i] = cx; RY[i] = cy;               // coude 3
+                if (hFirst) cy += ay * L2; else cx += ax * L2;
+                RX[++i] = tx; RY[i] = ty;               // cible
+
+                axon.nSeg = i;
+                this._measure(axon);
+                return i - 1;
             }
 
-            let cx = sx, cy = sy;
+            /* --- Schema « croise » : 2 coudes.
+                   diagonale / droite / diagonale. La course droite se fait
+                   sur l'axe dominant ; les deux diagonales consomment
+                   exactement le petit ecart. --- */
+            if (mn >= 14 && mx - mn >= MIN) {
+                const d1 = mn * (0.3 + 0.4 * axon.frac[0]);
+                const d2 = mn - d1;
 
-            /* --- Repartition des deux diagonales --- */
-            let d1, d2;
-            if (midAxis >= 0) {
-                /* Schema « etage » : les deux diagonales sont partagees par
-                   la course intermediaire ; elles sont donc toutes les
-                   deux non nulles. */
-                d1 = D * axon.frac[0];
-                d2 = D - d1;
-            } else if (D >= 40) {
-                /* Schema « simple » : une diagonale fendue en deux, donc un
-                   via pose en pleine course (routage de carte reelle). */
-                d1 = D * axon.frac[0];
-                d2 = D - d1;
-            } else {
-                d1 = D;
-                d2 = 0;
+                let cx = sx + ax * d1, cy = sy + ay * d1;
+                RX[++i] = cx; RY[i] = cy;               // coude 1
+                if (adx > ady) cx += ax * (mx - mn); else cy += ay * (mx - mn);
+                RX[++i] = cx; RY[i] = cy;               // coude 2
+                cx += ax * d2; cy += ay * d2;
+                RX[++i] = cx; RY[i] = cy;               // cible
+
+                axon.nSeg = i;
+                this._measure(axon);
+                return i - 1;
             }
 
-            /* --- Diagonale 1 : 45 deg, vers la cible --- */
-            cx += ax * d1; cy += ay * d1;
-            RX[++i] = cx; RY[i] = cy;
+            /* --- Schema « etage » en repli : la cible est proche de la
+                   diagonale du cerveau, on repasse par le schema a 3 coudes
+                   pour garder des angles francs. --- */
+            if (etageOK) {
+                const dmin = DMIN * 2;
+                const dmax = mn - MIN;
+                const D = dmin + (dmax - dmin) * axon.frac[1];
+                const d1 = DMIN + (D - DMIN * 2) * axon.frac[0];
+                const d2 = D - d1;
 
-            /* --- Course intermediaire (axe horizontal ou vertical) --- */
-            if (midAxis >= 0) {
-                const lenA = (midAxis === 0 ? adx : ady) - D;
-                const sgnA = midAxis === 0 ? ax : ay;
-                if (midAxis === 0) cx += sgnA * lenA; else cy += sgnA * lenA;
+                const hFirst = axon.axisPref === 0;
+                const L1 = hFirst ? adx - D : ady - D;
+                const L2 = hFirst ? ady - D : adx - D;
+
+                let cx = sx + ax * d1, cy = sy + ay * d1;
                 RX[++i] = cx; RY[i] = cy;
-            }
-
-            /* --- Diagonale 2 : meme direction que la premiere --- */
-            if (d2 > 0) {
+                if (hFirst) cx += ax * L1; else cy += ay * L1;
+                RX[++i] = cx; RY[i] = cy;
                 cx += ax * d2; cy += ay * d2;
                 RX[++i] = cx; RY[i] = cy;
+                if (hFirst) cy += ay * L2; else cx += ax * L2;
+                RX[++i] = tx; RY[i] = ty;
+
+                axon.nSeg = i;
+                this._measure(axon);
+                return i - 1;
             }
 
-            /* --- Course finale : la cible exacte --- */
-            RX[++i] = tx; RY[i] = ty;
-
-            axon.nSeg = i;
-            this._measure(axon);
-            return i - 1;   // nombre de coudes
+            /* --- Secours : une diagonale puis une course droite. --- */
+            {
+                let cx = sx + ax * mn, cy = sy + ay * mn;
+                RX[++i] = cx; RY[i] = cy;
+                RX[++i] = tx; RY[i] = ty;
+                axon.nSeg = i;
+                this._measure(axon);
+                return i - 1;
+            }
         }
 
         /* Longueurs cumulees + repartition des intervalles d'echantillonnage.
@@ -1172,9 +1259,15 @@
             const zp = s.constZ;
             this._setupScreenMap(zp);
 
+            /* Compteur de frame : sert a ne recalculer la cible DOM d'un
+               element qu'une seule fois par frame. */
+            this._frameId++;
+
             const vw = window.innerWidth, vh = window.innerHeight;
             /* Longueur minimale d'un segment de routage (adapter a l'ecran) */
             this._minLen = Math.max(18, Math.min(40, Math.min(vw, vh) * 0.035));
+            /* Longueur minimale d'une diagonale a 45 deg */
+            this._diagMin = Math.max(14, Math.min(30, Math.min(vw, vh) * 0.028));
 
             /* --- Vias : un seul tampon pour toute la scene --- */
             const viaGeo = this.viaGeo;
@@ -1185,8 +1278,22 @@
             let viaN = 0;
             this.viaMat.uniforms.uTime.value = t;
 
-            for (let n = 0; n < this.neurons.length; n++) {
-                const axon = this.neurons[n];
+            /* --- Coeffs de l'homographie, copies en local (pas de lookup
+                   sur `this` dans la boucle chaude) --- */
+            const su = this._su, sv = this._sv;
+            const d0 = this._d0, d1 = this._d1, d2 = this._d2;
+            const x0 = this._x0, x1 = this._x1, x2 = this._x2;
+            const y0 = this._y0, y1 = this._y1, y2 = this._y2;
+
+            /* --- Position ecran du cerveau (partagee par tous les axones) --- */
+            const bx = (s.constX + 1) * 0.5 * vw;
+            const by = (1 - s.constY) * 0.5 * vh;
+
+            const neurons = this.neurons;
+            const nNeurons = neurons.length;
+
+            for (let n = 0; n < nNeurons; n++) {
+                const axon = neurons[n];
                 const p = axon.state.progress;
                 axon.mat.uniforms.uTime.value = t;
                 axon.mat.uniforms.uProgress.value = p > 0.002 ? p : -0.05;
@@ -1209,51 +1316,118 @@
                 const cx = e[0] * v.x + e[4] * v.y + e[8] * v.z + e[12];
                 const cy = e[1] * v.x + e[5] * v.y + e[9] * v.z + e[13];
                 const iw = 1 / cw;
-                axon.sx = (cx * iw * 0.5 + 0.5) * vw;
-                axon.sy = (0.5 - cy * iw * 0.5) * vh;
+                const sx = (cx * iw * 0.5 + 0.5) * vw;
+                const sy = (0.5 - cy * iw * 0.5) * vh;
+                axon.sx = sx;
+                axon.sy = sy;
 
-                /* --- Cible : bord du conteneur de l'info --- */
-                this._targetScreenPos(axon.el, axon.anchor, this._p2);
-                axon.tx = this._p2[0];
-                axon.ty = this._p2[1];
+                /* --- Cible : bord du conteneur de l'info. Les 3 axones
+                       d'un meme element la partagent : on ne mesure le DOM
+                       qu'une fois par element et par frame (le reflow
+                       force par getBoundingClientRect est le poste le plus
+                       cher du frame). --- */
+                const ei = axon.elIdx;
+                if (this._tgtStamp[ei] !== this._frameId) {
+                    this._targetScreenBase(axon.el, axon.anchor, this._p3);
+                    this._tgtX[ei] = this._p3[0];
+                    this._tgtY[ei] = this._p3[1];
+                    this._tgtTX[ei] = this._p3[2];
+                    this._tgtTY[ei] = this._p3[3];
+                    this._tgtStamp[ei] = this._frameId;
+                }
+                const sp = axon.spread;
+                const tx = this._tgtX[ei] + this._tgtTX[ei] * sp;
+                const ty = this._tgtY[ei] + this._tgtTY[ei] * sp;
+                axon.tx = tx;
+                axon.ty = ty;
 
                 /* --- Route PCB --- */
                 this._routePCB(axon);
 
-                /* --- Echantillonnage + ecriture du ruban --- */
+                /* --- Echantillonnage + ecriture du ruban ---
+                   Les 26 points sont repartis sur les segments : chaque coude
+                   tombe exactement sur un point echantillonne, ce qui garde
+                   l'angle net. Le ruban est elargi aux coudes (jointure en
+                   mitre) pour eviter l'encoche que laisserait une largeur
+                   constante. */
                 const RX = axon.rx, RY = axon.ry, CUM = axon.cum, M = axon.m;
                 const arr = axon.path;
                 const aTArr = axon.geo.attributes.aT.array;
                 const nSeg = axon.nSeg, total = axon.total;
                 let si = 0, lnx = 0, lny = 0;
+                let pnx = 0, pny = 0, hasPrev = false;
 
                 for (let k = 0; k < nSeg; k++) {
-                    const x0 = RX[k], y0 = RY[k];
-                    const ex = RX[k + 1] - x0, ey = RY[k + 1] - y0;
+                    const x0s = RX[k], y0s = RY[k];
+                    const ex = RX[k + 1] - x0s, ey = RY[k + 1] - y0s;
                     const len = Math.sqrt(ex * ex + ey * ey) || 1e-4;
                     const nx = -ey / len, ny = ex / len;
                     lnx = nx; lny = ny;
                     const m = M[k];
                     const base = CUM[k];
+
+                    /* Normale du segment precedent (pour la mitre). */
+                    let mnx = nx, mny = ny, mscale = 1;
+                    if (hasPrev) {
+                        /* On lisse les deux normales et on allonge le trait
+                           juste assez pour que la largeur reste constante
+                           apres le coude (cos de l'angle). */
+                        const sx2 = pnx + nx, sy2 = pny + ny;
+                        const sl = Math.sqrt(sx2 * sx2 + sy2 * sy2) || 1e-4;
+                        mnx = sx2 / sl; mny = sy2 / sl;
+                        const cosA = mnx * nx + mny * ny;
+                        mscale = cosA > 0.2 ? 1 / cosA : 1;
+                    }
+
                     for (let j = 0; j < m; j++) {
                         const f = j / m;
-                        const px = x0 + ex * f, py = y0 + ey * f;
+                        const px = x0s + ex * f, py = y0s + ey * f;
                         const o = si * 6;
-                        this._screenToWorld(px + nx * TRACE_HALF_W, py + ny * TRACE_HALF_W);
-                        arr[o] = this._w[0]; arr[o + 1] = this._w[1]; arr[o + 2] = zp;
-                        this._screenToWorld(px - nx * TRACE_HALF_W, py - ny * TRACE_HALF_W);
-                        arr[o + 3] = this._w[0]; arr[o + 4] = this._w[1]; arr[o + 5] = zp;
+
+                        /* Echantillon situe sur le coude (1er point du
+                           segment suivant) : on elargit (mitre). */
+                        const w = (j === 0 && hasPrev) ? TRACE_HALF_W * mscale : TRACE_HALF_W;
+                        const un = (j === 0 && hasPrev) ? mnx : nx;
+                        const vn = (j === 0 && hasPrev) ? mny : ny;
+
+                        /* ecran -> monde (homographie inverse, in-linee) */
+                        let u = (px + un * w) * su - 1;
+                        let vv = 1 - (py + vn * w) * sv;
+                        let inv = 1 / (d0 * u + d1 * vv + d2);
+                        arr[o] = (x0 * u + x1 * vv + x2) * inv;
+                        arr[o + 1] = (y0 * u + y1 * vv + y2) * inv;
+                        arr[o + 2] = zp;
+
+                        u = (px - un * w) * su - 1;
+                        vv = 1 - (py - vn * w) * sv;
+                        inv = 1 / (d0 * u + d1 * vv + d2);
+                        arr[o + 3] = (x0 * u + x1 * vv + x2) * inv;
+                        arr[o + 4] = (y0 * u + y1 * vv + y2) * inv;
+                        arr[o + 5] = zp;
+
                         aTArr[si * 2] = aTArr[si * 2 + 1] = (base + len * f) / total;
                         si++;
                     }
+                    pnx = nx; pny = ny; hasPrev = true;
                 }
+
                 /* Dernier point : la cible exacte, largeur pleine */
                 {
                     const o = si * 6;
-                    this._screenToWorld(RX[nSeg] + lnx * TRACE_HALF_W, RY[nSeg] + lny * TRACE_HALF_W);
-                    arr[o] = this._w[0]; arr[o + 1] = this._w[1]; arr[o + 2] = zp;
-                    this._screenToWorld(RX[nSeg] - lnx * TRACE_HALF_W, RY[nSeg] - lny * TRACE_HALF_W);
-                    arr[o + 3] = this._w[0]; arr[o + 4] = this._w[1]; arr[o + 5] = zp;
+                    let u = (RX[nSeg] + lnx * TRACE_HALF_W) * su - 1;
+                    let vv = 1 - (RY[nSeg] + lny * TRACE_HALF_W) * sv;
+                    let inv = 1 / (d0 * u + d1 * vv + d2);
+                    arr[o] = (x0 * u + x1 * vv + x2) * inv;
+                    arr[o + 1] = (y0 * u + y1 * vv + y2) * inv;
+                    arr[o + 2] = zp;
+
+                    u = (RX[nSeg] - lnx * TRACE_HALF_W) * su - 1;
+                    vv = 1 - (RY[nSeg] - lny * TRACE_HALF_W) * sv;
+                    inv = 1 / (d0 * u + d1 * vv + d2);
+                    arr[o + 3] = (x0 * u + x1 * vv + x2) * inv;
+                    arr[o + 4] = (y0 * u + y1 * vv + y2) * inv;
+                    arr[o + 5] = zp;
+
                     aTArr[si * 2] = aTArr[si * 2 + 1] = 1;
                     si++;
                 }
@@ -1262,9 +1436,11 @@
 
                 /* --- Vias sur les coudes --- */
                 for (let k = 1; k < nSeg && viaN < maxVias; k++) {
-                    this._screenToWorld(RX[k], RY[k]);
-                    viaPos[viaN * 3] = this._w[0];
-                    viaPos[viaN * 3 + 1] = this._w[1];
+                    let u = RX[k] * su - 1;
+                    let vv = 1 - RY[k] * sv;
+                    let inv = 1 / (d0 * u + d1 * vv + d2);
+                    viaPos[viaN * 3] = (x0 * u + x1 * vv + x2) * inv;
+                    viaPos[viaN * 3 + 1] = (y0 * u + y1 * vv + y2) * inv;
                     viaPos[viaN * 3 + 2] = zp;
                     viaT[viaN] = CUM[k] / total;
                     viaProg[viaN] = p;
@@ -1277,8 +1453,18 @@
                 while (k < nSeg - 1 && CUM[k + 1] < sArc) k++;
                 const segLen = CUM[k + 1] - CUM[k];
                 const f = segLen > 0 ? Math.min(1, Math.max(0, (sArc - CUM[k]) / segLen)) : 0;
-                this._screenToWorld(RX[k] + (RX[k + 1] - RX[k]) * f, RY[k] + (RY[k + 1] - RY[k]) * f);
-                axon.tip.position.set(this._w[0], this._w[1], zp);
+                const tpx = RX[k] + (RX[k + 1] - RX[k]) * f;
+                const tpy = RY[k] + (RY[k + 1] - RY[k]) * f;
+                {
+                    let u = tpx * su - 1;
+                    let vv = 1 - tpy * sv;
+                    let inv = 1 / (d0 * u + d1 * vv + d2);
+                    axon.tip.position.set(
+                        (x0 * u + x1 * vv + x2) * inv,
+                        (y0 * u + y1 * vv + y2) * inv,
+                        zp
+                    );
+                }
                 axon.tip.material.opacity = 0.85 * Math.min(1, p * 2);
                 axon.tip.scale.setScalar(0.16 + 0.10 * Math.sin(t * 4 + n));
             }

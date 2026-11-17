@@ -20,6 +20,7 @@ export function Particles({ count = 500 }: { count?: number }) {
 
   useFrame((_, delta) => {
     if (!ref.current) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const arr = ref.current.geometry.attributes.position.array as Float32Array;
     for (let i = 0; i < count; i++) {
       arr[i * 3 + 1] += delta * 0.05 * speeds[i];

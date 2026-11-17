@@ -19,16 +19,16 @@ export function CameraRig() {
   useFrame((_, delta) => {
     const p = scrollStore.reduced ? scrollStore.targetProgress : scrollStore.progress;
 
-    // HERO
+    // HERO — cerveau très gros, occupant ~70–80% de l'écran
     if (p <= PHASES.heroEnd) {
-      desiredPos.set(0, 0.15, 4.2);
-      desiredLook.set(0, 0.05, 0);
+      desiredPos.set(0, 0.12, 3.25);
+      desiredLook.set(0, 0.03, 0);
     }
     // EXPLOSION
     else if (p <= PHASES.explodeEnd) {
       const t = smoothstep(PHASES.heroEnd, PHASES.explodeEnd, p);
-      desiredPos.lerpVectors(new THREE.Vector3(0, 0.15, 4.2), new THREE.Vector3(0.2, 0.2, 5.0), t);
-      desiredLook.set(0, 0.05, 0);
+      desiredPos.lerpVectors(new THREE.Vector3(0, 0.12, 3.25), new THREE.Vector3(0.25, 0.25, 5.2), t);
+      desiredLook.set(0, 0.03, 0);
     }
     // PIECES (entrée dans chaque pièce)
     else if (p <= PHASES.piecesEnd) {

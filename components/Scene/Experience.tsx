@@ -18,10 +18,15 @@ export function Experience() {
       try {
         const res = await fetch("/models/brain.glb", { method: "HEAD" });
         if (res.ok) {
-          // Un loader GLTF complet peut être branché ici (useGLTF) en mappant
-          // les meshes nommées (frontal, parietal, temporal, occipital, cerebellum, brainstem).
-          // Fallback procédural conservé pour garantir le fonctionnement sans asset.
-          // -> voir lib/brain.ts et public/models/README.md
+          // POINT D'INTÉGRATION GLB:
+          // 1) importer useGLTF from '@react-three/drei'
+          // 2) charger /models/brain.glb et parcourir scene.children/meshes
+          // 3) mapper les meshes nommées -> ids BrainPartData:
+          //    frontal, parietal, temporal, occipital, cerebellum, brainstem
+          // 4) construire PartBuild[] (geometry + basePosition + circuits) pour chaque mesh
+          //    (générer circuits via makeCircuits sur la bounding box si besoin)
+          // Fallback procédural conservé pour fonctionner sans asset.
+          // Voir lib/brain.ts et public/models/README.md
         }
       } catch {
         // ignore

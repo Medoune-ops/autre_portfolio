@@ -46,12 +46,25 @@ canvas {
 }
 .panel__inner {
   pointer-events: auto;
-  background: rgba(10, 15, 28, 0.55);
+  background: rgba(10, 15, 28, 0.62);
   border: 1px solid rgba(0, 229, 255, 0.25);
   box-shadow: 0 0 40px rgba(0, 229, 255, 0.08), inset 0 0 30px rgba(30, 144, 255, 0.05);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 20px 22px;
+}
+
+@media (max-width: 768px) {
+  .panel, .panel--left {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 8vh;
+    transform: translateX(-50%) translateY(12px);
+    width: min(520px, 92vw);
+  }
+  .panel__inner { padding: 16px 18px; }
+  .hud__hero { top: 7vh; }
 }
 .panel__kicker {
   font-size: 12px;

@@ -10,9 +10,10 @@ export default function SceneCanvas() {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
       <Canvas
-        camera={{ position: [0, 0.2, 4.2], fov: 42, near: 0.1, far: 100 }}
+        camera={{ position: [0, 0.15, 3.5], fov: 40, near: 0.1, far: 100 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+        style={{ touchAction: "pan-y" }}
         onCreated={({ gl }) => {
           gl.setClearColor("#0A0F1C", 1);
         }}

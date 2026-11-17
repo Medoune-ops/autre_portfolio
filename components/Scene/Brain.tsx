@@ -22,20 +22,20 @@ export function Brain({ builds }: { builds: PartBuild[] }) {
   useFrame((state, delta) => {
     if (!group.current) return;
     const p = scrollStore.reduced ? scrollStore.targetProgress : scrollStore.progress;
-    // rotation lente continue
-    group.current.rotation.y += delta * 0.08;
-    // mouvement souris léger en HERO
+    // rotation lente continue (désactivée en reduced-motion)
+    if (!scrollStore.reduced) group.current.rotation.y += delta * 0.08;
+    // mouvement souris/tactile léger en HERO
     if (!scrollStore.reduced && p < PHASES.heroEnd + 0.05) {
-      mouse.current.x += (state.pointer.x * 0.25 - mouse.current.x) * 0.05;
-      mouse.current.y += (state.pointer.y * 0.15 - mouse.current.y) * 0.05;
+      mouse.current.x += (state.pointer.x * 0.22 - mouse.current.x) * 0.05;
+      mouse.current.y += (state.pointer.y * 0.12 - mouse.current.y) * 0.05;
       group.current.rotation.x = mouse.current.y;
-      group.current.rotation.z = -mouse.current.x * 0.2;
+      group.current.rotation.z = -mouse.current.x * 0.18;
     } else {
       group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, 0, 0.05);
       group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, 0, 0.05);
     }
-    // échelle globale: gros cerveau
-    const s = p < PHASES.heroEnd ? 1.45 : 1.3;
+    // échelle globale: cerveau très gros et visible
+    const s = p < PHASES.heroEnd ? 1.75 : 1.45;
     group.current.scale.setScalar(THREE.MathUtils.lerp(group.current.scale.x, s, 0.04));
   });
 

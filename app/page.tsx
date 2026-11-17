@@ -17,7 +17,7 @@ export default function Page() {
       <SceneCanvas />
       <div className="hud" aria-hidden="false">
         <div className="hud__hero" id="hud-hero">
-          <h1 className="hud__title">À l'intérieur de l'esprit</h1>
+          <h1 className="hud__title">À l&rsquo;intérieur de l&rsquo;esprit</h1>
           <p className="hud__sub">Faites défiler pour explorer le cerveau, pièce par pièce.</p>
         </div>
         <ScrollHint />

@@ -1,0 +1,115 @@
+import type { BrainPartData } from "@/types";
+
+export const BRAIN_PARTS: BrainPartData[] = [
+  {
+    id: "frontal",
+    title: "Lobe frontal",
+    subtitle: "Décision & création",
+    text: "Ici naissent les idées, la planification et l'impulsion. Une pièce baignée de lumière cyan, où les circuits dessinent des chemins de décision.",
+    color: "#7fdcff",
+    accent: "#00E5FF",
+    explodeDir: [0.15, 0.7, 0.6],
+    explodeDist: 1.15,
+    cameraPos: [0.2, 0.6, 1.6],
+    cameraLookAt: [0.15, 0.35, 0.35],
+    wireAnchor: [0.25, 0.35, 0.55],
+    lightIntensity: 1.2,
+    circuitDensity: 0.9,
+  },
+  {
+    id: "parietal",
+    title: "Lobe pariétal",
+    subtitle: "Perception & espace",
+    text: "La carte du monde intérieur. Sensations, orientation et équilibre se croisent dans un réseau de connexions calmes et précises.",
+    color: "#a8e9ff",
+    accent: "#1E90FF",
+    explodeDir: [0.0, 0.85, -0.2],
+    explodeDist: 1.05,
+    cameraPos: [0.0, 1.2, 0.8],
+    cameraLookAt: [0.0, 0.45, -0.05],
+    wireAnchor: [0.0, 0.5, -0.05],
+    lightIntensity: 1.0,
+    circuitDensity: 0.7,
+  },
+  {
+    id: "temporal",
+    title: "Lobe temporal",
+    subtitle: "Mémoire & langage",
+    text: "Archives vivantes : sons, mots et souvenirs résonnent entre neurones et pistes lumineuses, comme des échos organisés.",
+    color: "#8fd9ff",
+    accent: "#00E5FF",
+    explodeDir: [0.95, 0.1, 0.0],
+    explodeDist: 1.2,
+    cameraPos: [1.7, 0.0, 0.6],
+    cameraLookAt: [0.55, -0.05, 0.05],
+    wireAnchor: [0.6, -0.05, 0.15],
+    lightIntensity: 1.05,
+    circuitDensity: 0.8,
+  },
+  {
+    id: "occipital",
+    title: "Lobe occipital",
+    subtitle: "Vision",
+    text: "La pièce des images. La lumière se transforme en formes : chaque impulsion dessine une perception nette sur fond de circuits.",
+    color: "#bfefff",
+    accent: "#1E90FF",
+    explodeDir: [0.0, 0.2, -0.95],
+    explodeDist: 1.1,
+    cameraPos: [0.0, 0.4, -1.7],
+    cameraLookAt: [0.0, 0.2, -0.55],
+    wireAnchor: [0.0, 0.25, -0.6],
+    lightIntensity: 1.15,
+    circuitDensity: 0.85,
+  },
+  {
+    id: "cerebellum",
+    title: "Cervelet",
+    subtitle: "Équilibre & précision",
+    text: "Coordination fine et fluidité du mouvement. Des motifs serrés, rythmés, où chaque signal est ajusté avec exactitude.",
+    color: "#9fe6ff",
+    accent: "#00E5FF",
+    explodeDir: [-0.2, -0.6, -0.75],
+    explodeDist: 1.0,
+    cameraPos: [-0.6, -0.6, -1.3],
+    cameraLookAt: [-0.1, -0.45, -0.45],
+    wireAnchor: [0.0, -0.45, -0.5],
+    lightIntensity: 0.95,
+    circuitDensity: 1.0,
+  },
+  {
+    id: "brainstem",
+    title: "Tronc cérébral",
+    subtitle: "Flux vital",
+    text: "Le socle silencieux. Il relie, régule et transmet : un faisceau de voies lumineuses qui maintient l'ensemble en vie.",
+    color: "#8fd0ff",
+    accent: "#1E90FF",
+    explodeDir: [0.0, -1.0, 0.1],
+    explodeDist: 0.95,
+    cameraPos: [0.0, -1.4, 1.1],
+    cameraLookAt: [0.0, -0.7, 0.0],
+    wireAnchor: [0.0, -0.75, 0.05],
+    lightIntensity: 0.9,
+    circuitDensity: 0.75,
+  },
+];
+
+export const PHASES = {
+  heroEnd: 0.12,
+  explodeEnd: 0.32,
+  piecesEnd: 0.78,
+  connectEnd: 0.88,
+  outroEnd: 1.0,
+};
+
+// segments d'entrée par pièce à l'intérieur de P3 (0.32 -> 0.78)
+export const PIECE_SEGMENT = (() => {
+  const start = PHASES.explodeEnd;
+  const end = PHASES.piecesEnd;
+  const span = (end - start) / BRAIN_PARTS.length;
+  return BRAIN_PARTS.map((p, i) => ({
+    id: p.id,
+    start: start + span * i,
+    end: start + span * (i + 1),
+    mid: start + span * (i + 0.5),
+  }));
+})();

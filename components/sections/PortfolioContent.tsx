@@ -43,16 +43,29 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="accueil"
           aria-labelledby="accueil-titre"
-          className="relative flex min-h-screen items-center overflow-hidden py-20"
+          className="relative flex min-h-screen items-center overflow-hidden py-24"
         >
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-neon/20 blur-[120px]" />
-            <div className="absolute top-1/3 -right-24 h-[28rem] w-[28rem] rounded-full bg-neon2/20 blur-[140px]" />
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent" />
+          {/* Scène 3D : occupe toute la hauteur du héro, cadrée à droite sur grand écran. */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-[54%] lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-auto lg:aspect-[5/6]"
+            role="img"
+            aria-label="Scène 3D interactive présentant le travail de Medoune"
+          >
+            <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={active} />
           </div>
 
-          <div className={`${CONTAINER} relative grid items-center gap-12 lg:grid-cols-2 lg:gap-16`}>
-            <div className="max-w-xl">
+          {/* Voiles de lisibilité : denses à gauche sous le texte, transparents à droite. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-bg/95 via-bg/80 to-bg/40 lg:bg-gradient-to-r lg:from-bg/95 lg:via-bg/70 lg:to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent"
+          />
+
+          <div className={`${CONTAINER} pointer-events-none relative z-10`}>
+            <div className="pointer-events-auto max-w-xl">
               <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
                 <span className="relative flex h-2 w-2" aria-hidden="true">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-75" />
@@ -77,20 +90,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 </a>
                 <a
                   href="#contact"
-                  className={`rounded-full border border-white/15 px-6 py-3 text-sm font-medium text-ice transition hover:border-neon/50 hover:bg-white/5 ${FOCUS}`}
+                  className={`rounded-full border border-white/15 bg-bg/40 px-6 py-3 text-sm font-medium text-ice backdrop-blur transition hover:border-neon/50 hover:bg-white/5 ${FOCUS}`}
                 >
                   Me contacter
                 </a>
-              </div>
-            </div>
-
-            <div className="relative rounded-2xl border border-white/10 bg-card/60 p-2 shadow-[0_0_80px_-24px_rgba(30,144,255,0.55)] backdrop-blur sm:p-3">
-              <div
-                className="h-[420px] w-full overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-neon2/10 via-transparent to-neon/10 md:h-[560px]"
-                role="img"
-                aria-label="Scène 3D interactive présentant le travail de Medoune"
-              >
-                <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={active} />
               </div>
             </div>
           </div>

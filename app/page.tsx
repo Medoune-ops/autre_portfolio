@@ -1,20 +1,18 @@
 "use client";
 
-import { SplineSceneBasic } from "@/components/ui/demo";
+import { useState } from "react";
+import { ScribbleIntro } from "@/components/ui/scribble-intro";
+import { PortfolioContent } from "@/components/sections/PortfolioContent";
 
 export default function Page() {
+  const [introDone, setIntroDone] = useState(false);
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "48px 20px",
-        display: "grid",
-        placeItems: "center",
-      }}
-    >
-      <section style={{ width: "min(1100px, 100%)" }}>
-        <SplineSceneBasic />
-      </section>
-    </main>
+    <div className="min-h-screen overflow-x-hidden bg-[#0A0F1C] text-[#EAF6FF]">
+      <div aria-hidden={!introDone}>
+        <PortfolioContent active={introDone} />
+      </div>
+      {!introDone && <ScribbleIntro onComplete={() => setIntroDone(true)} />}
+    </div>
   );
 }

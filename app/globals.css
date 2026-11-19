@@ -20,6 +20,19 @@ body {
   overflow-x: hidden;
 }
 
+/* Scribble Clock : styles sortis du composant pour éviter un mismatch d'hydratation */
+.ls-scribble-clock {
+  outline: none;
+}
+.ls-scribble-clock:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--ls-sc-ring);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 canvas {
   display: block;
 }

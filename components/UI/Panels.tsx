@@ -12,7 +12,7 @@ export function Panels() {
           className={`panel ${i % 2 === 0 ? "" : "panel--left"}`}
           aria-live="polite"
         >
-          <div className="panel__inner" style={{ borderColor: `${p.accent}55`, boxShadow: `0 0 40px ${p.accent}22` }}>
+          <div className="panel__inner glass3d" style={{ borderColor: `${p.accent}55` }}>
             <div className="panel__kicker" style={{ color: p.accent }}>
               {p.subtitle}
             </div>

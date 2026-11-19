@@ -1,10 +1,38 @@
 "use client";
 
-import { NAV_LINKS, PROFILE, PROJECTS, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
+import { NAV_LINKS, PROFILE, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import { ParticleText } from "@/components/ui/particle-text";
 import { ToolWheel } from "@/components/ui/tool-wheel";
+import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
+
+const PROJECT_GALLERY_ITEMS = [
+  {
+    id: "portfolio-3d",
+    title: "Portfolio 3D immersif",
+    discipline: "Expérience 3D / WebGL",
+    year: "2026",
+    alt: "Formes abstraites 3D aux tons cyan et violet",
+    src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    id: "hero-spline",
+    title: "Hero Spline interactive",
+    discipline: "Scène 3D temps réel",
+    year: "2026",
+    alt: "Écran affichant du code dans une ambiance sombre",
+    src: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    id: "systeme-neon",
+    title: "Système visuel néon",
+    discipline: "Design system & Motion",
+    year: "2025",
+    alt: "Lumières néon cyan dans un environnement sombre",
+    src: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1200&q=80",
+  },
+];
 
 const SKILL_WHEEL_BASE = [
   {
@@ -153,28 +181,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </p>
             </div>
 
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {PROJECTS.map((project) => (
-                <li key={project.title}>
-                  <article className="group flex h-full flex-col rounded-2xl border border-white/10 bg-card/70 p-6 backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-neon/40 hover:bg-card">
-                    <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-lg font-semibold leading-snug text-ice">{project.title}</h3>
-                      <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1 text-[11px] text-muted-foreground">
-                        {project.year}
-                      </span>
-                    </div>
-                    <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">{project.description}</p>
-                    <ul className="mt-6 flex flex-wrap gap-2" aria-label={`Technologies — ${project.title}`}>
-                      {project.tags.map((tag) => (
-                        <li key={tag} className="rounded-full border border-neon/20 bg-neon/5 px-2.5 py-1 text-[11px] text-neon/90">
-                          {tag}
-                        </li>
-                      ))}
-                    </ul>
-                  </article>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-12">
+              <FerrisWheelGallery
+                items={PROJECT_GALLERY_ITEMS}
+                aria-label="Galerie des projets récents"
+              />
+            </div>
 
             <div className="mt-14 grid items-center gap-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neon/10 via-card/60 to-neon2/10 p-8 backdrop-blur sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">

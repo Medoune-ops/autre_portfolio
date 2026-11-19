@@ -1,0 +1,34 @@
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: #0a0f1c;
+}
+
+/* Le champ de formes est volontairement très atténué pour rester un fond lisible. */
+.site-bg__waves {
+  position: absolute;
+  inset: 0;
+  opacity: 0.32;
+}
+
+/* Repli si WebGPU n'est pas disponible : dégradé discret aux couleurs du composant. */
+.site-bg .shape-waves {
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, rgba(146, 146, 146, 0.12), transparent 62%),
+    linear-gradient(160deg, #16121d 0%, #120f17 55%, #0e0c13 100%);
+}
+
+/* Voile : garde le texte confortable même au-dessus des zones les plus denses. */
+.site-bg__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 28, 0.55) 0%,
+    rgba(10, 15, 28, 0.3) 40%,
+    rgba(10, 15, 28, 0.7) 100%
+  );
+}

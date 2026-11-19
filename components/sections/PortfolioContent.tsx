@@ -13,7 +13,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   const year = new Date().getFullYear();
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-bg font-sans text-ice antialiased selection:bg-neon/30">
+    <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/30">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-bg/70 backdrop-blur-xl">
         <div className={`${CONTAINER} flex items-center justify-between gap-4 py-4`}>
           <a

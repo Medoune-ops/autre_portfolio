@@ -4,6 +4,25 @@ import { NAV_LINKS, PROFILE, PROJECTS, SKILL_GROUPS, SPLINE_SCENE, STATS } from 
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import { ParticleText } from "@/components/ui/particle-text";
+import { ToolWheel } from "@/components/ui/tool-wheel";
+
+const PROJECT_WHEEL_BASE = [
+  {
+    label: "Portfolio 3D immersif",
+    path: "M12 2 3 7v10l9 5 9-5V7Zm0 2.2 6.8 3.8L12 11.8 5.2 8ZM5 9.7l6 3.3v6.6l-6-3.3Zm8 9.9v-6.6l6-3.3v6.6Z",
+  },
+  {
+    label: "Hero Spline interactive",
+    path: "M8.5 6.5 3.5 12l5 5.5 1.5-1.4L6.4 12 10 7.9Zm7 0-1.5 1.4L17.6 12 14 16.1l1.5 1.4 5-5.5ZM11 20l-1.8-.7 3.8-15.3 1.8.7Z",
+  },
+  {
+    label: "Système visuel néon",
+    path: "M12 1.5Q13.3 10.7 22.5 12Q13.3 13.3 12 22.5Q10.7 13.3 1.5 12Q10.7 10.7 12 1.5Z",
+  },
+];
+
+// Neuf éléments ou plus pour que chaque emplacement visible soit unique.
+const PROJECT_WHEEL_ITEMS = [...PROJECT_WHEEL_BASE, ...PROJECT_WHEEL_BASE, ...PROJECT_WHEEL_BASE];
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -123,18 +142,29 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* PROJETS */}
-        <section id="projets" aria-labelledby="projets-titre" className="relative border-t border-white/10 py-20 sm:py-28">
+        <section id="projets" aria-label="Projets récents" className="relative border-t border-white/10 py-20 sm:py-28">
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
-            <div className="max-w-2xl">
-              <p className="text-xs font-medium tracking-[0.22em] text-neon uppercase">Sélection</p>
-              <h2 id="projets-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Projets récents</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system.
-              </p>
+            <div className="h-[440px] w-full sm:h-[540px] lg:h-[620px]">
+              <ToolWheel
+                items={PROJECT_WHEEL_ITEMS}
+                eyebrow="SÉLECTION"
+                title="Projets récents"
+                subtitle="Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system."
+                background="#0A0F1C"
+                surface="#111827"
+                color="#EAF6FF"
+                mutedColor="rgba(234,246,255,0.6)"
+                accent="#00E5FF"
+                signal="#1E90FF"
+                lineColor="rgba(255,255,255,0.12)"
+                frame={false}
+                autoplay
+                pauseOnHover
+              />
             </div>
 
-            <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {PROJECTS.map((project) => (
                 <li key={project.title}>
                   <article className="group flex h-full flex-col rounded-2xl border border-white/10 bg-card/70 p-6 backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-neon/40 hover:bg-card">

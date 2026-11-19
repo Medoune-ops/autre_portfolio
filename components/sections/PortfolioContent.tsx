@@ -2,6 +2,7 @@
 
 import { NAV_LINKS, PROFILE, PROJECTS, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
+import BiteMark from "@/components/ui/BiteMark";
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -129,6 +130,31 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 </li>
               ))}
             </ul>
+
+            <div className="mt-14 grid items-center gap-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neon/10 via-card/60 to-neon2/10 p-8 backdrop-blur sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
+              <div className="max-w-md">
+                <p className="text-xs font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
+                <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Une marque, une morsure</h3>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues neon ne
+                  se révèlent qu&apos;à l&apos;intérieur de la morsure. Le même langage graphique appliqué à tout
+                  le portfolio.
+                </p>
+                <ul className="mt-6 flex flex-wrap gap-2" aria-label="Techniques du visuel">
+                  {["Masque SVG", "Shader WebGPU", "React Bits"].map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-full border border-neon/20 bg-neon/5 px-2.5 py-1 text-[11px] text-neon/90"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mx-auto w-full max-w-[280px] sm:max-w-[320px]">
+                <BiteMark size={320} />
+              </div>
+            </div>
           </div>
         </section>
 

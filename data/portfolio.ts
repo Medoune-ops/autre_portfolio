@@ -61,18 +61,25 @@ export type SkillGroup = {
 export const SKILL_GROUPS: SkillGroup[] = [
   {
     title: "Langages",
-    items: ["TypeScript", "JavaScript", "HTML", "CSS", "Dart (exploré)", "SQL"],
+    items: ["HTML5", "CSS3", "JavaScript", "TypeScript", "Python", "Java", "PHP", "SQL", "Dart (exploré)"],
   },
   {
-    title: "Frontend",
-    items: ["Next.js 14", "React", "Tailwind CSS", "Vanilla JS (portfolio, effets 3D)", "React Native + Expo"],
-  },
-  {
-    title: "Backend / API",
+    title: "Frameworks & bibliothèques",
     items: [
+      "React.js",
+      "Next.js 14",
       "Node.js",
       "Express.js",
       "NestJS",
+      "Laravel",
+      "Django",
+      "Angular",
+      "Tailwind CSS",
+    ],
+  },
+  {
+    title: "Backend & API",
+    items: [
       "API CRUD",
       "JWT",
       "Middleware",
@@ -83,16 +90,29 @@ export const SKILL_GROUPS: SkillGroup[] = [
     ],
   },
   {
+    title: "Mobile",
+    items: ["React Native + Expo", "Flutter", "Riverpod", "Firebase", "Android Studio"],
+  },
+  {
     title: "Bases de données",
-    items: ["PostgreSQL", "Neon.tech", "Prisma (ORM)", "Supabase", "Merise (MCD, 18 entités)"],
+    items: [
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Oracle",
+      "Neon.tech",
+      "Prisma (ORM)",
+      "Supabase",
+      "Merise (MCD, 18 entités)",
+    ],
   },
   {
-    title: "Déploiement / outils",
-    items: ["Vercel", "Render", "Git", "GitHub", "Figma (maquettes HiFi)", "pptxgenjs", "LibreOffice (pipeline PDF)"],
+    title: "Infra / DevOps & outils",
+    items: ["Linux", "Docker", "VMware", "Git", "GitHub", "Vercel", "Render", "pptxgenjs", "LibreOffice (pipeline PDF)"],
   },
   {
-    title: "Mobile (exploré)",
-    items: ["Flutter", "Riverpod", "Firebase"],
+    title: "Design",
+    items: ["Figma (maquettes HiFi)", "Photoshop", "Canva", "Illustrator"],
   },
   {
     title: "IA",

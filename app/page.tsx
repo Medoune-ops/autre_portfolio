@@ -8,65 +8,11 @@ export default function Page() {
       style={{
         minHeight: "100vh",
         padding: "48px 20px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 40,
+        display: "grid",
+        placeItems: "center",
       }}
     >
-      <section
-        style={{
-          minHeight: "70vh",
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <div style={{ width: "min(720px, 100%)", textAlign: "center" }}>
-          <div
-            className="glass3d"
-            style={{
-              borderRadius: 20,
-              padding: "40px 32px",
-              border: "1px solid rgba(0, 229, 255, 0.18)",
-            }}
-          >
-            <p
-              style={{
-                color: "#00E5FF",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                fontSize: 12,
-              }}
-            >
-              Portfolio
-            </p>
-            <h1
-              style={{
-                fontSize: "clamp(32px, 6vw, 56px)",
-                fontWeight: 700,
-                marginTop: 10,
-              }}
-            >
-              Bienvenue sur mon portfolio
-            </h1>
-            <p
-              style={{
-                marginTop: 14,
-                color: "rgba(234, 246, 255, 0.78)",
-                lineHeight: 1.7,
-                maxWidth: 560,
-                marginInline: "auto",
-              }}
-            >
-              Un espace pour présenter mes projets, mes compétences et mon parcours.
-            </p>
-            <a className="btn-neon" href="mailto:hello@example.com">
-              Me contacter
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ width: "min(1100px, 100%)", margin: "0 auto" }}>
+      <section style={{ width: "min(1100px, 100%)" }}>
         <SplineSceneBasic />
       </section>
     </main>

@@ -3,6 +3,7 @@
 import { NAV_LINKS, PROFILE, PROJECTS, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
+import { ParticleText } from "@/components/ui/particle-text";
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -74,9 +75,31 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 {PROFILE.availability}
               </p>
 
-              <h1 id="accueil-titre" className="mt-6 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">{PROFILE.name}</h1>
-              <p className="mt-3 bg-gradient-to-r from-neon via-ice to-neon2 bg-clip-text text-xl font-medium text-transparent sm:text-2xl">
-                {PROFILE.role}
+              <h1 id="accueil-titre" className="mt-6">
+                <ParticleText
+                  text={PROFILE.name}
+                  className="h-[64px] w-full max-w-[520px] sm:h-[88px] lg:h-[112px]"
+                  font='700 120px system-ui, -apple-system, "Segoe UI", sans-serif'
+                  color="#EAF6FF"
+                  particleColor="#EAF6FF"
+                  maxDimension={420}
+                  size={1.15}
+                  randomness={1.4}
+                  depth={2.2}
+                />
+              </h1>
+              <p className="mt-3">
+                <ParticleText
+                  text={"Développeur front-end &\nexpériences 3D"}
+                  className="h-[56px] w-full max-w-[520px] sm:h-[72px]"
+                  font='600 56px system-ui, -apple-system, "Segoe UI", sans-serif'
+                  color="#00E5FF"
+                  particleColor="#00E5FF"
+                  maxDimension={520}
+                  size={1.1}
+                  randomness={1.2}
+                  depth={2.0}
+                />
               </p>
               <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">{PROFILE.bio}</p>

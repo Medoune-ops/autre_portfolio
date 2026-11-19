@@ -36,21 +36,37 @@ const PROJECT_GALLERY_ITEMS = [
 
 const SKILL_WHEEL_BASE = [
   {
-    label: "Front-end",
-    path: "M8.5 6.5 3.5 12l5 5.5 1.5-1.4L6.4 12 10 7.9Zm7 0-1.5 1.4L17.6 12 14 16.1l1.5 1.4 5-5.5ZM11 20l-1.8-.7 3.8-15.3 1.8.7Z",
+    label: "Langages",
+    path: "M8.5 6.5 3.5 12l5 5.5 1.5-1.4L6.4 12 10 7.9Zm7 0-1.5 1.4L17.6 12 14 16.1l1.5 1.4 5-5.5Z",
   },
   {
-    label: "3D & motion",
-    path: "M12 2 3 7v10l9 5 9-5V7Zm0 2.2 6.8 3.8L12 11.8 5.2 8ZM5 9.7l6 3.3v6.6l-6-3.3Zm8 9.9v-6.6l6-3.3v6.6Z",
+    label: "Frontend",
+    path: "M3 4.5h18A1.5 1.5 0 0 1 22.5 6v12a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 18V6A1.5 1.5 0 0 1 3 4.5Zm.5 4V18h17V8.5Zm2 2h5v4h-5Zm7 0h6v1.8h-6Zm0 3h6v1.8h-6Z",
   },
   {
-    label: "Outils",
-    path: "M21.3 7.4a6 6 0 0 1-8 7.7l-6.8 6.8a2 2 0 0 1-2.8-2.8l6.8-6.8a6 6 0 0 1 7.7-8l-3.2 3.2 2.1 2.1 3.2-3.2Z",
+    label: "Backend / API",
+    path: "M4 4h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 9h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2Zm2-6.5v1.8h1.8V6.5Zm3 0v1.8h1.8V6.5ZM6 15.5v1.8h1.8v-1.8Zm3 0v1.8h1.8v-1.8Z",
+  },
+  {
+    label: "Bases de données",
+    path: "M12 2c-4.97 0-9 1.57-9 3.5v13c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-13C21 3.57 16.97 2 12 2Zm0 2c4.2 0 7 .99 7 1.5S16.2 7 12 7s-7-.99-7-1.5S7.8 4 12 4Zm0 15c-4.2 0-7-.99-7-1.5v-3.2c1.64 1 4.58 1.7 7 1.7s5.36-.7 7-1.7v3.2c0 .51-2.8 1.5-7 1.5Zm0-5c-4.2 0-7-.99-7-1.5v-3.2c1.64 1 4.58 1.7 7 1.7s5.36-.7 7-1.7v3.2c0 .51-2.8 1.5-7 1.5Z",
+  },
+  {
+    label: "Déploiement / outils",
+    path: "M12 2.2c2.8 2 4.8 4.6 5.8 7.8l3.2 1.6-3.2 1.6c-1 3.2-3 5.8-5.8 7.8-2.8-2-4.8-4.6-5.8-7.8L3 11.6l3.2-1.6c1-3.2 3-5.8 5.8-7.8Zm0 6.3a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2ZM7 15.8l2 2-3.4 1.4Z",
+  },
+  {
+    label: "Mobile (exploré)",
+    path: "M8 2.5h8A2.5 2.5 0 0 1 18.5 5v14A2.5 2.5 0 0 1 16 21.5H8A2.5 2.5 0 0 1 5.5 19V5A2.5 2.5 0 0 1 8 2.5Zm0 2.5v14h8V5Zm2.8 11.8h2.4v1.8h-2.4Z",
+  },
+  {
+    label: "IA",
+    path: "M12 1.5Q13.3 10.7 22.5 12Q13.3 13.3 12 22.5Q10.7 13.3 1.5 12Q10.7 10.7 12 1.5Z",
   },
 ];
 
 // Neuf éléments ou plus pour que chaque emplacement visible soit unique.
-const SKILL_WHEEL_ITEMS = [...SKILL_WHEEL_BASE, ...SKILL_WHEEL_BASE, ...SKILL_WHEEL_BASE];
+const SKILL_WHEEL_ITEMS = [...SKILL_WHEEL_BASE, ...SKILL_WHEEL_BASE.slice(0, 2)];
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";

@@ -60,16 +60,47 @@ export type SkillGroup = {
 
 export const SKILL_GROUPS: SkillGroup[] = [
   {
-    title: "Front-end",
-    items: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    title: "Langages",
+    items: ["TypeScript", "JavaScript", "HTML", "CSS", "Dart (exploré)", "SQL"],
   },
   {
-    title: "3D & motion",
-    items: ["Three.js", "React Three Fiber", "Spline", "GSAP", "Framer Motion"],
+    title: "Frontend",
+    items: ["Next.js 14", "React", "Tailwind CSS", "Vanilla JS (portfolio, effets 3D)", "React Native + Expo"],
   },
   {
-    title: "Outils",
-    items: ["Git", "Figma", "Vercel", "ESLint"],
+    title: "Backend / API",
+    items: [
+      "Node.js",
+      "Express.js",
+      "NestJS",
+      "API CRUD",
+      "JWT",
+      "Middleware",
+      "Architecture MVC",
+      "POO",
+      "Swagger (documentation API)",
+      "NextAuth v5",
+    ],
+  },
+  {
+    title: "Bases de données",
+    items: ["PostgreSQL", "Neon.tech", "Prisma (ORM)", "Supabase", "Merise (MCD, 18 entités)"],
+  },
+  {
+    title: "Déploiement / outils",
+    items: ["Vercel", "Render", "Git", "GitHub", "Figma (maquettes HiFi)", "pptxgenjs", "LibreOffice (pipeline PDF)"],
+  },
+  {
+    title: "Mobile (exploré)",
+    items: ["Flutter", "Riverpod", "Firebase"],
+  },
+  {
+    title: "IA",
+    items: [
+      "Whisper API (score tajwid, Tarteel)",
+      "Claude (génération contenu, docs, code)",
+      "Algorithme SM-2 (répétition espacée)",
+    ],
   },
 ];
 

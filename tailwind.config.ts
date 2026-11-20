@@ -38,7 +38,7 @@ const config: Config = {
         },
         muted: {
           DEFAULT: "rgba(15, 23, 42, 0.06)",
-          foreground: "rgba(15, 23, 42, 0.58)",
+          foreground: "rgba(15, 23, 42, 0.75)",
         },
         destructive: {
           DEFAULT: "#ef4444",

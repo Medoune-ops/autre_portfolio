@@ -93,10 +93,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             {PROFILE.name}
           </a>
           <nav aria-label="Navigation principale">
-            <ul className="flex items-center gap-3 text-[11px] sm:gap-7 sm:text-sm">
+            <ul className="flex items-center gap-3 text-xs sm:gap-7 sm:text-sm">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className={`rounded-md text-muted-foreground transition-colors hover:text-ice ${FOCUS}`}>
+                  <a href={link.href} className={`rounded-md text-ice/75 transition-colors hover:text-ice ${FOCUS}`}>
                     {link.label}
                   </a>
                 </li>
@@ -134,7 +134,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>
             <div className="pointer-events-auto max-w-xl">
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+              <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm text-ice/80 backdrop-blur">
                 <span className="relative flex h-2 w-2" aria-hidden="true">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-neon" />
@@ -235,7 +235,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 )}
               </p>
               <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">{PROFILE.bio}</p>
+              <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">{PROFILE.bio}</p>
 
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <a
@@ -261,9 +261,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
             <div className="max-w-2xl">
-              <p className="text-xs font-medium tracking-[0.22em] text-neon uppercase">Sélection</p>
+              <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Sélection</p>
               <h2 id="projets-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Projets récents</h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
                 Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system.
               </p>
             </div>
@@ -277,9 +277,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
             <div className="mt-14 grid items-center gap-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neon/10 via-card/60 to-neon2/10 p-8 backdrop-blur sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">
-                <p className="text-xs font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
+                <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
                 <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Une marque, une morsure</h3>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
                   Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues neon ne
                   se révèlent qu&apos;à l&apos;intérieur de la morsure. Le même langage graphique appliqué à tout
                   le portfolio.
@@ -288,7 +288,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   {["Masque SVG", "Shader WebGPU", "React Bits"].map((tag) => (
                     <li
                       key={tag}
-                      className="rounded-full border border-neon/20 bg-neon/5 px-2.5 py-1 text-[11px] text-neon/90"
+                      className="rounded-full border border-neon/20 bg-neon/5 px-3 py-1 text-xs font-medium text-neon"
                     >
                       {tag}
                     </li>
@@ -319,7 +319,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 background="#f1f5f9"
                 surface="#ffffff"
                 color="#0f172a"
-                mutedColor="rgba(15,23,42,0.55)"
+                mutedColor="rgba(15,23,42,0.72)"
                 accent="#0891b2"
                 signal="#0284c7"
                 lineColor="rgba(15,23,42,0.12)"
@@ -338,7 +338,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   <h3 className="text-sm font-semibold tracking-wide text-ice uppercase">{group.title}</h3>
                   <ul className="mt-4 flex flex-wrap gap-2">
                     {group.items.map((item) => (
-                      <li key={item} className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-muted-foreground">
+                      <li key={item} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-ice/80">
                         {item}
                       </li>
                     ))}
@@ -353,7 +353,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   <dt className="sr-only">{stat.label}</dt>
                   <dd>
                     <span className="block text-2xl font-semibold text-ice sm:text-3xl">{stat.value}</span>
-                    <span className="mt-1 block text-[11px] text-muted-foreground sm:text-xs">{stat.label}</span>
+                    <span className="mt-1 block text-xs text-ice/75 sm:text-sm">{stat.label}</span>
                   </dd>
                 </div>
               ))}
@@ -369,9 +369,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-8 text-center backdrop-blur sm:p-14">
               <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-neon/15 blur-[100px]" />
               <div className="relative">
-                <p className="text-xs font-medium tracking-[0.22em] text-neon uppercase">Contact</p>
+                <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Contact</p>
                 <h2 id="contact-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Travaillons ensemble</h2>
-                <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg">
                   Un projet, une idée ou simplement envie d&apos;échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement.
                 </p>
                 <div className="mt-8 flex flex-col items-center gap-5">
@@ -382,7 +382,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                     {PROFILE.email}
                     <span aria-hidden="true">→</span>
                   </a>
-                  <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  <p className="inline-flex items-center gap-2 text-sm text-ice/80">
                     <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
                     {PROFILE.availability}
                   </p>
@@ -390,7 +390,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
             </div>
 
-            <footer className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-muted-foreground sm:flex-row">
+            <footer className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-ice/75 sm:flex-row">
               <p>
                 © {year} {PROFILE.name}. Tous droits réservés.
               </p>

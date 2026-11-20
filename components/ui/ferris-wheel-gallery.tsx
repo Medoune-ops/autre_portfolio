@@ -53,7 +53,7 @@ function Photo({ item, thumbnail = false }: { item: FerrisWheelItem; thumbnail?:
       {failed === item.src && (
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted text-muted-foreground" role={thumbnail ? undefined : "img"} aria-label={thumbnail ? undefined : `${item.alt} — image unavailable`}>
           <ImageIcon className={thumbnail ? "size-4" : "size-6"} aria-hidden="true" />
-          {!thumbnail && <span className="text-xs">Image unavailable</span>}
+          {!thumbnail && <span className="text-sm">Image unavailable</span>}
         </span>
       )}
     </>
@@ -317,8 +317,8 @@ export function FerrisWheelGallery({
             >
               <div className="relative aspect-square">
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 flex flex-col items-center gap-1 text-muted-foreground">
-                <span className="text-[10px] font-medium tracking-[0.22em]">ON VIEW</span>
-                <ChevronDown className="size-3" />
+                <span className="text-xs font-medium tracking-[0.22em]">ON VIEW</span>
+                <ChevronDown className="size-3.5" />
               </div>
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full text-foreground/20" viewBox="0 0 400 400" fill="none">
                 <path d="M200 184 146 362M200 184 254 362M124 362H276" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
@@ -350,7 +350,7 @@ export function FerrisWheelGallery({
                                 style={{ transform: `scale(${isActive ? 1.12 : 1})`, transition: reducedMotion ? "none" : "transform 320ms ease" }}
                               >
                                 <span className="relative block aspect-[1.45] overflow-hidden rounded-[3px] bg-muted"><Photo item={item} thumbnail /></span>
-                                <span aria-hidden="true" className={`mt-1 block text-center font-mono text-[10px] leading-none ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{String(index + 1).padStart(2, "0")}</span>
+                                <span aria-hidden="true" className={`mt-1 block text-center font-mono text-xs leading-none ${isActive ? "text-foreground" : "text-muted-foreground"}`}>{String(index + 1).padStart(2, "0")}</span>
                               </button>
                             </div>
                           </div>
@@ -362,11 +362,11 @@ export function FerrisWheelGallery({
               </div>
               <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[46%] flex size-[18%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border-2 border-foreground/15 bg-card shadow-md shadow-foreground/10">
                 <span className="font-mono text-lg font-light leading-none tracking-tight">{String(total).padStart(2, "0")}</span>
-                <span className="mt-1 text-[9px] font-medium leading-none tracking-[0.14em] text-muted-foreground">STUDIES</span>
+                <span className="mt-1 text-[11px] font-medium leading-none tracking-[0.14em] text-muted-foreground">STUDIES</span>
               </div>
               </div>
             </div>
-            <p id={helpId} className="mt-1 text-center text-[10px] tracking-wide text-muted-foreground">Drag to explore <span aria-hidden="true" className="px-1.5 text-border">/</span> Scroll or use ← →</p>
+            <p id={helpId} className="mt-1 text-center text-xs tracking-wide text-muted-foreground">Drag to explore <span aria-hidden="true" className="px-1.5 text-border">/</span> Scroll or use ← →</p>
           </div>
           <div data-detail-panel id={labelId} className="grid grid-cols-[1.35fr_1fr] items-center gap-5 @min-[600px]/ferris:grid-cols-1 @min-[600px]/ferris:gap-5">
             <div className="relative aspect-[1.8] min-w-0 overflow-hidden rounded-xl bg-muted @min-[600px]/ferris:aspect-[1.15]">
@@ -376,14 +376,14 @@ export function FerrisWheelGallery({
             </div>
             <div className="min-w-0">
               <div ref={captionRef} data-caption>
-                <p className="mb-2 border-l-2 border-chart-2 pl-2 font-mono text-[10px] tracking-wider text-muted-foreground">STUDY {String(view.index + 1).padStart(2, "0")}</p>
+                <p className="mb-2 border-l-2 border-chart-2 pl-2 font-mono text-xs tracking-wider text-muted-foreground">STUDY {String(view.index + 1).padStart(2, "0")}</p>
                 <h3 className="text-xl font-medium leading-tight tracking-tight @min-[600px]/ferris:text-2xl @min-[900px]/ferris:text-3xl">{current.title}</h3>
-                <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{[current.discipline, current.year].filter((value) => value !== undefined && value !== "").join(" · ")}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{[current.discipline, current.year].filter((value) => value !== undefined && value !== "").join(" · ")}</p>
               </div>
               <div className="mt-5 flex items-center gap-2 @min-[600px]/ferris:mt-6">
                 <button type="button" data-previous aria-label="Previous image" disabled={total < 2} onClick={() => request(selected - 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background hover:bg-accent disabled:opacity-40 ${focusRing}`}><ArrowLeft className="size-3.5" aria-hidden="true" /></button>
                 <button type="button" data-next aria-label="Next image" disabled={total < 2} onClick={() => request(selected + 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 ${focusRing}`}><ArrowRight className="size-3.5" aria-hidden="true" /></button>
-                <span aria-hidden="true" className="ml-auto font-mono text-[10px] tabular-nums text-muted-foreground">{String(view.index + 1).padStart(2, "0")}<span className="px-1 text-border">/</span>{String(total).padStart(2, "0")}</span>
+                <span aria-hidden="true" className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">{String(view.index + 1).padStart(2, "0")}<span className="px-1 text-border">/</span>{String(total).padStart(2, "0")}</span>
                 {autoplay && !reducedMotion && total > 1 && <button data-autoplay-control type="button" aria-label={paused ? "Resume automatic rotation" : "Pause automatic rotation"} onClick={() => setPaused(!paused)} className={`flex size-8 shrink-0 items-center justify-center rounded-full border border-border ${focusRing}`}>{paused ? <Play className="size-3" aria-hidden="true" /> : <Pause className="size-3" aria-hidden="true" />}</button>}
               </div>
             </div>

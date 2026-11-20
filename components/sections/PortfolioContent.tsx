@@ -122,14 +122,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={active} />
           </div>
 
-          {/* Voiles de lisibilité : denses à gauche sous le texte, transparents à droite. */}
+          {/* Le voile de lisibilité global (site-bg) couvre toute la page ; dégradé discret conservé en bas du hero. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-bg/95 via-bg/80 to-bg/40 lg:bg-gradient-to-r lg:from-bg/95 lg:via-bg/70 lg:to-transparent"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg/30 to-transparent"
           />
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>

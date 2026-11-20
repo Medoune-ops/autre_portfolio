@@ -38,7 +38,7 @@ export function ParticleText({
   className,
   font = "700 96px system-ui, -apple-system, Segoe UI, sans-serif",
   color = "#0f172a",
-  particleColor = "#ffffff",
+  particleColor,
   maxDimension = 360,
   size = 1.2,
   randomness = 1.6,
@@ -57,8 +57,9 @@ export function ParticleText({
   const [src, setSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    setSrc(renderTextImage(text, { font, color, paddingX: 24, paddingY: 24 }));
-  }, [text, font, color]);
+    // Masque blanc : les pixels clairs sont échantillonnés, la teinte vient de `particleColor`.
+    setSrc(renderTextImage(text, { font, color: "#ffffff", paddingX: 24, paddingY: 24 }));
+  }, [text, font]);
 
   if (!src) return <div className={className} aria-label={text} />;
 
@@ -70,7 +71,7 @@ export function ParticleText({
           src={src}
           allowUpload={false}
           background="transparent"
-          color={particleColor}
+          color={particleColor ?? color}
           maxDimension={maxDimension}
           size={size}
           randomness={randomness}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NAV_LINKS, PROFILE, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
+import { NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
@@ -41,7 +41,6 @@ import {
   CloudCog,
   Code2,
   Database,
-  Layers3,
   PenTool,
   ServerCog,
   Smartphone,
@@ -105,25 +104,25 @@ const STACK_WHEEL_ITEMS: ToolWheelItem[] = [
   { label: "Claude", description: "Assistant IA d'Anthropic", path: siClaude.path, fillRule: "nonzero" },
 ];
 
-const SKILL_GROUP_ICONS: Record<string, LucideIcon> = {
-  Langages: Code2,
-  "Frameworks & bibliothèques": Layers3,
-  "Backend & API": ServerCog,
+const DOMAIN_ICONS: Record<string, LucideIcon> = {
+  "Front-end": Code2,
+  "Back-end & API": ServerCog,
   Mobile: Smartphone,
   "Bases de données": Database,
-  "Infra / DevOps & outils": CloudCog,
-  Design: PenTool,
+  "Infra / DevOps": CloudCog,
+  "Design & outils": PenTool,
   IA: Sparkles,
 };
 
 const TOTAL_SKILLS = SKILL_GROUPS.reduce((total, group) => total + group.items.length, 0);
 
-const SKILL_STEPS: PathStep[] = SKILL_GROUPS.map((group) => {
-  const Icon = SKILL_GROUP_ICONS[group.title] ?? Code2;
+const SKILL_STEPS: PathStep[] = SKILL_DOMAINS.map((domain) => {
+  const Icon = DOMAIN_ICONS[domain.title] ?? Code2;
   return {
-    id: group.title,
-    title: group.title,
-    body: group.items.join(" · "),
+    id: domain.title,
+    title: domain.title,
+    body: domain.description,
+    tags: domain.stacks,
     icon: <Icon size={20} strokeWidth={1.8} aria-hidden="true" />,
   };
 });
@@ -602,14 +601,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <div className="mt-14 flex flex-col items-center gap-2 text-center">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">Vue détaillée</p>
               <p className="text-xs text-ice/50">
-                {TOTAL_SKILLS} compétences référencées · {SKILL_GROUPS.length} catégories
+                {TOTAL_SKILLS} compétences référencées · {SKILL_DOMAINS.length} domaines
               </p>
             </div>
 
             <div className="mt-6">
               <StepsPath
                 steps={SKILL_STEPS}
-                title="Les outils, par catégorie"
+                title="Mes stacks, domaine par domaine"
                 accentColor="#94a3b8"
                 autoPlay
                 autoPlayInterval={4200}

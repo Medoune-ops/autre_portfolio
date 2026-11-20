@@ -124,6 +124,81 @@ export const SKILL_GROUPS: SkillGroup[] = [
   },
 ];
 
+export type SkillDomain = {
+  title: string;
+  description: string;
+  stacks: string[];
+};
+
+/** Les stacks réellement utilisées, regroupées par domaine d'intervention. */
+export const SKILL_DOMAINS: SkillDomain[] = [
+  {
+    title: "Front-end",
+    description: "Interfaces web, design system et micro-interactions.",
+    stacks: ["HTML5", "CSS3", "JavaScript", "TypeScript", "React.js", "Next.js 14", "Angular", "Tailwind CSS"],
+  },
+  {
+    title: "Back-end & API",
+    description: "Services, logique métier et documentation d'API.",
+    stacks: [
+      "Python",
+      "Java",
+      "PHP",
+      "Node.js",
+      "Express.js",
+      "NestJS",
+      "Laravel",
+      "Django",
+      "API CRUD",
+      "JWT",
+      "Middleware",
+      "Architecture MVC",
+      "POO",
+      "Swagger (documentation API)",
+      "NextAuth v5",
+    ],
+  },
+  {
+    title: "Mobile",
+    description: "Applications multiplateforme et état réactif.",
+    stacks: ["Dart (exploré)", "React Native + Expo", "Flutter", "Riverpod", "Firebase", "Android Studio"],
+  },
+  {
+    title: "Bases de données",
+    description: "Modélisation, requêtes et accès aux données.",
+    stacks: [
+      "SQL",
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Oracle",
+      "Neon.tech",
+      "Prisma (ORM)",
+      "Supabase",
+      "Merise (MCD, 18 entités)",
+    ],
+  },
+  {
+    title: "Infra / DevOps",
+    description: "Conteneurs, versionnage et déploiement.",
+    stacks: ["Linux", "Docker", "VMware", "Git", "GitHub", "Vercel", "Render"],
+  },
+  {
+    title: "Design & outils",
+    description: "Maquettes, direction artistique et livrables.",
+    stacks: ["Figma (maquettes HiFi)", "Photoshop", "Canva", "Illustrator", "pptxgenjs", "LibreOffice (pipeline PDF)"],
+  },
+  {
+    title: "IA",
+    description: "Contenu généré, transcription et répétition espacée.",
+    stacks: [
+      "Whisper API (score tajwid, Tarteel)",
+      "Claude (génération contenu, docs, code)",
+      "Algorithme SM-2 (répétition espacée)",
+    ],
+  },
+];
+
 export const STATS = [
   { value: "3D", label: "temps réel" },
   { value: "100%", label: "responsive" },

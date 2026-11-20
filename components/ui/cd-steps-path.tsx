@@ -8,6 +8,8 @@ export interface PathStep {
   id: string
   title: string
   body: string
+  /** Optional list rendered as chips, e.g. the stacks used for a domain. */
+  tags?: string[]
   icon?: React.ReactNode
 }
 export interface StepsPathProps {
@@ -45,7 +47,14 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Étape {i + 1}</p>
         </div>
         <h3 className="relative mt-3 text-xl font-semibold tracking-tight">{s.title}</h3>
-        <p className="relative mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{s.body}</p>
+        <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
+        {s.tags && s.tags.length > 0 && (
+          <ul className="relative mt-3 flex flex-wrap gap-1.5">
+            {s.tags.map((tag) => (
+              <li key={tag} className="rounded-lg border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium leading-4 text-foreground/80">{tag}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </motion.li>
   )
@@ -72,7 +81,8 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
   const px = (t: number) => PAD + t * (Wr.current - PAD * 2)
   const route = React.useMemo(() => Array.from({ length: 90 }, (_, i) => { const t = i / 89; return `${i ? "L" : "M"}${(PAD + t * (W - PAD * 2)).toFixed(1)} ${wave(t).toFixed(1)}` }).join(" "), [W])
   const filled = useTransform(sp, (v) => { const tc = Math.max(0, Math.min(1, v / last)); const c = Math.max(2, Math.round(tc * 90)); return Array.from({ length: c }, (_, i) => { const t = (i / (c - 1)) * tc; return `${i ? "L" : "M"}${px(t).toFixed(1)} ${wave(t).toFixed(1)}` }).join(" ") })
-  const kx = useTransform(sp, (v) => px(v / last) - 22), ky = useTransform(sp, (v) => wave(v / last) - 22)
+  const halfKnob = () => (W < 420 ? 14 : 22)
+  const kx = useTransform(sp, (v) => px(v / last) - halfKnob()), ky = useTransform(sp, (v) => wave(v / last) - halfKnob())
   const settle = React.useCallback((target: number, velocity = 0) => {
     const t = Math.max(0, Math.min(n - 1, target)); setStep(t); onChange?.(t)
     animate(pos, t, reduce ? { duration: 0.2 } : { type: "spring", stiffness: 160, damping: 17, velocity }).then(() => { if (!reduce) setBurst((b) => b + 1) })
@@ -126,27 +136,27 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
           {steps.map((s, i) => {
             const t = i / last
             return (
-              <button key={s.id} type="button" tabIndex={-1} aria-label={`Aller à l'étape ${i + 1} : ${s.title}`} onClick={() => { setPlaying(false); settle(i) }} className="absolute hidden size-11 place-items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:grid" style={{ left: PAD + t * (W - PAD * 2) - 22, top: wave(t) - 22 }}>
-                <motion.span className={cn("grid size-7 place-items-center rounded-full border-2 text-xs font-bold", i <= step ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground")} animate={{ scale: i === step ? 1.15 : 1 }} transition={{ type: "spring", stiffness: 400, damping: 16 }}>
+              <button key={s.id} type="button" tabIndex={-1} aria-label={`Aller à l'étape ${i + 1} : ${s.title}`} onClick={() => { setPlaying(false); settle(i) }} className="absolute grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full outline-none after:absolute after:-inset-2 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:size-11" style={{ left: PAD + t * (W - PAD * 2), top: wave(t) }}>
+                <motion.span className={cn("grid size-5 place-items-center rounded-full border-2 text-[10px] font-bold sm:size-7 sm:text-xs", i <= step ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground")} animate={{ scale: i === step ? 1.15 : 1 }} transition={{ type: "spring", stiffness: 400, damping: 16 }}>
                   {i < step ? <Check className="size-3.5" aria-hidden /> : i + 1}
                 </motion.span>
               </button>
             )
           })}
-          <motion.div className="absolute left-0 top-0 size-11" style={{ x: kx, y: ky }}>
+          <motion.div className="absolute left-0 top-0 size-7 sm:size-11" style={{ x: kx, y: ky }}>
             {burst > 0 && !reduce && (
               <span key={burst} aria-hidden className="pointer-events-none absolute left-1/2 top-1/2">
                 {Array.from({ length: 10 }, (_, k) => { const a = (k / 10) * Math.PI * 2; return <motion.span key={k} className="absolute -ml-[3px] -mt-[3px] block size-1.5 rounded-full" style={{ background: k % 2 ? GOLD : "var(--primary)" }} initial={{ x: 0, y: 0, opacity: 1, scale: 1 }} animate={{ x: Math.cos(a) * 34, y: Math.sin(a) * 34, opacity: 0, scale: 0.2 }} transition={{ duration: 0.7, ease: "easeOut" }} /> })}
               </span>
             )}
             <div role="slider" tabIndex={0} aria-label="Étape" aria-orientation="horizontal" aria-valuemin={1} aria-valuemax={n} aria-valuenow={step + 1} aria-valuetext={`Étape ${step + 1} : ${steps[step]?.title}`} onKeyDown={key} onPointerDown={begin("knob")} onPointerMove={move} onPointerUp={end} onPointerCancel={end}
-              className="grid size-11 cursor-grab place-items-center rounded-full outline-none active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-              <motion.span className="block size-7 rounded-full border-[3px] border-card" style={{ background: `linear-gradient(135deg,${GOLD},var(--primary))`, boxShadow: `0 0 0 2px var(--primary), 0 8px 18px -4px color-mix(in oklab, var(--primary) 70%, transparent)` }} whileTap={reduce ? undefined : { scale: 1.2 }} />
+              className="grid size-7 cursor-grab place-items-center rounded-full outline-none active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:size-11">
+              <motion.span className="block size-5 rounded-full border-[3px] border-card sm:size-7" style={{ background: `linear-gradient(135deg,${GOLD},var(--primary))`, boxShadow: `0 0 0 2px var(--primary), 0 8px 18px -4px color-mix(in oklab, var(--primary) 70%, transparent)` }} whileTap={reduce ? undefined : { scale: 1.2 }} />
             </div>
           </motion.div>
         </div>
 
-        <div onPointerDown={begin("card")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} className="relative mt-2 h-[18rem] touch-pan-y cursor-grab select-none active:cursor-grabbing" style={{ perspective: 1000 }}>
+        <div onPointerDown={begin("card")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} className="relative mt-2 h-[19rem] touch-pan-y cursor-grab select-none active:cursor-grabbing" style={{ perspective: 1000 }}>
           <ul className="relative h-full">{steps.map((s, i) => <StepCard key={s.id} s={s} i={i} pos={pos} w={cw} reduce={reduce} active={i === step} total={n} />)}</ul>
         </div>
 

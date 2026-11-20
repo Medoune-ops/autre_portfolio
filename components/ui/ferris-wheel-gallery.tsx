@@ -278,9 +278,9 @@ export function FerrisWheelGallery({
       }}
     >
       {!current ? <div className="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground" role="status">Add images to start your collection.</div> : (
-        <div className="grid items-center gap-6 @min-[600px]/ferris:grid-cols-[1.15fr_1fr] @min-[900px]/ferris:gap-14">
-          <div data-detail-panel id={labelId} className="min-w-0">
-            <div className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-2xl bg-muted shadow-soft @min-[600px]/ferris:aspect-[1.1] @min-[900px]/ferris:aspect-[4/3]">
+        <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:gap-12">
+          <div data-detail-panel id={labelId} className="mx-auto w-full min-w-0 max-w-[420px] md:mx-0 md:max-w-none">
+            <div className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-2xl bg-muted shadow-soft md:aspect-[5/4] lg:aspect-[4/3]">
               {previous && view.previous !== view.index && <div ref={previousRef} data-previous-photo aria-hidden="true" className="absolute inset-0" style={{ opacity: 0 }}><Photo item={previous} /></div>}
               <div ref={photoRef} data-current-photo className="absolute inset-0"><Photo item={current} /></div>
               <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
@@ -289,7 +289,7 @@ export function FerrisWheelGallery({
               <div className="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
                 <div ref={captionRef} data-caption>
                   <p className="mb-2 inline-flex border-l-2 border-chart-2 pl-2 font-mono text-xs tracking-wider text-white/80">STUDY {String(view.index + 1).padStart(2, "0")}</p>
-                  <h3 className="text-xl font-semibold leading-tight tracking-tight text-white @min-[600px]/ferris:text-2xl @min-[900px]/ferris:text-3xl">{current.title}</h3>
+                  <h3 className="text-xl font-semibold leading-tight tracking-tight text-white sm:text-2xl">{current.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/80">{[current.discipline, current.year].filter((value) => value !== undefined && value !== "").join(" · ")}</p>
                 </div>
                 <div className="mt-4 flex items-center gap-2">
@@ -302,14 +302,14 @@ export function FerrisWheelGallery({
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <div
               ref={stageRef}
               data-wheel-stage
               tabIndex={0}
               aria-label="Browse the collection"
               aria-describedby={helpId}
-              className={`relative mx-auto w-full max-w-[380px] select-none overflow-hidden rounded-3xl pb-4 @min-[600px]/ferris:max-w-none ${focusRing}`}
+              className={`relative mx-auto w-full max-w-[380px] select-none overflow-hidden rounded-3xl pb-4 md:max-w-[520px] lg:max-w-[560px] ${focusRing}`}
               style={{ touchAction: "none" }}
               onPointerDown={(event) => {
                 if (!event.isPrimary || event.button !== 0) return;

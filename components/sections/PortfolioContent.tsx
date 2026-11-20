@@ -5,6 +5,7 @@ import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
 import BlurText from "@/components/ui/BlurText";
+import TextLoop from "@/components/ui/TextLoop";
 import { ToolWheel } from "@/components/ui/tool-wheel";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 
@@ -72,6 +73,8 @@ const SKILL_WHEEL_BASE = [
 
 // Neuf éléments ou plus pour que chaque emplacement visible soit unique.
 const SKILL_WHEEL_ITEMS = [...SKILL_WHEEL_BASE, SKILL_WHEEL_BASE[0]];
+
+const ALL_STACKS_TEXT = SKILL_GROUPS.flatMap((group) => group.items).join(" ✦ ");
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -303,6 +306,36 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <span>Défiler</span>
             <span aria-hidden="true" className="h-8 w-px bg-gradient-to-b from-neon/70 to-transparent" />
           </a>
+        </section>
+
+        {/* STACKS */}
+        <section aria-label="Technologies maîtrisées" className="relative overflow-hidden border-t border-slate-900/10 py-8 sm:py-12">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
+          <div className="relative">
+            <TextLoop
+              text={ALL_STACKS_TEXT}
+              shape="wave"
+              speed={90}
+              direction="forward"
+              separator="✦"
+              curviness={90}
+              tilt={0}
+              fontSize={46}
+              fontWeight={800}
+              letterSpacing={2}
+              uppercase
+              ribbon
+              ribbonColor="#475569"
+              ribbonWidth={86}
+              edgeFade={0}
+              cross={false}
+              crossAngle={16}
+              draggable={false}
+              scrollBoost={0}
+              outline={false}
+              pauseOnHover
+            />
+          </div>
         </section>
 
         {/* PROJETS */}

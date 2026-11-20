@@ -22,9 +22,8 @@
     linear-gradient(160deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%);
 }
 
-/* Voile léger uniforme : adoucit le fond animé sur tout le site pour garder les textes lisibles. */
+/* Voile global géré au niveau de la page pour une lisibilité uniforme sur tout le site. */
 .site-bg__veil {
   position: absolute;
   inset: 0;
-  background: rgba(241, 245, 249, 0.62);
 }

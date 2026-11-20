@@ -4,7 +4,7 @@ import { NAV_LINKS, PROFILE, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/po
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
-import TextType from "@/components/ui/TextType";
+import BlurText from "@/components/ui/BlurText";
 import { ToolWheel } from "@/components/ui/tool-wheel";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 
@@ -226,21 +226,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-60" />
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-neon" />
                 </span>
-                <TextType
-                  as="span"
-                  text={PROFILE.availability}
-                  typingSpeed={75}
-                  pauseDuration={1500}
-                  deletingSpeed={50}
-                  deleteMode="backspace"
-                  typeEffect="fade"
-                  mistakes={0.2}
-                  cursorStyle="bar"
-                  cursorGlide
-                  showCursor
-                  loop={false}
-                  startOnVisible
-                />
+                <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
               </p>
 
               <SectionTitle
@@ -274,40 +260,22 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 trigger="mount"
                 showOverlay={active}
               />
-              <p className="mt-7 max-w-2xl text-base leading-relaxed text-ice/90 sm:text-lg">
-                <TextType
-                  as="span"
-                  text={PROFILE.tagline}
-                  typingSpeed={75}
-                  pauseDuration={1500}
-                  deletingSpeed={50}
-                  deleteMode="backspace"
-                  typeEffect="fade"
-                  mistakes={0.2}
-                  cursorStyle="bar"
-                  cursorGlide
-                  showCursor
-                  loop={false}
-                  startOnVisible
-                />
-              </p>
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
-                <TextType
-                  as="span"
-                  text={PROFILE.bio}
-                  typingSpeed={75}
-                  pauseDuration={1500}
-                  deletingSpeed={50}
-                  deleteMode="backspace"
-                  typeEffect="fade"
-                  mistakes={0.2}
-                  cursorStyle="bar"
-                  cursorGlide
-                  showCursor
-                  loop={false}
-                  startOnVisible
-                />
-              </p>
+              <BlurText
+                as="p"
+                text={PROFILE.tagline}
+                className="mt-7 max-w-2xl text-base leading-relaxed text-ice/90 sm:text-lg"
+                delay={60}
+                animateBy="words"
+                direction="top"
+              />
+              <BlurText
+                as="p"
+                text={PROFILE.bio}
+                className="mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg"
+                delay={40}
+                animateBy="words"
+                direction="top"
+              />
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <a
@@ -359,23 +327,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 stagger={0.04}
                 trigger="scroll"
               />
-              <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
-                <TextType
-                  as="span"
-                  text="Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system."
-                  typingSpeed={75}
-                  pauseDuration={1500}
-                  deletingSpeed={50}
-                  deleteMode="backspace"
-                  typeEffect="fade"
-                  mistakes={0.2}
-                  cursorStyle="bar"
-                  cursorGlide
-                  showCursor
-                  loop={false}
-                  startOnVisible
-                />
-              </p>
+              <BlurText
+                as="p"
+                text="Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system."
+                className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg"
+                delay={50}
+                animateBy="words"
+                direction="top"
+              />
             </div>
 
             <div className="mt-12">
@@ -402,23 +361,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   stagger={0.04}
                   trigger="scroll"
                 />
-                <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
-                  <TextType
-                    as="span"
-                    text="Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues neon ne se révèlent qu'à l'intérieur de la morsure. Le même langage graphique appliqué à tout le portfolio."
-                    typingSpeed={75}
-                    pauseDuration={1500}
-                    deletingSpeed={50}
-                    deleteMode="backspace"
-                    typeEffect="fade"
-                    mistakes={0.2}
-                    cursorStyle="bar"
-                    cursorGlide
-                    showCursor
-                    loop={false}
-                    startOnVisible
-                  />
-                </p>
+                <BlurText
+                  as="p"
+                  text="Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues neon ne se révèlent qu'à l'intérieur de la morsure. Le même langage graphique appliqué à tout le portfolio."
+                  className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg"
+                  delay={40}
+                  animateBy="words"
+                  direction="top"
+                />
                 <ul className="mt-6 flex flex-wrap gap-2" aria-label="Techniques du visuel">
                   {["Masque SVG", "Shader WebGPU", "React Bits"].map((tag) => (
                     <li
@@ -497,20 +447,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                         key={item}
                         className="rounded-lg border border-slate-900/10 bg-white/80 px-3 py-1.5 text-sm font-medium text-ice/80 transition-colors duration-200 group-hover:border-slate-900/15"
                       >
-                        <TextType
+                        <BlurText
                           as="span"
                           text={item}
-                          typingSpeed={45}
-                          pauseDuration={1500}
-                          deletingSpeed={50}
-                          deleteMode="backspace"
-                          typeEffect="fade"
-                          mistakes={0}
-                          cursorStyle="bar"
-                          cursorGlide
-                          showCursor={false}
-                          loop={false}
-                          startOnVisible
+                          delay={40}
+                          animateBy="words"
+                          direction="top"
                         />
                       </li>
                     ))}
@@ -525,23 +467,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   <dt className="sr-only">{stat.label}</dt>
                   <dd>
                     <span className="block text-3xl font-semibold tracking-tight text-ice sm:text-4xl">{stat.value}</span>
-                    <span className="mt-2 block text-sm font-medium text-ice/70 sm:text-base">
-                      <TextType
-                        as="span"
-                        text={stat.label}
-                        typingSpeed={75}
-                        pauseDuration={1500}
-                        deletingSpeed={50}
-                        deleteMode="backspace"
-                        typeEffect="fade"
-                        mistakes={0.2}
-                        cursorStyle="bar"
-                        cursorGlide
-                        showCursor
-                        loop={false}
-                        startOnVisible
-                      />
-                    </span>
+                    <BlurText
+                      as="span"
+                      text={stat.label}
+                      className="mt-2 block text-sm font-medium text-ice/70 sm:text-base"
+                      delay={80}
+                      animateBy="words"
+                      direction="top"
+                    />
                   </dd>
                 </div>
               ))}
@@ -574,23 +507,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   stagger={0.04}
                   trigger="scroll"
                 />
-                <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg">
-                  <TextType
-                    as="span"
-                    text="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."
-                    typingSpeed={75}
-                    pauseDuration={1500}
-                    deletingSpeed={50}
-                    deleteMode="backspace"
-                    typeEffect="fade"
-                    mistakes={0.2}
-                    cursorStyle="bar"
-                    cursorGlide
-                    showCursor
-                    loop={false}
-                    startOnVisible
-                  />
-                </p>
+                <BlurText
+                  as="p"
+                  text="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."
+                  className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg"
+                  delay={50}
+                  animateBy="words"
+                  direction="top"
+                />
                 <div className="mt-9 flex flex-col items-center gap-5">
                   <a
                     href={`mailto:${PROFILE.email}`}
@@ -601,21 +525,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   </a>
                   <p className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/70 px-4 py-2 text-sm text-ice/80 shadow-sm">
                     <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
-                    <TextType
-                      as="span"
-                      text={PROFILE.availability}
-                      typingSpeed={75}
-                      pauseDuration={1500}
-                      deletingSpeed={50}
-                      deleteMode="backspace"
-                      typeEffect="fade"
-                      mistakes={0.2}
-                      cursorStyle="bar"
-                      cursorGlide
-                      showCursor
-                      loop={false}
-                      startOnVisible
-                    />
+                    <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
                   </p>
                 </div>
               </div>

@@ -8,6 +8,7 @@ import StrokeText from "@/components/ui/StrokeText";
 import BlurText from "@/components/ui/BlurText";
 import TextLoop from "@/components/ui/TextLoop";
 import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
+import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 import {
   siAngular,
@@ -116,6 +117,16 @@ const SKILL_GROUP_ICONS: Record<string, LucideIcon> = {
 };
 
 const TOTAL_SKILLS = SKILL_GROUPS.reduce((total, group) => total + group.items.length, 0);
+
+const SKILL_STEPS: PathStep[] = SKILL_GROUPS.map((group) => {
+  const Icon = SKILL_GROUP_ICONS[group.title] ?? Code2;
+  return {
+    id: group.title,
+    title: group.title,
+    body: group.items.join(" · "),
+    icon: <Icon size={20} strokeWidth={1.8} aria-hidden="true" />,
+  };
+});
 
 const ALL_STACKS_TEXT = SKILL_GROUPS.flatMap((group) => group.items).join(" ✦ ");
 
@@ -588,63 +599,21 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
             </div>
 
-            <div className="mt-14 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">Vue détaillée</p>
-                <h3 className="mt-1 text-lg font-semibold tracking-tight text-ice">Les outils, par catégorie</h3>
-              </div>
-              <p className="text-xs text-ice/50">{TOTAL_SKILLS} compétences référencées</p>
+            <div className="mt-14 flex flex-col items-center gap-2 text-center">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">Vue détaillée</p>
+              <p className="text-xs text-ice/50">
+                {TOTAL_SKILLS} compétences référencées · {SKILL_GROUPS.length} catégories
+              </p>
             </div>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {SKILL_GROUPS.map((group, groupIndex) => {
-                const Icon = SKILL_GROUP_ICONS[group.title] ?? Code2;
-                return (
-                  <div
-                    key={group.title}
-                    className="group relative overflow-hidden rounded-2xl border border-slate-900/10 bg-white/70 p-5 shadow-soft backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:bg-white/90 hover:shadow-glow"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-900/20 to-transparent"
-                    />
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-900/10 bg-slate-900/[0.035] text-neon transition-colors duration-300 group-hover:bg-neon group-hover:text-white">
-                          <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
-                        </span>
-                        <div>
-                          <h3 className="text-[13px] font-semibold leading-tight tracking-wide text-ice uppercase">
-                            {group.title}
-                          </h3>
-                          <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-ice/40">
-                            {group.items.length} outils
-                          </p>
-                        </div>
-                      </div>
-                      <span className="rounded-full border border-slate-900/10 bg-white/70 px-2 py-0.5 font-mono text-[9px] tabular-nums text-ice/50">
-                        {String(groupIndex + 1).padStart(2, "0")}
-                      </span>
-                    </div>
-                    <ul className="mt-4 flex flex-wrap gap-1.5">
-                      {group.items.map((item) => (
-                        <li
-                          key={item}
-                          className="rounded-lg border border-slate-900/[0.08] bg-white/70 px-2.5 py-1 text-[13px] font-medium leading-5 text-ice/75 transition-colors duration-200 group-hover:border-slate-900/20 group-hover:bg-white/90"
-                        >
-                          <BlurText
-                            as="span"
-                            text={item}
-                            delay={40}
-                            animateBy="words"
-                            direction="top"
-                          />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+            <div className="mt-6">
+              <StepsPath
+                steps={SKILL_STEPS}
+                title="Les outils, par catégorie"
+                accentColor="#94a3b8"
+                autoPlay
+                autoPlayInterval={4200}
+              />
             </div>
 
             <dl className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-slate-900/10 rounded-2xl border border-slate-900/10 bg-white/75 py-6 shadow-soft backdrop-blur-sm">

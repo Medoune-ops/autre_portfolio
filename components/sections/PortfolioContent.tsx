@@ -3,7 +3,7 @@
 import { NAV_LINKS, PROFILE, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
-import { ParticleText } from "@/components/ui/particle-text";
+import StrokeText from "@/components/ui/StrokeText";
 import { ToolWheel } from "@/components/ui/tool-wheel";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 
@@ -143,29 +143,49 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </p>
 
               <h1 id="accueil-titre" className="mt-6">
-                <ParticleText
+                <StrokeText
                   text={PROFILE.name}
-                  className="h-[64px] w-full max-w-[520px] sm:h-[88px] lg:h-[112px]"
-                  font='700 120px system-ui, -apple-system, "Segoe UI", sans-serif'
-                  color="#020617"
-                  particleColor="#020617"
-                  maxDimension={420}
-                  size={1.3}
-                  randomness={1.2}
-                  depth={2.0}
+                  strokeColor="#334155"
+                  fillColor="#020617"
+                  strokeStyle="solid"
+                  strokeWidth={1.6}
+                  dashLength={10}
+                  drawDuration={1.6}
+                  fillDelay={0.2}
+                  stagger={0.05}
+                  ease="power2.out"
+                  trigger="mount"
+                  fillMode="wipe"
+                  wipeFrom="left"
+                  fontSize={128}
+                  fontWeight={800}
+                  letterSpacing={-4}
+                  marching={false}
+                  hoverRedraw={true}
+                  shadow={false}
                 />
               </h1>
               <p className="mt-3">
-                <ParticleText
-                  text={"Développeur front-end &\nexpériences 3D"}
-                  className="h-[56px] w-full max-w-[520px] sm:h-[72px]"
-                  font='600 56px system-ui, -apple-system, "Segoe UI", sans-serif'
-                  color="#020617"
-                  particleColor="#020617"
-                  maxDimension={520}
-                  size={1.25}
-                  randomness={1.0}
-                  depth={1.8}
+                <StrokeText
+                  text={PROFILE.role}
+                  strokeColor="#475569"
+                  fillColor="#0f172a"
+                  strokeStyle="solid"
+                  strokeWidth={1.2}
+                  dashLength={10}
+                  drawDuration={1.4}
+                  fillDelay={0.15}
+                  stagger={0.03}
+                  ease="power2.out"
+                  trigger="mount"
+                  fillMode="wipe"
+                  wipeFrom="left"
+                  fontSize={54}
+                  fontWeight={700}
+                  letterSpacing={-1}
+                  marching={false}
+                  hoverRedraw={true}
+                  shadow={false}
                 />
               </p>
               <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>

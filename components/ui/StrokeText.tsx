@@ -23,6 +23,7 @@ export interface StrokeTextProps {
   strokeWidth?: number;
   drawDuration?: number;
   fillDelay?: number;
+  fillDuration?: number;
   stagger?: number;
   ease?: string;
   trigger?: StrokeTextTrigger;
@@ -89,6 +90,7 @@ const StrokeText = ({
   strokeWidth = 1.4,
   drawDuration = 1.6,
   fillDelay = 0.2,
+  fillDuration,
   stagger = 0.05,
   ease = 'power2.out',
   trigger = 'mount',
@@ -201,7 +203,7 @@ const StrokeText = ({
 
     const fillEnabled = fillMode !== 'none';
     const useWipe = fillEnabled && fillMode === 'wipe';
-    const fillDuration = Math.max(0.4, drawDuration * 0.5);
+    const fillDurationValue = fillDuration ?? Math.max(0.4, drawDuration * 0.5);
     const staggerConfig: number | gsap.StaggerVars = reverse ? { each: stagger, from: 'end' as const } : stagger;
     const frames = getWipeFrames(box, wipeFrom);
     const lifted = { dx: lift, dy: lift, 'flood-opacity': SHADOW_OPACITY };
@@ -244,11 +246,11 @@ const StrokeText = ({
       tl.to(strokes, { strokeDashoffset: 0, duration: drawDuration, ease, stagger: staggerConfig }, 0);
 
       if (useWipe && wipe) {
-        tl.to(wipe, { attr: frames.end, duration: fillDuration, ease: 'power2.inOut' }, drawDuration + fillDelay);
+        tl.to(wipe, { attr: frames.end, duration: fillDurationValue, ease: 'power2.inOut' }, drawDuration + fillDelay);
       } else if (fillEnabled) {
         tl.to(
           fills,
-          { opacity: 1, duration: fillDuration, ease: 'power2.out', stagger: staggerConfig },
+          { opacity: 1, duration: fillDurationValue, ease: 'power2.out', stagger: staggerConfig },
           drawDuration + fillDelay
         );
       }
@@ -256,8 +258,8 @@ const StrokeText = ({
       if (drop && fillEnabled) {
         tl.to(
           drop,
-          { attr: lifted, duration: fillDuration * 1.4, ease: 'power3.out' },
-          drawDuration + fillDelay + fillDuration * 0.3
+          { attr: lifted, duration: fillDurationValue * 1.4, ease: 'power3.out' },
+          drawDuration + fillDelay + fillDurationValue * 0.3
         );
       }
 
@@ -329,6 +331,7 @@ const StrokeText = ({
     dash,
     drawDuration,
     fillDelay,
+    fillDuration,
     stagger,
     ease,
     trigger,

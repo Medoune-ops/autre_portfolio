@@ -161,29 +161,32 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                     shadow={false}
                   />
                 </span>
-                <span aria-hidden="true" className="absolute inset-0 block">
-                  <StrokeText
-                    text={PROFILE.name}
-                    strokeColor="#94a3b8"
-                    fillColor="#020617"
-                    strokeStyle="solid"
-                    strokeWidth={1.6}
-                    dashLength={10}
-                    drawDuration={1.6}
-                    fillDelay={0.2}
-                    stagger={0.05}
-                    ease="power2.out"
-                    trigger="mount"
-                    fillMode="wipe"
-                    wipeFrom="left"
-                    fontSize={128}
-                    fontWeight={800}
-                    letterSpacing={-4}
-                    marching={false}
-                    hoverRedraw={true}
-                    shadow={false}
-                  />
-                </span>
+                {active && (
+                  <span aria-hidden="true" className="absolute inset-0 block">
+                    <StrokeText
+                      text={PROFILE.name}
+                      strokeColor="#94a3b8"
+                      fillColor="#020617"
+                      strokeStyle="solid"
+                      strokeWidth={1.6}
+                      dashLength={10}
+                      drawDuration={2.2}
+                      fillDelay={0.8}
+                      fillDuration={3.2}
+                      stagger={0.06}
+                      ease="power2.out"
+                      trigger="mount"
+                      fillMode="wipe"
+                      wipeFrom="left"
+                      fontSize={128}
+                      fontWeight={800}
+                      letterSpacing={-4}
+                      marching={false}
+                      hoverRedraw={true}
+                      shadow={false}
+                    />
+                  </span>
+                )}
               </h1>
               <p className="relative mt-3">
                 <span className="sr-only">{PROFILE.role}</span>
@@ -204,29 +207,32 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                     shadow={false}
                   />
                 </span>
-                <span aria-hidden="true" className="absolute inset-0 block">
-                  <StrokeText
-                    text={PROFILE.role}
-                    strokeColor="#94a3b8"
-                    fillColor="#020617"
-                    strokeStyle="solid"
-                    strokeWidth={1.2}
-                    dashLength={10}
-                    drawDuration={1.4}
-                    fillDelay={0.15}
-                    stagger={0.03}
-                    ease="power2.out"
-                    trigger="mount"
-                    fillMode="wipe"
-                    wipeFrom="left"
-                    fontSize={54}
-                    fontWeight={700}
-                    letterSpacing={-1}
-                    marching={false}
-                    hoverRedraw={true}
-                    shadow={false}
-                  />
-                </span>
+                {active && (
+                  <span aria-hidden="true" className="absolute inset-0 block">
+                    <StrokeText
+                      text={PROFILE.role}
+                      strokeColor="#94a3b8"
+                      fillColor="#020617"
+                      strokeStyle="solid"
+                      strokeWidth={1.2}
+                      dashLength={10}
+                      drawDuration={2.0}
+                      fillDelay={1.0}
+                      fillDuration={3.0}
+                      stagger={0.03}
+                      ease="power2.out"
+                      trigger="mount"
+                      fillMode="wipe"
+                      wipeFrom="left"
+                      fontSize={54}
+                      fontWeight={700}
+                      letterSpacing={-1}
+                      marching={false}
+                      hoverRedraw={true}
+                      shadow={false}
+                    />
+                  </span>
+                )}
               </p>
               <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">{PROFILE.bio}</p>

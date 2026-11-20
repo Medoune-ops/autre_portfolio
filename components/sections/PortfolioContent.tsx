@@ -147,12 +147,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   text={PROFILE.name}
                   className="h-[64px] w-full max-w-[520px] sm:h-[88px] lg:h-[112px]"
                   font='700 120px system-ui, -apple-system, "Segoe UI", sans-serif'
-                  color="#0f172a"
-                  particleColor="#0f172a"
+                  color="#020617"
+                  particleColor="#020617"
                   maxDimension={420}
-                  size={1.15}
-                  randomness={1.4}
-                  depth={2.2}
+                  size={1.3}
+                  randomness={1.2}
+                  depth={2.0}
                 />
               </h1>
               <p className="mt-3">
@@ -160,12 +160,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   text={"Développeur front-end &\nexpériences 3D"}
                   className="h-[56px] w-full max-w-[520px] sm:h-[72px]"
                   font='600 56px system-ui, -apple-system, "Segoe UI", sans-serif'
-                  color="#0891b2"
-                  particleColor="#0891b2"
+                  color="#020617"
+                  particleColor="#020617"
                   maxDimension={520}
-                  size={1.1}
-                  randomness={1.2}
-                  depth={2.0}
+                  size={1.25}
+                  randomness={1.0}
+                  depth={1.8}
                 />
               </p>
               <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>

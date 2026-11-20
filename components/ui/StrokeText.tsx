@@ -19,6 +19,7 @@ export interface StrokeTextProps {
   text?: string;
   strokeColor?: string;
   fillColor?: string;
+  baseFillColor?: string;
   strokeWidth?: number;
   drawDuration?: number;
   fillDelay?: number;
@@ -84,6 +85,7 @@ const StrokeText = ({
   text = DEFAULT_TEXT,
   strokeColor = '#A78BFA',
   fillColor = 'currentColor',
+  baseFillColor,
   strokeWidth = 1.4,
   drawDuration = 1.6,
   fillDelay = 0.2,
@@ -449,6 +451,22 @@ const StrokeText = ({
         {!dashArray && outlineLayer}
 
         <g filter={castShadow ? `url(#${shadowId})` : undefined}>
+          {baseFillColor && (
+            <text
+              className="stroke-text__fill"
+              x="0"
+              y="0"
+              fill={baseFillColor}
+              stroke="none"
+              style={fontStyle}
+            >
+              {characters.map((char, index) => (
+                <tspan key={`b-${index}`}>
+                  {char}
+                </tspan>
+              ))}
+            </text>
+          )}
           <text
             className="stroke-text__fill"
             x="0"

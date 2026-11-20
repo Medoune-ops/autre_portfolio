@@ -278,7 +278,30 @@ export function FerrisWheelGallery({
       }}
     >
       {!current ? <div className="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-border text-sm text-muted-foreground" role="status">Add images to start your collection.</div> : (
-        <div className="grid items-center gap-4 @min-[600px]/ferris:grid-cols-[1.6fr_1fr] @min-[900px]/ferris:gap-14">
+        <div className="grid items-center gap-6 @min-[600px]/ferris:grid-cols-[1.15fr_1fr] @min-[900px]/ferris:gap-14">
+          <div data-detail-panel id={labelId} className="min-w-0">
+            <div className="relative aspect-[4/3] min-w-0 overflow-hidden rounded-2xl bg-muted shadow-soft @min-[600px]/ferris:aspect-[1.1] @min-[900px]/ferris:aspect-[4/3]">
+              {previous && view.previous !== view.index && <div ref={previousRef} data-previous-photo aria-hidden="true" className="absolute inset-0" style={{ opacity: 0 }}><Photo item={previous} /></div>}
+              <div ref={photoRef} data-current-photo className="absolute inset-0"><Photo item={current} /></div>
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+              <span aria-hidden="true" className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
+
+              <div className="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
+                <div ref={captionRef} data-caption>
+                  <p className="mb-2 inline-flex border-l-2 border-chart-2 pl-2 font-mono text-xs tracking-wider text-white/80">STUDY {String(view.index + 1).padStart(2, "0")}</p>
+                  <h3 className="text-xl font-semibold leading-tight tracking-tight text-white @min-[600px]/ferris:text-2xl @min-[900px]/ferris:text-3xl">{current.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/80">{[current.discipline, current.year].filter((value) => value !== undefined && value !== "").join(" · ")}</p>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                  <button type="button" data-previous aria-label="Previous image" disabled={total < 2} onClick={() => request(selected - 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 disabled:opacity-40 ${focusRing}`}><ArrowLeft className="size-3.5" aria-hidden="true" /></button>
+                  <button type="button" data-next aria-label="Next image" disabled={total < 2} onClick={() => request(selected + 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-slate-900 hover:bg-white/90 disabled:opacity-40 ${focusRing}`}><ArrowRight className="size-3.5" aria-hidden="true" /></button>
+                  <span aria-hidden="true" className="ml-auto font-mono text-xs tabular-nums text-white/80">{String(view.index + 1).padStart(2, "0")}<span className="px-1 text-white/40">/</span>{String(total).padStart(2, "0")}</span>
+                  {autoplay && !reducedMotion && total > 1 && <button data-autoplay-control type="button" aria-label={paused ? "Resume automatic rotation" : "Pause automatic rotation"} onClick={() => setPaused(!paused)} className={`flex size-8 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 ${focusRing}`}>{paused ? <Play className="size-3" aria-hidden="true" /> : <Pause className="size-3" aria-hidden="true" />}</button>}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div>
             <div
               ref={stageRef}
@@ -367,26 +390,6 @@ export function FerrisWheelGallery({
               </div>
             </div>
             <p id={helpId} className="mt-1 text-center text-xs tracking-wide text-muted-foreground">Drag to explore <span aria-hidden="true" className="px-1.5 text-border">/</span> Scroll or use ← →</p>
-          </div>
-          <div data-detail-panel id={labelId} className="grid grid-cols-[1.35fr_1fr] items-center gap-5 @min-[600px]/ferris:grid-cols-1 @min-[600px]/ferris:gap-5">
-            <div className="relative aspect-[1.8] min-w-0 overflow-hidden rounded-xl bg-muted @min-[600px]/ferris:aspect-[1.15]">
-              {previous && view.previous !== view.index && <div ref={previousRef} data-previous-photo aria-hidden="true" className="absolute inset-0" style={{ opacity: 0 }}><Photo item={previous} /></div>}
-              <div ref={photoRef} data-current-photo className="absolute inset-0"><Photo item={current} /></div>
-              <span aria-hidden="true" className="absolute inset-0 rounded-xl ring-1 ring-inset ring-foreground/10" />
-            </div>
-            <div className="min-w-0">
-              <div ref={captionRef} data-caption>
-                <p className="mb-2 border-l-2 border-chart-2 pl-2 font-mono text-xs tracking-wider text-muted-foreground">STUDY {String(view.index + 1).padStart(2, "0")}</p>
-                <h3 className="text-xl font-medium leading-tight tracking-tight @min-[600px]/ferris:text-2xl @min-[900px]/ferris:text-3xl">{current.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{[current.discipline, current.year].filter((value) => value !== undefined && value !== "").join(" · ")}</p>
-              </div>
-              <div className="mt-5 flex items-center gap-2 @min-[600px]/ferris:mt-6">
-                <button type="button" data-previous aria-label="Previous image" disabled={total < 2} onClick={() => request(selected - 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background hover:bg-accent disabled:opacity-40 ${focusRing}`}><ArrowLeft className="size-3.5" aria-hidden="true" /></button>
-                <button type="button" data-next aria-label="Next image" disabled={total < 2} onClick={() => request(selected + 1)} className={`flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 ${focusRing}`}><ArrowRight className="size-3.5" aria-hidden="true" /></button>
-                <span aria-hidden="true" className="ml-auto font-mono text-xs tabular-nums text-muted-foreground">{String(view.index + 1).padStart(2, "0")}<span className="px-1 text-border">/</span>{String(total).padStart(2, "0")}</span>
-                {autoplay && !reducedMotion && total > 1 && <button data-autoplay-control type="button" aria-label={paused ? "Resume automatic rotation" : "Pause automatic rotation"} onClick={() => setPaused(!paused)} className={`flex size-8 shrink-0 items-center justify-center rounded-full border border-border ${focusRing}`}>{paused ? <Play className="size-3" aria-hidden="true" /> : <Pause className="size-3" aria-hidden="true" />}</button>}
-              </div>
-            </div>
           </div>
         </div>
       )}

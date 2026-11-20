@@ -176,7 +176,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             className={`group flex items-center gap-2.5 rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
             aria-label={`Retour à l'accueil — ${PROFILE.name}`}
           >
-            <span className="h-2.5 w-2.5 rounded-full bg-neon shadow-[0_0_14px_3px_rgba(8,145,178,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-full bg-neon shadow-[0_0_14px_3px_rgba(71,85,105,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {PROFILE.name}
           </a>
           <nav aria-label="Navigation principale">
@@ -283,7 +283,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <a
                   href="#projets"
-                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(8,145,178,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(8,145,178,0.75)] active:translate-y-0 ${FOCUS}`}
+                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(71,85,105,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(71,85,105,0.75)] active:translate-y-0 ${FOCUS}`}
                 >
                   Voir les projets
                   <span aria-hidden="true" className="ml-2 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
@@ -396,7 +396,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 />
                 <BlurText
                   as="p"
-                  text="Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues neon ne se révèlent qu'à l'intérieur de la morsure. Le même langage graphique appliqué à tout le portfolio."
+                  text="Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues grises ne se révèlent qu'à l'intérieur de la morsure. Le même langage graphique appliqué à tout le portfolio."
                   className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg"
                   delay={40}
                   animateBy="words"
@@ -458,8 +458,8 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 surface="#ffffff"
                 color="#0f172a"
                 mutedColor="rgba(15,23,42,0.72)"
-                accent="#0891b2"
-                signal="#0284c7"
+                accent="#475569"
+                signal="#334155"
                 lineColor="rgba(15,23,42,0.12)"
                 frame={false}
                 autoplay
@@ -551,7 +551,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 <div className="mt-9 flex flex-col items-center gap-5">
                   <a
                     href={`mailto:${PROFILE.email}`}
-                    className={`inline-flex items-center gap-2 rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(8,145,178,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(8,145,178,0.75)] active:translate-y-0 ${FOCUS}`}
+                    className={`inline-flex items-center gap-2 rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(71,85,105,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(71,85,105,0.75)] active:translate-y-0 ${FOCUS}`}
                   >
                     {PROFILE.email}
                     <span aria-hidden="true">→</span>

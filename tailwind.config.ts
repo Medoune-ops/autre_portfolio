@@ -10,12 +10,12 @@ const config: Config = {
     extend: {
       colors: {
         bg: "#f1f5f9",
-        neon: "#0891b2",
-        neon2: "#0284c7",
+        neon: "#475569",
+        neon2: "#334155",
         ice: "#0f172a",
         border: "rgba(15, 23, 42, 0.12)",
         input: "rgba(15, 23, 42, 0.12)",
-        ring: "#0891b2",
+        ring: "#475569",
         card: {
           DEFAULT: "rgba(255, 255, 255, 0.72)",
           foreground: "#0f172a",
@@ -25,7 +25,7 @@ const config: Config = {
           foreground: "#0f172a",
         },
         primary: {
-          DEFAULT: "#0891b2",
+          DEFAULT: "#475569",
           foreground: "#ffffff",
         },
         secondary: {
@@ -44,7 +44,7 @@ const config: Config = {
           DEFAULT: "#ef4444",
           foreground: "#ffffff",
         },
-        "chart-2": "#0891b2",
+        "chart-2": "#475569",
         background: "#f1f5f9",
         foreground: "#0f172a",
       },
@@ -56,7 +56,7 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 8px 30px rgba(15, 23, 42, 0.08)",
-        glow: "0 0 0 1px rgba(8, 145, 178, 0.12), 0 12px 40px rgba(8, 145, 178, 0.12)",
+        glow: "0 0 0 1px rgba(71, 85, 105, 0.12), 0 12px 40px rgba(71, 85, 105, 0.12)",
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "Segoe UI", "sans-serif"],

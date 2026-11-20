@@ -102,7 +102,6 @@ export function FerrisWheelGallery({
   const latest = React.useRef({ selected, active, onActiveChange, items });
   latest.current = { selected, active, onActiveChange, items };
   const labelId = React.useId();
-  const helpId = React.useId();
 
   React.useLayoutEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -308,7 +307,6 @@ export function FerrisWheelGallery({
               data-wheel-stage
               tabIndex={0}
               aria-label="Browse the collection"
-              aria-describedby={helpId}
               className={`relative mx-auto w-full max-w-[380px] select-none overflow-hidden rounded-3xl pb-4 md:max-w-[520px] lg:max-w-[560px] ${focusRing}`}
               style={{ touchAction: "none" }}
               onPointerDown={(event) => {
@@ -389,7 +387,6 @@ export function FerrisWheelGallery({
               </div>
               </div>
             </div>
-            <p id={helpId} className="mt-1 text-center text-xs tracking-wide text-muted-foreground">Drag to explore <span aria-hidden="true" className="px-1.5 text-border">/</span> Scroll or use ← →</p>
           </div>
         </div>
       )}

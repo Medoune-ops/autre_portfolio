@@ -290,16 +290,18 @@ const TextLoop = ({
     const crossTail = crossTailRef.current;
     const crossPaths = cross && crossHead && crossTail && crossLength > 0 ? [crossHead, crossTail] : null;
 
-    let travel = progressRef.current * length;
+    const span = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.reps : length;
+    const crossSpan = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.crossReps : crossLength;
+    let travel = progressRef.current * span;
     const apply = () => {
-      const offset = wrap(travel, length);
-      progressRef.current = offset / length;
+      const offset = wrap(travel, span);
+      progressRef.current = span ? offset / span : 0;
       head.setAttribute('startOffset', String(offset));
-      tail.setAttribute('startOffset', String(offset - length));
-      if (crossPaths) {
-        const crossOffset = wrap(-travel, crossLength);
+      tail.setAttribute('startOffset', String(offset - span));
+      if (crossPaths && crossSpan) {
+        const crossOffset = wrap(-travel, crossSpan);
         crossPaths[0].setAttribute('startOffset', String(crossOffset));
-        crossPaths[1].setAttribute('startOffset', String(crossOffset - crossLength));
+        crossPaths[1].setAttribute('startOffset', String(crossOffset - crossSpan));
       }
     };
     apply();

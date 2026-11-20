@@ -6,8 +6,35 @@ import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
 import BlurText from "@/components/ui/BlurText";
 import TextLoop from "@/components/ui/TextLoop";
-import { ToolWheel } from "@/components/ui/tool-wheel";
+import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
+import {
+  siAngular,
+  siClaude,
+  siCss,
+  siDocker,
+  siExpo,
+  siExpress,
+  siFigma,
+  siFlutter,
+  siGit,
+  siGithub,
+  siHtml5,
+  siJavascript,
+  siLaravel,
+  siMongodb,
+  siMysql,
+  siNestjs,
+  siNextdotjs,
+  siNodedotjs,
+  siPostgresql,
+  siPrisma,
+  siPython,
+  siReact,
+  siTailwindcss,
+  siTypescript,
+  siVercel,
+} from "simple-icons";
 
 const PROJECT_GALLERY_ITEMS = [
   {
@@ -36,43 +63,34 @@ const PROJECT_GALLERY_ITEMS = [
   },
 ];
 
-const SKILL_WHEEL_BASE = [
-  {
-    label: "Langages",
-    path: "M8.5 6.5 3.5 12l5 5.5 1.5-1.4L6.4 12 10 7.9Zm7 0-1.5 1.4L17.6 12 14 16.1l1.5 1.4 5-5.5Z",
-  },
-  {
-    label: "Frameworks & bibliothèques",
-    path: "M12 2 3 7v10l9 5 9-5V7Zm0 2.2 6.8 3.8L12 11.8 5.2 8ZM5 9.7l6 3.3v6.6l-6-3.3Zm8 9.9v-6.6l6-3.3v6.6Z",
-  },
-  {
-    label: "Backend & API",
-    path: "M4 4h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 9h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2Zm2-6.5v1.8h1.8V6.5Zm3 0v1.8h1.8V6.5ZM6 15.5v1.8h1.8v-1.8Zm3 0v1.8h1.8v-1.8Z",
-  },
-  {
-    label: "Mobile",
-    path: "M8 2.5h8A2.5 2.5 0 0 1 18.5 5v14A2.5 2.5 0 0 1 16 21.5H8A2.5 2.5 0 0 1 5.5 19V5A2.5 2.5 0 0 1 8 2.5Zm0 2.5v14h8V5Zm2.8 11.8h2.4v1.8h-2.4Z",
-  },
-  {
-    label: "Bases de données",
-    path: "M12 2c-4.97 0-9 1.57-9 3.5v13c0 1.93 4.03 3.5 9 3.5s9-1.57 9-3.5v-13C21 3.57 16.97 2 12 2Zm0 2c4.2 0 7 .99 7 1.5S16.2 7 12 7s-7-.99-7-1.5S7.8 4 12 4Zm0 15c-4.2 0-7-.99-7-1.5v-3.2c1.64 1 4.58 1.7 7 1.7s5.36-.7 7-1.7v3.2c0 .51-2.8 1.5-7 1.5Zm0-5c-4.2 0-7-.99-7-1.5v-3.2c1.64 1 4.58 1.7 7 1.7s5.36-.7 7-1.7v3.2c0 .51-2.8 1.5-7 1.5Z",
-  },
-  {
-    label: "Infra / DevOps & outils",
-    path: "M12 2.2c2.8 2 4.8 4.6 5.8 7.8l3.2 1.6-3.2 1.6c-1 3.2-3 5.8-5.8 7.8-2.8-2-4.8-4.6-5.8-7.8L3 11.6l3.2-1.6c1-3.2 3-5.8 5.8-7.8Zm0 6.3a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2ZM7 15.8l2 2-3.4 1.4Z",
-  },
-  {
-    label: "Design",
-    path: "M4 20.5 16.5 8 20 11.5 7.5 24H4Zm11.2-13.8 1.8-1.8a1.8 1.8 0 0 1 2.6 0l1 1a1.8 1.8 0 0 1 0 2.6l-1.8 1.8Z",
-  },
-  {
-    label: "IA",
-    path: "M12 1.5Q13.3 10.7 22.5 12Q13.3 13.3 12 22.5Q10.7 13.3 1.5 12Q10.7 10.7 12 1.5Z",
-  },
+// Sélection de stacks affichées dans la roue, avec leurs logos officiels.
+const STACK_WHEEL_ITEMS: ToolWheelItem[] = [
+  { label: "HTML5", description: "Structure des pages web", path: siHtml5.path, fillRule: "nonzero" },
+  { label: "CSS", description: "Mise en forme et design", path: siCss.path, fillRule: "nonzero" },
+  { label: "JavaScript", description: "Langage du web", path: siJavascript.path, fillRule: "nonzero" },
+  { label: "TypeScript", description: "JavaScript typé", path: siTypescript.path, fillRule: "nonzero" },
+  { label: "Python", description: "Langage polyvalent", path: siPython.path, fillRule: "nonzero" },
+  { label: "React", description: "Bibliothèque d'interface", path: siReact.path, fillRule: "nonzero" },
+  { label: "Next.js", description: "Framework React full-stack", path: siNextdotjs.path, fillRule: "nonzero" },
+  { label: "Tailwind CSS", description: "Styles utilitaires", path: siTailwindcss.path, fillRule: "nonzero" },
+  { label: "Angular", description: "Framework front-end", path: siAngular.path, fillRule: "nonzero" },
+  { label: "Node.js", description: "Runtime JavaScript", path: siNodedotjs.path, fillRule: "nonzero" },
+  { label: "Express", description: "Framework backend minimal", path: siExpress.path, fillRule: "nonzero" },
+  { label: "NestJS", description: "Backend Node.js structuré", path: siNestjs.path, fillRule: "nonzero" },
+  { label: "Laravel", description: "Framework PHP", path: siLaravel.path, fillRule: "nonzero" },
+  { label: "Expo", description: "Apps React Native", path: siExpo.path, fillRule: "nonzero" },
+  { label: "Flutter", description: "UI mobile multiplateforme", path: siFlutter.path, fillRule: "nonzero" },
+  { label: "MySQL", description: "Base de données relationnelle", path: siMysql.path, fillRule: "nonzero" },
+  { label: "PostgreSQL", description: "Base de données SQL", path: siPostgresql.path, fillRule: "nonzero" },
+  { label: "MongoDB", description: "Base NoSQL orientée documents", path: siMongodb.path, fillRule: "nonzero" },
+  { label: "Prisma", description: "ORM pour TypeScript", path: siPrisma.path, fillRule: "nonzero" },
+  { label: "Docker", description: "Conteneurisation", path: siDocker.path, fillRule: "nonzero" },
+  { label: "Git", description: "Versionnage du code", path: siGit.path, fillRule: "nonzero" },
+  { label: "GitHub", description: "Hébergement et CI/CD", path: siGithub.path, fillRule: "nonzero" },
+  { label: "Vercel", description: "Déploiement front-end", path: siVercel.path, fillRule: "nonzero" },
+  { label: "Figma", description: "Design d'interfaces", path: siFigma.path, fillRule: "nonzero" },
+  { label: "Claude", description: "Assistant IA d'Anthropic", path: siClaude.path, fillRule: "nonzero" },
 ];
-
-// Neuf éléments ou plus pour que chaque emplacement visible soit unique.
-const SKILL_WHEEL_ITEMS = [...SKILL_WHEEL_BASE, SKILL_WHEEL_BASE[0]];
 
 const ALL_STACKS_TEXT = SKILL_GROUPS.flatMap((group) => group.items).join(" ✦ ");
 
@@ -450,7 +468,8 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             </div>
             <div className="h-[440px] w-full sm:h-[540px] lg:h-[620px]">
               <ToolWheel
-                items={SKILL_WHEEL_ITEMS}
+                items={STACK_WHEEL_ITEMS}
+                showDetails
                 eyebrow=""
                 title=""
                 subtitle=""

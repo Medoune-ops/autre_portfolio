@@ -9,8 +9,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 export interface ToolWheelItem {
   /** Name of the tool, read out to screen readers when it comes to the front. */
   label: string;
-  /** Solid icon as SVG path data drawn in a 24 x 24 box (even-odd fill). Leave out for a plain dot. */
+  /** Short description shown under the label in the hub when `showDetails` is on. */
+  description?: string;
+  /** Solid icon as SVG path data drawn in a 24 x 24 box. Leave out for a plain dot. */
   path?: string;
+  /** Fill rule for the icon path. Simple Icons paths use `nonzero`. */
+  fillRule?: "evenodd" | "nonzero";
 }
 
 export interface ToolWheelProps {
@@ -28,6 +32,8 @@ export interface ToolWheelProps {
   interval?: number;
   /** Hold the wheel still while a mouse rests over it. */
   pauseOnHover?: boolean;
+  /** Show the active tool's name and description in the hub. */
+  showDetails?: boolean;
   /** Small caps label above the title, between two accent squares. Empty hides it. */
   eyebrow?: string;
   /** Serif headline. Empty hides it. */
@@ -131,6 +137,7 @@ export function ToolWheel({
   autoplay = true,
   interval = 2.2,
   pauseOnHover = true,
+  showDetails = false,
   eyebrow = "CONNECTIONS",
   title = "Every tool. One shared workspace.",
   subtitle = "Plug the apps your team already works in into one shared view. Less switching. More time on the work itself.",
@@ -158,6 +165,7 @@ export function ToolWheel({
   const n = Math.max(1, items.length);
   const controlled = active !== undefined;
   const start = mod(Math.round(controlled ? (active as number) : defaultActive), n);
+  const [activeIndex, setActiveIndex] = useState(start);
 
   const live = useRef({
     T: 0,
@@ -178,8 +186,8 @@ export function ToolWheel({
     reduced: false,
   });
 
-  const props = useRef({ items, n, autoplay, interval, pauseOnHover, controlled, onActiveChange, focusRing });
-  props.current = { items, n, autoplay, interval, pauseOnHover, controlled, onActiveChange, focusRing };
+  const props = useRef({ items, n, autoplay, interval, pauseOnHover, controlled, onActiveChange, focusRing, showDetails });
+  props.current = { items, n, autoplay, interval, pauseOnHover, controlled, onActiveChange, focusRing, showDetails };
 
   const paths = useMemo(() => {
     if (typeof Path2D === "undefined") return [] as (Path2D | null)[];
@@ -328,8 +336,10 @@ export function ToolWheel({
         L.scales.set(to, { from: scaleOf(to, tc), to: 1, start: tc });
         L.shown = to;
         const idx = mod(to, props.current.n);
+        const item = props.current.items[idx];
+        setActiveIndex(idx);
         props.current.onActiveChange?.(idx);
-        setAnnounce(`${props.current.items[idx]?.label ?? ""}, ${idx + 1} of ${props.current.n}`);
+        setAnnounce(`${item?.label ?? ""}${item?.description ? `. ${item.description}` : ""}, ${idx + 1} sur ${props.current.n}`);
       }
       for (const [j, tw] of L.scales) if (tw.to === 0 && T - tw.start > SCALE_DUR + 0.05) L.scales.delete(j);
     };
@@ -378,7 +388,8 @@ export function ToolWheel({
         ctx.lineWidth = Math.max(1, k);
         ctx.stroke();
       };
-      halo(HUB_CY);
+      const showHub = !P.showDetails || size.w >= 520;
+      if (showHub) halo(HUB_CY);
       halo(FOCUS_CY);
 
       const disc = (x: number, y: number, r: number) => {
@@ -404,13 +415,15 @@ export function ToolWheel({
         const r = DISC_R * it.s * k;
         if (y + r * 1.4 < oy + FR.t * k) continue;
         disc(x, y, r);
-        const p = paths[mod(it.j, P.n)];
+        const idx = mod(it.j, P.n);
+        const item = P.items[idx];
+        const p = paths[idx];
         const sz = ICON * it.s * k;
         ctx.save();
         ctx.translate(x - sz / 2, y - sz / 2);
         ctx.scale(sz / 24, sz / 24);
         ctx.fillStyle = C.color;
-        if (p) ctx.fill(p, "evenodd");
+        if (p) ctx.fill(p, item?.fillRule ?? "evenodd");
         else {
           ctx.beginPath();
           ctx.arc(12, 12, 4, 0, Math.PI * 2);
@@ -420,8 +433,8 @@ export function ToolWheel({
       }
 
       // Hub.
-      disc(X(CX), Y(HUB_CY), HUB_R * k);
-      if (mark && markBox.length === 4) {
+      if (showHub) disc(X(CX), Y(HUB_CY), HUB_R * k);
+      if (!P.showDetails && mark && markBox.length === 4) {
         const [mx, my, mw, mh] = markBox;
         const hgt = 48.5 * k;
         const sc = hgt / mh;
@@ -549,7 +562,8 @@ export function ToolWheel({
   };
 
   const fontPx = (v: number, floor: number) => `${Math.max(floor, v * (layout(size.w || BOX_W, size.h || BOX_H).k)).toFixed(2)}px`;
-  const { k, oy } = layout(size.w || BOX_W, size.h || BOX_H);
+  const { k, ox, oy, dy } = layout(size.w || BOX_W, size.h || BOX_H);
+  const activeItem = items[mod(activeIndex, n)];
 
   return (
     <div
@@ -663,6 +677,50 @@ export function ToolWheel({
           </p>
         ) : null}
       </div>
+      {showDetails && activeItem ? (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: ox + CX * k,
+            top: oy + dy + HUB_CY * k,
+            transform: "translate(-50%, -50%)",
+            width: Math.min((size.w || BOX_W) * 0.86, Math.max(112, 124 * k)),
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: Math.max(2, 3.5 * k),
+            textAlign: "center",
+            pointerEvents: "none",
+            textWrap: "balance",
+          } as React.CSSProperties}
+        >
+          <span
+            style={{
+              fontFamily: uiFont,
+              fontWeight: 600,
+              fontSize: Math.max(13, 18 * k),
+              lineHeight: 1.1,
+              letterSpacing: "-0.01em",
+              color,
+            }}
+          >
+            {activeItem.label}
+          </span>
+          {activeItem.description ? (
+            <span
+              style={{
+                fontFamily: uiFont,
+                fontSize: Math.max(9.5, 11.5 * k),
+                lineHeight: 1.35,
+                color: mutedColor,
+              }}
+            >
+              {activeItem.description}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div aria-live="polite" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}>
         {announce}
       </div>

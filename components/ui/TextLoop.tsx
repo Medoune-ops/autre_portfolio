@@ -43,6 +43,7 @@ interface Metrics {
   reps: number;
   crossLength: number;
   crossReps: number;
+  unitWidth: number;
 }
 
 interface FadeStop {
@@ -193,7 +194,7 @@ const TextLoop = ({
   const crossTailRef = useRef<SVGTextPathElement | null>(null);
   const progressRef = useRef(0);
 
-  const [metrics, setMetrics] = useState<Metrics>({ length: 0, reps: 1, crossLength: 0, crossReps: 1 });
+  const [metrics, setMetrics] = useState<Metrics>({ length: 0, reps: 1, crossLength: 0, crossReps: 1, unitWidth: 0 });
 
   const rawId = useId();
   const pathId = `text-loop-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
@@ -254,13 +255,14 @@ const TextLoop = ({
       }
       if (!length) return;
 
-      const repsFor = (total: number) => (unitWidth > 0 ? Math.max(1, Math.round(total / unitWidth)) : 1);
-      const next = { length, reps: repsFor(length), crossLength, crossReps: repsFor(crossLength) };
+      const repsFor = (total: number) => (unitWidth > 0 ? Math.max(2, Math.ceil(total / unitWidth) + 1) : 1);
+      const next = { length, reps: repsFor(length), crossLength, crossReps: repsFor(crossLength), unitWidth };
       setMetrics(prev =>
         prev.length === next.length &&
         prev.reps === next.reps &&
         prev.crossLength === next.crossLength &&
-        prev.crossReps === next.crossReps
+        prev.crossReps === next.crossReps &&
+        prev.unitWidth === next.unitWidth
           ? prev
           : next
       );
@@ -480,8 +482,8 @@ const TextLoop = ({
 
   const loopText = unit.repeat(metrics.reps);
   const crossText = unit.repeat(metrics.crossReps);
-  const fitLength = metrics.length || undefined;
-  const crossFit = metrics.crossLength || undefined;
+  const fitLength = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.reps : metrics.length || undefined;
+  const crossFit = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.crossReps : metrics.crossLength || undefined;
   const paint = (ink: string, opacity: number): SVGProps<SVGTextElement> =>
     outline
       ? {

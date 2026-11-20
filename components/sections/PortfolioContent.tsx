@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { NAV_LINKS, PROFILE, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
@@ -35,6 +36,17 @@ import {
   siTypescript,
   siVercel,
 } from "simple-icons";
+import {
+  CloudCog,
+  Code2,
+  Database,
+  Layers3,
+  PenTool,
+  ServerCog,
+  Smartphone,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
 
 const PROJECT_GALLERY_ITEMS = [
   {
@@ -91,6 +103,19 @@ const STACK_WHEEL_ITEMS: ToolWheelItem[] = [
   { label: "Figma", description: "Design d'interfaces", path: siFigma.path, fillRule: "nonzero" },
   { label: "Claude", description: "Assistant IA d'Anthropic", path: siClaude.path, fillRule: "nonzero" },
 ];
+
+const SKILL_GROUP_ICONS: Record<string, LucideIcon> = {
+  Langages: Code2,
+  "Frameworks & bibliothèques": Layers3,
+  "Backend & API": ServerCog,
+  Mobile: Smartphone,
+  "Bases de données": Database,
+  "Infra / DevOps & outils": CloudCog,
+  Design: PenTool,
+  IA: Sparkles,
+};
+
+const TOTAL_SKILLS = SKILL_GROUPS.reduce((total, group) => total + group.items.length, 0);
 
 const ALL_STACKS_TEXT = SKILL_GROUPS.flatMap((group) => group.items).join(" ✦ ");
 
@@ -184,6 +209,8 @@ function SectionTitle({
 
 export function PortfolioContent({ active = true }: { active?: boolean }) {
   const year = new Date().getFullYear();
+  const [activeStack, setActiveStack] = useState(0);
+  const activeStackItem = STACK_WHEEL_ITEMS[activeStack] ?? STACK_WHEEL_ITEMS[0];
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
@@ -446,12 +473,17 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${CONTAINER} relative`}>
-            <div className="mx-auto mb-8 max-w-2xl text-center">
-              <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Expertise</p>
+            <div className="mx-auto mb-10 max-w-3xl text-center">
+              <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
+                Expertise
+                <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
+                <span className="text-neon">Stack &amp; outils</span>
+              </span>
               <SectionTitle
                 as="h2"
                 text="Compétences"
-                className="mt-3"
+                className="mt-5"
                 fontSize={52}
                 fontWeight={700}
                 letterSpacing={-1.5}
@@ -465,52 +497,154 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
                 Les technologies et outils que j’utilise pour concevoir des interfaces rapides, immersives et cohérentes.
               </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ice/40">
+                <span>{STACK_WHEEL_ITEMS.length} technologies</span>
+                <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
+                <span>{SKILL_GROUPS.length} catégories</span>
+                <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
+                <span>Veille continue</span>
+              </div>
             </div>
-            <div className="h-[440px] w-full sm:h-[540px] lg:h-[620px]">
-              <ToolWheel
-                items={STACK_WHEEL_ITEMS}
-                showDetails
-                eyebrow=""
-                title=""
-                subtitle=""
-                background="#f1f5f9"
-                surface="#ffffff"
-                color="#0f172a"
-                mutedColor="rgba(15,23,42,0.72)"
-                accent="#475569"
-                signal="#334155"
-                lineColor="rgba(15,23,42,0.12)"
-                frame={false}
-                autoplay
-                pauseOnHover
+            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/60 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] backdrop-blur-md">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 opacity-60"
+                style={{
+                  backgroundImage: "radial-gradient(circle, rgba(15,23,42,0.16) 1px, transparent 1px)",
+                  backgroundSize: "24px 24px",
+                  WebkitMaskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
+                  maskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
+                }}
               />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background: "radial-gradient(ellipse 58% 52% at 50% 46%, rgba(71,85,105,0.12), transparent 72%)",
+                }}
+              />
+
+              <div className="relative flex items-center justify-between gap-4 border-b border-slate-900/[0.08] px-5 py-3.5 sm:px-7">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2 w-2" aria-hidden="true">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-40" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-neon" />
+                  </span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ice/60">
+                    Carte des stacks
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ice/40 sm:text-[10px]">
+                  <span className="hidden sm:inline">Rotation automatique</span>
+                  <span className="hidden h-3 w-px bg-slate-900/10 sm:inline" aria-hidden="true" />
+                  <span className="sm:hidden">{STACK_WHEEL_ITEMS.length}</span>
+                  <span className="hidden sm:inline">{STACK_WHEEL_ITEMS.length} technologies</span>
+                </div>
+              </div>
+
+              <div className="relative h-[440px] w-full sm:h-[540px] lg:h-[620px]">
+                <ToolWheel
+                  items={STACK_WHEEL_ITEMS}
+                  showDetails
+                  ariaLabel="Roue des stacks"
+                  onActiveChange={setActiveStack}
+                  eyebrow=""
+                  title=""
+                  subtitle=""
+                  background="transparent"
+                  surface="#ffffff"
+                  color="#0f172a"
+                  mutedColor="rgba(15,23,42,0.72)"
+                  accent="#475569"
+                  signal="#334155"
+                  lineColor="rgba(15,23,42,0.12)"
+                  frame={false}
+                  autoplay
+                  pauseOnHover
+                />
+              </div>
+
+              <div className="relative flex flex-col gap-3 border-t border-slate-900/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div className="flex min-w-0 items-baseline gap-2.5">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ice/40">Sélection</span>
+                  <span className="truncate text-sm font-semibold text-ice">{activeStackItem.label}</span>
+                  <span className="hidden truncate text-xs text-ice/50 md:inline">{activeStackItem.description}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-[2px]" aria-hidden="true">
+                    {STACK_WHEEL_ITEMS.map((item, index) => (
+                      <span
+                        key={item.label}
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          index === activeStack ? "w-4 bg-neon" : "w-[3px] bg-slate-900/20"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-mono text-[10px] tabular-nums text-ice/50">
+                    {String(activeStack + 1).padStart(2, "0")} / {String(STACK_WHEEL_ITEMS.length).padStart(2, "0")}
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {SKILL_GROUPS.map((group) => (
-                <div
-                  key={group.title}
-                  className="group rounded-2xl border border-slate-900/10 bg-white/75 p-6 shadow-soft backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-glow"
-                >
-                  <h3 className="text-sm font-semibold tracking-wide text-ice uppercase">{group.title}</h3>
-                  <ul className="mt-4 flex flex-wrap gap-2">
-                    {group.items.map((item) => (
-                      <li
-                        key={item}
-                        className="rounded-lg border border-slate-900/10 bg-white/80 px-3 py-1.5 text-sm font-medium text-ice/80 transition-colors duration-200 group-hover:border-slate-900/15"
-                      >
-                        <BlurText
-                          as="span"
-                          text={item}
-                          delay={40}
-                          animateBy="words"
-                          direction="top"
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+            <div className="mt-14 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">Vue détaillée</p>
+                <h3 className="mt-1 text-lg font-semibold tracking-tight text-ice">Les outils, par catégorie</h3>
+              </div>
+              <p className="text-xs text-ice/50">{TOTAL_SKILLS} compétences référencées</p>
+            </div>
+
+            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              {SKILL_GROUPS.map((group, groupIndex) => {
+                const Icon = SKILL_GROUP_ICONS[group.title] ?? Code2;
+                return (
+                  <div
+                    key={group.title}
+                    className="group relative overflow-hidden rounded-2xl border border-slate-900/10 bg-white/70 p-5 shadow-soft backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:bg-white/90 hover:shadow-glow"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-900/20 to-transparent"
+                    />
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-900/10 bg-slate-900/[0.035] text-neon transition-colors duration-300 group-hover:bg-neon group-hover:text-white">
+                          <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
+                        </span>
+                        <div>
+                          <h3 className="text-[13px] font-semibold leading-tight tracking-wide text-ice uppercase">
+                            {group.title}
+                          </h3>
+                          <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-ice/40">
+                            {group.items.length} outils
+                          </p>
+                        </div>
+                      </div>
+                      <span className="rounded-full border border-slate-900/10 bg-white/70 px-2 py-0.5 font-mono text-[9px] tabular-nums text-ice/50">
+                        {String(groupIndex + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <ul className="mt-4 flex flex-wrap gap-1.5">
+                      {group.items.map((item) => (
+                        <li
+                          key={item}
+                          className="rounded-lg border border-slate-900/[0.08] bg-white/70 px-2.5 py-1 text-[13px] font-medium leading-5 text-ice/75 transition-colors duration-200 group-hover:border-slate-900/20 group-hover:bg-white/90"
+                        >
+                          <BlurText
+                            as="span"
+                            text={item}
+                            delay={40}
+                            animateBy="words"
+                            direction="top"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
 
             <dl className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-slate-900/10 rounded-2xl border border-slate-900/10 bg-white/75 py-6 shadow-soft backdrop-blur-sm">

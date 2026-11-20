@@ -34,6 +34,8 @@ export interface ToolWheelProps {
   pauseOnHover?: boolean;
   /** Show the active tool's name and description in the hub. */
   showDetails?: boolean;
+  /** Accessible name for the wheel. Falls back to the title. */
+  ariaLabel?: string;
   /** Small caps label above the title, between two accent squares. Empty hides it. */
   eyebrow?: string;
   /** Serif headline. Empty hides it. */
@@ -138,6 +140,7 @@ export function ToolWheel({
   interval = 2.2,
   pauseOnHover = true,
   showDetails = false,
+  ariaLabel,
   eyebrow = "CONNECTIONS",
   title = "Every tool. One shared workspace.",
   subtitle = "Plug the apps your team already works in into one shared view. Less switching. More time on the work itself.",
@@ -572,7 +575,7 @@ export function ToolWheel({
       tabIndex={0}
       role="group"
       aria-roledescription="tool wheel"
-      aria-label={title || "Tools"}
+      aria-label={ariaLabel || title || "Tools"}
       onKeyDown={(e) => {
         const L = live.current;
         if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -695,6 +698,19 @@ export function ToolWheel({
             textWrap: "balance",
           } as React.CSSProperties}
         >
+          <span
+            style={{
+              fontFamily: monoFont,
+              fontSize: Math.max(7.5, 8.5 * k),
+              lineHeight: 1,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: mutedColor,
+              opacity: 0.75,
+            }}
+          >
+            {String(activeIndex + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
+          </span>
           <span
             style={{
               fontFamily: uiFont,

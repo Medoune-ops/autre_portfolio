@@ -26,10 +26,5 @@
 .site-bg__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(241, 245, 249, 0.38) 0%,
-    rgba(241, 245, 249, 0.3) 50%,
-    rgba(241, 245, 249, 0.38) 100%
-  );
+  background: rgba(241, 245, 249, 0.45);
 }

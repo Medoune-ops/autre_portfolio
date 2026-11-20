@@ -314,22 +314,21 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div className="relative">
             <TextLoop
               text={ALL_STACKS_TEXT}
-              shape="wave"
-              speed={90}
+              shape="line"
+              speed={80}
               direction="forward"
               separator="✦"
-              curviness={90}
               tilt={0}
-              fontSize={46}
-              fontWeight={800}
-              letterSpacing={2}
+              fontSize={40}
+              fontWeight={700}
+              letterSpacing={1.5}
               uppercase
+              color="#f8fafc"
               ribbon
-              ribbonColor="#475569"
-              ribbonWidth={86}
-              edgeFade={0}
+              ribbonColor="#334155"
+              ribbonWidth={96}
+              edgeFade={0.12}
               cross={false}
-              crossAngle={16}
               draggable={false}
               scrollBoost={0}
               outline={false}

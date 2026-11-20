@@ -7,9 +7,9 @@
   isolation: isolate;
   /* Repli visible si WebGPU n'est pas disponible : le canvas reste transparent. */
   background-image:
-    radial-gradient(120% 90% at 50% 12%, rgba(30, 144, 255, 0.38), transparent 62%),
-    radial-gradient(90% 80% at 18% 92%, rgba(124, 58, 237, 0.34), transparent 70%),
-    linear-gradient(158deg, #101a2e 0%, #0c0b10 58%, #0a0f1c 100%);
+    radial-gradient(120% 90% at 50% 12%, rgba(148, 163, 184, 0.25), transparent 62%),
+    radial-gradient(90% 80% at 18% 92%, rgba(56, 189, 248, 0.18), transparent 70%),
+    linear-gradient(158deg, #f8fafc 0%, #f1f5f9 58%, #e2e8f0 100%);
   background-size: cover;
   background-position: center;
 }

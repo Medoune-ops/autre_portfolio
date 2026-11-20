@@ -67,7 +67,7 @@ export function SplineScene({ scene, className, active = true }: SplineSceneProp
           />
         </Suspense>
         {!sceneReady && (
-          <div className="absolute inset-0 z-10 bg-[#0A0F1C]/40">
+          <div className="absolute inset-0 z-10 bg-[#f1f5f9]/40">
             <Spinner />
           </div>
         )}

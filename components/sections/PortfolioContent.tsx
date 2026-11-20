@@ -78,6 +78,89 @@ const FOCUS =
 
 const CONTAINER = "mx-auto w-full max-w-6xl px-6 lg:px-8";
 
+type SectionTitleProps = {
+  text: string;
+  as?: "h1" | "h2" | "h3" | "p";
+  id?: string;
+  className?: string;
+  fontSize?: number;
+  fontWeight?: number;
+  letterSpacing?: number;
+  strokeWidth?: number;
+  drawDuration?: number;
+  fillDelay?: number;
+  fillDuration?: number;
+  stagger?: number;
+  trigger?: "mount" | "scroll";
+  showOverlay?: boolean;
+};
+
+function SectionTitle({
+  text,
+  as: Tag = "h2",
+  id,
+  className = "",
+  fontSize = 56,
+  fontWeight = 700,
+  letterSpacing = -2,
+  strokeWidth = 1.4,
+  drawDuration = 2.0,
+  fillDelay = 0.7,
+  fillDuration = 2.8,
+  stagger = 0.05,
+  trigger = "scroll",
+  showOverlay = true,
+}: SectionTitleProps) {
+  return (
+    <Tag id={id} className={`relative ${className}`}>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true" className="block">
+        <StrokeText
+          text={text}
+          strokeColor="transparent"
+          strokeWidth={0}
+          fillColor="#94a3b8"
+          fillMode="fade"
+          drawDuration={0.01}
+          fillDelay={0}
+          trigger="mount"
+          fontSize={fontSize}
+          fontWeight={fontWeight}
+          letterSpacing={letterSpacing}
+          hoverRedraw={false}
+          shadow={false}
+        />
+      </span>
+      {showOverlay && (
+        <span aria-hidden="true" className="absolute inset-0 block">
+          <StrokeText
+            text={text}
+            strokeColor="#94a3b8"
+            fillColor="#020617"
+            strokeStyle="solid"
+            strokeWidth={strokeWidth}
+            dashLength={10}
+            drawDuration={drawDuration}
+            fillDelay={fillDelay}
+            fillDuration={fillDuration}
+            stagger={stagger}
+            ease="power2.out"
+            trigger={trigger}
+            fillMode="wipe"
+            wipeFrom="left"
+            fontSize={fontSize}
+            fontWeight={fontWeight}
+            letterSpacing={letterSpacing}
+            marching={false}
+            hoverRedraw={true}
+            shadow={false}
+          />
+        </span>
+      )}
+    </Tag>
+  );
+}
+
 export function PortfolioContent({ active = true }: { active?: boolean }) {
   const year = new Date().getFullYear();
 
@@ -160,98 +243,37 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 />
               </p>
 
-              <h1 id="accueil-titre" className="relative mt-7">
-                <span className="sr-only">{PROFILE.name}</span>
-                <span aria-hidden="true" className="block">
-                  <StrokeText
-                    text={PROFILE.name}
-                    strokeColor="transparent"
-                    strokeWidth={0}
-                    fillColor="#94a3b8"
-                    fillMode="fade"
-                    drawDuration={0.01}
-                    fillDelay={0}
-                    trigger="mount"
-                    fontSize={128}
-                    fontWeight={800}
-                    letterSpacing={-4}
-                    hoverRedraw={false}
-                    shadow={false}
-                  />
-                </span>
-                {active && (
-                  <span aria-hidden="true" className="absolute inset-0 block">
-                    <StrokeText
-                      text={PROFILE.name}
-                      strokeColor="#94a3b8"
-                      fillColor="#020617"
-                      strokeStyle="solid"
-                      strokeWidth={1.6}
-                      dashLength={10}
-                      drawDuration={2.2}
-                      fillDelay={0.8}
-                      fillDuration={3.2}
-                      stagger={0.06}
-                      ease="power2.out"
-                      trigger="mount"
-                      fillMode="wipe"
-                      wipeFrom="left"
-                      fontSize={128}
-                      fontWeight={800}
-                      letterSpacing={-4}
-                      marching={false}
-                      hoverRedraw={true}
-                      shadow={false}
-                    />
-                  </span>
-                )}
-              </h1>
-              <p className="relative mt-3">
-                <span className="sr-only">{PROFILE.role}</span>
-                <span aria-hidden="true" className="block">
-                  <StrokeText
-                    text={PROFILE.role}
-                    strokeColor="transparent"
-                    strokeWidth={0}
-                    fillColor="#94a3b8"
-                    fillMode="fade"
-                    drawDuration={0.01}
-                    fillDelay={0}
-                    trigger="mount"
-                    fontSize={54}
-                    fontWeight={700}
-                    letterSpacing={-1}
-                    hoverRedraw={false}
-                    shadow={false}
-                  />
-                </span>
-                {active && (
-                  <span aria-hidden="true" className="absolute inset-0 block">
-                    <StrokeText
-                      text={PROFILE.role}
-                      strokeColor="#94a3b8"
-                      fillColor="#020617"
-                      strokeStyle="solid"
-                      strokeWidth={1.2}
-                      dashLength={10}
-                      drawDuration={2.0}
-                      fillDelay={1.0}
-                      fillDuration={3.0}
-                      stagger={0.03}
-                      ease="power2.out"
-                      trigger="mount"
-                      fillMode="wipe"
-                      wipeFrom="left"
-                      fontSize={54}
-                      fontWeight={700}
-                      letterSpacing={-1}
-                      marching={false}
-                      hoverRedraw={true}
-                      shadow={false}
-                    />
-                  </span>
-                )}
-              </p>
+              <SectionTitle
+                as="h1"
+                id="accueil-titre"
+                text={PROFILE.name}
+                className="mt-7"
+                fontSize={128}
+                fontWeight={800}
+                letterSpacing={-4}
+                strokeWidth={1.6}
+                drawDuration={2.2}
+                fillDelay={0.8}
+                fillDuration={3.2}
+                stagger={0.06}
+                trigger="mount"
+                showOverlay={active}
+              />
+              <SectionTitle
+                as="p"
+                text={PROFILE.role}
+                className="mt-3"
+                fontSize={54}
+                fontWeight={700}
+                letterSpacing={-1}
+                strokeWidth={1.2}
+                drawDuration={2.0}
+                fillDelay={1.0}
+                fillDuration={3.0}
+                stagger={0.03}
+                trigger="mount"
+                showOverlay={active}
+              />
               <p className="mt-7 max-w-2xl text-base leading-relaxed text-ice/90 sm:text-lg">
                 <TextType
                   as="span"
@@ -322,7 +344,21 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div className={`${CONTAINER} relative`}>
             <div className="max-w-2xl">
               <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Sélection</p>
-              <h2 id="projets-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Projets récents</h2>
+              <SectionTitle
+                as="h2"
+                id="projets-titre"
+                text="Projets récents"
+                className="mt-3 max-w-xl"
+                fontSize={52}
+                fontWeight={700}
+                letterSpacing={-1.5}
+                strokeWidth={1.3}
+                drawDuration={1.8}
+                fillDelay={0.5}
+                fillDuration={2.4}
+                stagger={0.04}
+                trigger="scroll"
+              />
               <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
                 <TextType
                   as="span"
@@ -352,7 +388,20 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/80 via-neon/5 to-neon2/10 p-8 shadow-soft backdrop-blur-sm transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">
                 <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
-                <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Une marque, une morsure</h3>
+                <SectionTitle
+                  as="h3"
+                  text="Une marque, une morsure"
+                  className="mt-3 max-w-md"
+                  fontSize={42}
+                  fontWeight={700}
+                  letterSpacing={-1}
+                  strokeWidth={1.2}
+                  drawDuration={1.8}
+                  fillDelay={0.5}
+                  fillDuration={2.4}
+                  stagger={0.04}
+                  trigger="scroll"
+                />
                 <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">
                   <TextType
                     as="span"
@@ -396,12 +445,32 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${CONTAINER} relative`}>
+            <div className="mx-auto mb-8 max-w-2xl text-center">
+              <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Expertise</p>
+              <SectionTitle
+                as="h2"
+                text="Compétences"
+                className="mt-3"
+                fontSize={52}
+                fontWeight={700}
+                letterSpacing={-1.5}
+                strokeWidth={1.3}
+                drawDuration={1.8}
+                fillDelay={0.5}
+                fillDuration={2.4}
+                stagger={0.04}
+                trigger="scroll"
+              />
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
+                Les technologies et outils que j’utilise pour concevoir des interfaces rapides, immersives et cohérentes.
+              </p>
+            </div>
             <div className="h-[440px] w-full sm:h-[540px] lg:h-[620px]">
               <ToolWheel
                 items={SKILL_WHEEL_ITEMS}
-                eyebrow="EXPERTISE"
-                title="Compétences"
-                subtitle="Les technologies et outils que j’utilise pour concevoir des interfaces rapides, immersives et cohérentes."
+                eyebrow=""
+                title=""
+                subtitle=""
                 background="#f1f5f9"
                 surface="#ffffff"
                 color="#0f172a"
@@ -490,7 +559,21 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-neon/40 to-transparent" />
               <div className="relative">
                 <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Contact</p>
-                <h2 id="contact-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Travaillons ensemble</h2>
+                <SectionTitle
+                  as="h2"
+                  id="contact-titre"
+                  text="Travaillons ensemble"
+                  className="mt-3"
+                  fontSize={52}
+                  fontWeight={700}
+                  letterSpacing={-1.5}
+                  strokeWidth={1.3}
+                  drawDuration={1.8}
+                  fillDelay={0.5}
+                  fillDuration={2.4}
+                  stagger={0.04}
+                  trigger="scroll"
+                />
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg">
                   <TextType
                     as="span"

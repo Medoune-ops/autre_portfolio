@@ -122,10 +122,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={active} />
           </div>
 
-          {/* Le voile de lisibilité global (site-bg) couvre toute la page ; dégradé discret conservé en bas du hero. */}
+          {/* Voile de lisibilité : dense sous le texte, plus léger à droite pour laisser voir la scène 3D. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg/30 to-transparent"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-bg/[0.88] via-bg/[0.78] to-bg/45 lg:bg-gradient-to-r lg:from-bg/[0.92] lg:via-bg/[0.72] lg:to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg/60 to-transparent"
           />
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>
@@ -253,6 +257,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
         {/* PROJETS */}
         <section id="projets" aria-labelledby="projets-titre" className="relative border-t border-white/10 py-20 sm:py-28">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
             <div className="max-w-2xl">
@@ -303,7 +308,8 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           aria-label="Compétences"
           className="relative border-t border-white/10 py-20 sm:py-28"
         >
-          <div className={`${CONTAINER}`}>
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
+          <div className={`${CONTAINER} relative`}>
             <div className="h-[440px] w-full sm:h-[540px] lg:h-[620px]">
               <ToolWheel
                 items={SKILL_WHEEL_ITEMS}
@@ -357,6 +363,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
         {/* CONTACT / FOOTER */}
         <section id="contact" aria-labelledby="contact-titre" className="relative border-t border-white/10 py-20 sm:py-28">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-neon2/10 to-transparent" />
           <div className={`${CONTAINER} relative`}>
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-8 text-center backdrop-blur sm:p-14">

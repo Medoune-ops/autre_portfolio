@@ -52,7 +52,11 @@ const config: Config = {
         background: "#f1f5f9",
       },
       borderColor: {
-        DEFAULT: "rgba(234, 246, 255, 0.12)",
+        DEFAULT: "rgba(15, 23, 42, 0.12)",
+      },
+      boxShadow: {
+        soft: "0 8px 30px rgba(15, 23, 42, 0.08)",
+        glow: "0 0 0 1px rgba(8, 145, 178, 0.12), 0 12px 40px rgba(8, 145, 178, 0.12)",
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "Segoe UI", "sans-serif"],

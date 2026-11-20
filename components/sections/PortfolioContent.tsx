@@ -81,22 +81,25 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   const year = new Date().getFullYear();
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/30">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-bg/70 backdrop-blur-xl">
-        <div className={`${CONTAINER} flex items-center justify-between gap-4 py-4`}>
+    <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
+      <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-bg/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
+        <div className={`${CONTAINER} flex items-center justify-between gap-4 py-3.5 sm:py-4`}>
           <a
             href="#accueil"
-            className={`flex items-center gap-2 text-sm font-semibold tracking-tight ${FOCUS}`}
+            className={`group flex items-center gap-2.5 rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
             aria-label={`Retour à l'accueil — ${PROFILE.name}`}
           >
-            <span className="h-2 w-2 rounded-full bg-neon shadow-[0_0_12px_2px_rgba(0,229,255,0.65)]" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-full bg-neon shadow-[0_0_14px_3px_rgba(8,145,178,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {PROFILE.name}
           </a>
           <nav aria-label="Navigation principale">
-            <ul className="flex items-center gap-3 text-xs sm:gap-7 sm:text-sm">
+            <ul className="flex items-center gap-1 text-xs sm:gap-2 sm:text-sm">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className={`rounded-md text-ice/75 transition-colors hover:text-ice ${FOCUS}`}>
+                  <a
+                    href={link.href}
+                    className={`rounded-full px-3 py-1.5 text-ice/75 transition-all duration-200 hover:bg-white/70 hover:text-ice hover:shadow-sm ${FOCUS}`}
+                  >
                     {link.label}
                   </a>
                 </li>
@@ -134,15 +137,15 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>
             <div className="pointer-events-auto max-w-xl">
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm text-ice/80 backdrop-blur">
-                <span className="relative flex h-2 w-2" aria-hidden="true">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-neon" />
+              <p className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/75 px-4 py-2 text-sm font-medium text-ice/85 shadow-sm backdrop-blur-md">
+                <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-neon" />
                 </span>
                 {PROFILE.availability}
               </p>
 
-              <h1 id="accueil-titre" className="relative mt-6">
+              <h1 id="accueil-titre" className="relative mt-7">
                 <span className="sr-only">{PROFILE.name}</span>
                 <span aria-hidden="true" className="block">
                   <StrokeText
@@ -234,29 +237,39 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   </span>
                 )}
               </p>
-              <p className="mt-6 text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>
-              <p className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg">{PROFILE.bio}</p>
+              <p className="mt-7 max-w-2xl text-base leading-relaxed text-ice/90 sm:text-lg">{PROFILE.tagline}</p>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">{PROFILE.bio}</p>
 
-              <div className="mt-9 flex flex-wrap items-center gap-3">
+              <div className="mt-10 flex flex-wrap items-center gap-4">
                 <a
                   href="#projets"
-                  className={`rounded-full bg-neon px-6 py-3 text-sm font-semibold text-bg shadow-[0_0_28px_-6px_rgba(0,229,255,0.8)] transition hover:bg-ice ${FOCUS}`}
+                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(8,145,178,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(8,145,178,0.75)] active:translate-y-0 ${FOCUS}`}
                 >
                   Voir les projets
+                  <span aria-hidden="true" className="ml-2 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
                 </a>
                 <a
                   href="#contact"
-                  className={`rounded-full border border-white/15 bg-bg/40 px-6 py-3 text-sm font-medium text-ice backdrop-blur transition hover:border-neon/50 hover:bg-white/5 ${FOCUS}`}
+                  className={`inline-flex items-center justify-center rounded-full border border-slate-900/15 bg-white/70 px-7 py-3.5 text-sm font-semibold text-ice shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-neon/40 hover:bg-white hover:shadow-md active:translate-y-0 ${FOCUS}`}
                 >
                   Me contacter
                 </a>
               </div>
             </div>
           </div>
+
+          <a
+            href="#projets"
+            className={`pointer-events-auto absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 rounded-full px-3 py-2 text-xs font-medium tracking-[0.18em] text-ice/60 uppercase transition-colors hover:text-ice sm:inline-flex ${FOCUS}`}
+            aria-label="Défiler vers les projets"
+          >
+            <span>Défiler</span>
+            <span aria-hidden="true" className="h-8 w-px bg-gradient-to-b from-neon/70 to-transparent" />
+          </a>
         </section>
 
         {/* PROJETS */}
-        <section id="projets" aria-labelledby="projets-titre" className="relative border-t border-white/10 py-20 sm:py-28">
+        <section id="projets" aria-labelledby="projets-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
@@ -275,7 +288,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
             </div>
 
-            <div className="mt-14 grid items-center gap-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neon/10 via-card/60 to-neon2/10 p-8 backdrop-blur sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
+            <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/80 via-neon/5 to-neon2/10 p-8 shadow-soft backdrop-blur-sm transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">
                 <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
                 <h3 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">Une marque, une morsure</h3>
@@ -288,7 +301,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   {["Masque SVG", "Shader WebGPU", "React Bits"].map((tag) => (
                     <li
                       key={tag}
-                      className="rounded-full border border-neon/20 bg-neon/5 px-3 py-1 text-xs font-medium text-neon"
+                      className="rounded-full border border-neon/25 bg-white/70 px-3 py-1.5 text-xs font-semibold text-neon shadow-sm"
                     >
                       {tag}
                     </li>
@@ -306,7 +319,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="competences"
           aria-label="Compétences"
-          className="relative border-t border-white/10 py-20 sm:py-28"
+          className="relative border-t border-slate-900/10 py-24 sm:py-32"
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${CONTAINER} relative`}>
@@ -329,16 +342,19 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
             </div>
 
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
+            <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
               {SKILL_GROUPS.map((group) => (
                 <div
                   key={group.title}
-                  className="rounded-2xl border border-white/10 bg-card/70 p-6 backdrop-blur transition hover:border-neon2/40"
+                  className="group rounded-2xl border border-slate-900/10 bg-white/75 p-6 shadow-soft backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-neon/30 hover:shadow-glow"
                 >
                   <h3 className="text-sm font-semibold tracking-wide text-ice uppercase">{group.title}</h3>
                   <ul className="mt-4 flex flex-wrap gap-2">
                     {group.items.map((item) => (
-                      <li key={item} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-ice/80">
+                      <li
+                        key={item}
+                        className="rounded-lg border border-slate-900/10 bg-white/80 px-3 py-1.5 text-sm font-medium text-ice/80 transition-colors duration-200 group-hover:border-slate-900/15"
+                      >
                         {item}
                       </li>
                     ))}
@@ -347,13 +363,13 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               ))}
             </div>
 
-            <dl className="mt-8 grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-gradient-to-r from-neon/10 via-card/60 to-neon2/10 py-6 backdrop-blur">
+            <dl className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-slate-900/10 rounded-2xl border border-slate-900/10 bg-white/75 py-6 shadow-soft backdrop-blur-sm">
               {STATS.map((stat) => (
-                <div key={stat.label} className="px-3 text-center sm:px-6">
+                <div key={stat.label} className="px-4 text-center sm:px-6">
                   <dt className="sr-only">{stat.label}</dt>
                   <dd>
-                    <span className="block text-2xl font-semibold text-ice sm:text-3xl">{stat.value}</span>
-                    <span className="mt-1 block text-xs text-ice/75 sm:text-sm">{stat.label}</span>
+                    <span className="block text-3xl font-semibold tracking-tight text-ice sm:text-4xl">{stat.value}</span>
+                    <span className="mt-2 block text-sm font-medium text-ice/70 sm:text-base">{stat.label}</span>
                   </dd>
                 </div>
               ))}
@@ -362,27 +378,28 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* CONTACT / FOOTER */}
-        <section id="contact" aria-labelledby="contact-titre" className="relative border-t border-white/10 py-20 sm:py-28">
+        <section id="contact" aria-labelledby="contact-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-neon2/10 to-transparent" />
           <div className={`${CONTAINER} relative`}>
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/70 p-8 text-center backdrop-blur sm:p-14">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/80 p-8 text-center shadow-soft backdrop-blur-sm sm:p-14">
               <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-neon/15 blur-[100px]" />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-neon/40 to-transparent" />
               <div className="relative">
                 <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Contact</p>
                 <h2 id="contact-titre" className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Travaillons ensemble</h2>
                 <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg">
                   Un projet, une idée ou simplement envie d&apos;échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement.
                 </p>
-                <div className="mt-8 flex flex-col items-center gap-5">
+                <div className="mt-9 flex flex-col items-center gap-5">
                   <a
                     href={`mailto:${PROFILE.email}`}
-                    className={`inline-flex items-center gap-2 rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-bg shadow-[0_0_32px_-8px_rgba(0,229,255,0.9)] transition hover:bg-ice ${FOCUS}`}
+                    className={`inline-flex items-center gap-2 rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(8,145,178,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(8,145,178,0.75)] active:translate-y-0 ${FOCUS}`}
                   >
                     {PROFILE.email}
                     <span aria-hidden="true">→</span>
                   </a>
-                  <p className="inline-flex items-center gap-2 text-sm text-ice/80">
+                  <p className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/70 px-4 py-2 text-sm text-ice/80 shadow-sm">
                     <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
                     {PROFILE.availability}
                   </p>
@@ -390,7 +407,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
             </div>
 
-            <footer className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-sm text-ice/75 sm:flex-row">
+            <footer className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-900/10 pt-8 text-sm text-ice/75 sm:flex-row">
               <p>
                 © {year} {PROFILE.name}. Tous droits réservés.
               </p>

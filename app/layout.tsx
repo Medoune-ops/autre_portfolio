@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Medoune Seck — Web Designer & Developer",
-  description: "Développeur & Designer diplômé Licence Génie Informatique. Full-stack, UI/UX Design et communication digitale.",
+  description: "Développeur & Designer full-stack, UI/UX Design et communication digitale.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

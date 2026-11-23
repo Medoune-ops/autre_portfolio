@@ -11,7 +11,7 @@ export const PROFILE = {
   fullName: "Medoune Seck",
   role: "Web Designer & Developer",
   tagline: "Génie Informatique · Full-Stack Development · UI/UX Design",
-  bio: "Développeur & Designer diplômé d'une Licence en Génie Informatique (Mention Bien). Maîtrise full-stack, design UI/UX et communication digitale. Autonome, rigoureux et orienté impact sur des projets tech ambitieux.",
+  bio: "Développeur & Designer. Maîtrise full-stack, design UI/UX et communication digitale. Autonome, rigoureux et orienté impact sur des projets tech ambitieux.",
   email: "smedoune16@gmail.com",
   phone: "+221 76 921 10 73",
   location: "Keur Massar, Dakar",

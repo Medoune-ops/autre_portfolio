@@ -51,19 +51,67 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
   ]
   const dc = domainColors[i % domainColors.length]
 
+  /* Métadonnées tech & IA pour chaque domaine */
+  const domainTechInfo = [
+    { code: "UI_MATRIX // 0x01", symbol: "⬡", badge: "FRONTEND", chip: "SYS.DOM", binary: "01000110" },
+    { code: "CORE_API // 0x02", symbol: "⚡", badge: "BACKEND", chip: "SYS.NODE", binary: "01000010" },
+    { code: "NATIVE_OS // 0x03", symbol: "◈", badge: "MOBILE", chip: "SYS.APP", binary: "01001101" },
+    { code: "DATA_LAKE // 0x04", symbol: "☵", badge: "STORAGE", chip: "SYS.SQL", binary: "01000100" },
+    { code: "CLOUD_OPS // 0x05", symbol: "⌘", badge: "DEVOPS", chip: "SYS.ENV", binary: "01001001" },
+    { code: "VECTOR_LAB // 0x06", symbol: "✦", badge: "CREATIVE", chip: "SYS.UIX", binary: "01010110" },
+    { code: "NEURAL_NET // 0x07", symbol: "⌬", badge: "AI_CORE", chip: "SYS.AI", binary: "01001001" },
+  ]
+  const tech = domainTechInfo[i % domainTechInfo.length]
+
   return (
     <motion.li aria-hidden={!active} aria-roledescription="étape" aria-label={`Étape ${i + 1} sur ${total} : ${s.title}`} className="absolute left-1/2 top-0 list-none" style={{ width: w, marginLeft: -w / 2, x, rotateY, scale, opacity, zIndex: zi }}>
       <div
         className="group relative overflow-hidden rounded-3xl border border-slate-900/[0.08] bg-white/90 p-6 backdrop-blur-xl transition-shadow duration-500 hover:shadow-[0_30px_60px_-20px_rgba(22,35,44,0.22)]"
         style={{ boxShadow: `0 26px 50px -24px ${dc.glow}, 0 0 0 1px rgba(120,154,153,0.08) inset` }}
       >
+        {/* Motifs HUD cybernétiques aux 4 coins */}
+        <span aria-hidden className="pointer-events-none absolute left-3 top-3 h-2.5 w-2.5 border-l-2 border-t-2 opacity-35" style={{ borderColor: dc.tagBg }} />
+        <span aria-hidden className="pointer-events-none absolute right-3 top-3 h-2.5 w-2.5 border-r-2 border-t-2 opacity-35" style={{ borderColor: dc.tagBg }} />
+        <span aria-hidden className="pointer-events-none absolute bottom-3 left-3 h-2.5 w-2.5 border-b-2 border-l-2 opacity-35" style={{ borderColor: dc.tagBg }} />
+        <span aria-hidden className="pointer-events-none absolute bottom-3 right-3 h-2.5 w-2.5 border-b-2 border-r-2 opacity-35" style={{ borderColor: dc.tagBg }} />
+
+        {/* Traces de circuits imprimés & réseau neuronal SVG en arrière-plan */}
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute -right-4 -top-4 h-64 w-64 opacity-20 transition-opacity duration-500 group-hover:opacity-35"
+          viewBox="0 0 240 240"
+          fill="none"
+        >
+          {/* Lignes de bus et pistes de circuits */}
+          <path d="M40 0 V45 L85 90 H170 L200 120 V240" stroke={dc.tagBg} strokeWidth="1.5" strokeDasharray="6 3" />
+          <path d="M120 0 V30 L160 70 H240" stroke={dc.tagBg} strokeWidth="1.5" />
+          <path d="M0 80 H60 L100 120 V180 L130 210 H240" stroke={dc.tagBg} strokeWidth="1.2" opacity="0.7" />
+          <path d="M180 0 V25 L215 60 V110" stroke={dc.tagBg} strokeWidth="1" opacity="0.6" />
+
+          {/* Nœuds neuronaux / points de soudure */}
+          <circle cx="85" cy="90" r="3.5" fill={dc.tagBg} />
+          <circle cx="170" cy="90" r="2.5" fill={dc.tagBg} />
+          <circle cx="160" cy="70" r="3" fill={dc.tagBg} />
+          <circle cx="100" cy="120" r="2.5" fill={dc.tagBg} />
+          <circle cx="130" cy="210" r="3" fill={dc.tagBg} />
+          <circle cx="40" cy="45" r="2" fill={dc.tagBg} />
+
+          {/* Schéma microprocesseur / Core IA */}
+          <rect x="180" y="140" width="36" height="36" rx="6" stroke={dc.tagBg} strokeWidth="1.5" />
+          <rect x="188" y="148" width="20" height="20" rx="3" fill={dc.tagBg} fillOpacity="0.18" stroke={dc.tagBg} strokeWidth="1" />
+          <path d="M174 147 H180 M174 153 H180 M174 159 H180 M174 165 H180" stroke={dc.tagBg} strokeWidth="1.5" />
+          <path d="M216 147 H222 M216 153 H222 M216 159 H222 M216 165 H222" stroke={dc.tagBg} strokeWidth="1.5" />
+          <path d="M187 134 V140 M193 134 V140 M201 134 V140 M207 134 V140" stroke={dc.tagBg} strokeWidth="1.5" />
+          <path d="M187 176 V182 M193 176 V182 M201 176 V182 M207 176 V182" stroke={dc.tagBg} strokeWidth="1.5" />
+        </svg>
+
         {/* Halo de fond subtil */}
         <div
           aria-hidden
           className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full opacity-40 blur-[80px] transition-opacity duration-500 group-hover:opacity-60"
           style={{ background: dc.gradient }}
         />
-        {/* Motif de points discret */}
+        {/* Motif de grille tech discret */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.04]"
@@ -73,26 +121,39 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
         {/* Grand numéro en arrière-plan */}
         <motion.span
           aria-hidden
-          className="pointer-events-none absolute -right-3 -top-8 select-none text-[140px] font-black leading-none tracking-tighter"
+          className="pointer-events-none absolute -right-3 -top-8 select-none font-mono text-[140px] font-black leading-none tracking-tighter"
           style={{ x: num, color: dc.glow, opacity: 0.5 }}
         >
           {i + 1}
         </motion.span>
 
-        {/* En-tête : icône + badge domaine */}
-        <div className="relative flex items-center gap-3.5">
-          <span
-            className="grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-lg"
-            style={{ background: dc.gradient, boxShadow: `0 8px 20px -6px ${dc.glow}` }}
-          >
-            {s.icon ?? <span className="text-sm font-bold">{i + 1}</span>}
-          </span>
-          <div className="min-w-0">
+        {/* En-tête : icône + badge domaine + télémétrie tech */}
+        <div className="relative flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
             <span
-              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white"
-              style={{ background: dc.gradient }}
+              className="grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+              style={{ background: dc.gradient, boxShadow: `0 8px 20px -6px ${dc.glow}` }}
             >
-              Domaine {i + 1}
+              {s.icon ?? <span className="text-sm font-bold">{i + 1}</span>}
+            </span>
+            <div className="min-w-0">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white"
+                style={{ background: dc.gradient }}
+              >
+                <span>{tech.symbol}</span>
+                <span>Domaine {i + 1}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Télémétrie Tech / IA */}
+          <div className="flex flex-col items-end text-right font-mono">
+            <span className="text-[10px] font-bold tracking-wider" style={{ color: dc.tagBg }}>
+              {tech.code}
+            </span>
+            <span className="text-[9px] uppercase tracking-[0.2em] text-[#16232c]/40">
+              {tech.badge} · {tech.binary}
             </span>
           </div>
         </div>
@@ -100,41 +161,49 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
         {/* Titre du domaine */}
         <h3 className="relative mt-4 text-xl font-bold tracking-tight text-[#16232c]">{s.title}</h3>
 
-        {/* Séparateur stylisé */}
-        <div className="relative mt-3 flex items-center gap-3">
-          <div className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, ${dc.tagBg}33, transparent)` }} />
-          <span className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: dc.tagBg }}>{s.tags?.length ?? 0} stacks</span>
-          <div className="h-[2px] flex-1 rounded-full" style={{ background: `linear-gradient(90deg, transparent, ${dc.tagBg}33)` }} />
+        {/* Séparateur stylisé tech avec métadonnées */}
+        <div className="relative mt-3 flex items-center gap-2.5 font-mono">
+          <div className="h-[1px] flex-1" style={{ background: `linear-gradient(90deg, ${dc.tagBg}40, transparent)` }} />
+          <span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.2em]" style={{ color: dc.tagBg }}>
+            <span className="opacity-60">{tech.symbol}</span>
+            <span>{s.tags?.length ?? 0} STACKS</span>
+            <span className="text-[#16232c]/30">{"///"}</span>
+            <span className="opacity-60">{tech.chip}</span>
+          </span>
+          <div className="h-[1px] flex-1" style={{ background: `linear-gradient(90deg, transparent, ${dc.tagBg}40)` }} />
         </div>
 
         {/* Description */}
         <p className="relative mt-3 text-sm leading-relaxed text-[#16232c]/70">{s.body}</p>
 
-        {/* Tags / Chips des stacks */}
+        {/* Tags / Chips des stacks avec glyphe tech */}
         {s.tags && s.tags.length > 0 && (
           <ul className="relative mt-4 flex flex-wrap gap-2">
             {s.tags.map((tag) => (
               <li
                 key={tag}
-                className="group/tag relative inline-flex items-center rounded-xl border px-3 py-1.5 text-[11px] font-semibold leading-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group/tag relative inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 font-mono text-[11px] font-medium leading-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                 style={{
                   borderColor: `${dc.tagBg}30`,
                   background: `linear-gradient(135deg, ${dc.tagBg}0A, ${dc.tagBg}14)`,
                   color: dc.tagBg,
                 }}
               >
-                {tag}
+                <span className="opacity-40 transition-opacity group-hover/tag:opacity-100" aria-hidden>
+                  ◈
+                </span>
+                <span className="font-sans font-semibold">{tag}</span>
               </li>
             ))}
           </ul>
         )}
 
-        {/* Barre d'accent en bas */}
-        <div
-          className="absolute bottom-0 left-6 right-6 h-[3px] rounded-t-full opacity-60"
-          style={{ background: dc.gradient }}
-          aria-hidden
-        />
+        {/* Ligne cybernétique et statut en bas */}
+        <div className="absolute bottom-0 left-6 right-6 flex items-center justify-between pb-1.5 pt-2 font-mono text-[8px] uppercase tracking-widest text-[#16232c]/30">
+          <div className="h-[2px] flex-1 rounded-full opacity-60" style={{ background: dc.gradient }} />
+          <span className="px-2.5">SYS.READY // {tech.chip}</span>
+          <div className="h-[2px] w-8 rounded-full opacity-60" style={{ background: dc.gradient }} />
+        </div>
       </div>
     </motion.li>
   )

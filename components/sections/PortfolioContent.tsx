@@ -286,11 +286,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>
             <div className="pointer-events-auto max-w-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-neon/20 bg-white/75 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-neon shadow-sm backdrop-blur">
+                Façonner des expériences web d&apos;impact
+              </span>
               <SectionTitle
                 as="h1"
                 id="accueil-titre"
                 text={PROFILE.name}
-                className="mt-7"
+                className="mt-5"
                 fontSize={128}
                 fontWeight={800}
                 letterSpacing={-4}
@@ -350,6 +353,18 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 </a>
                 <CVDownloadDropdown variant="hero" />
               </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-xs text-ice/65">
+                <span className="inline-flex items-center gap-1.5 font-medium">
+                  <span className="text-neon" aria-hidden="true">✦</span> Architecture Full-Stack
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium">
+                  <span className="text-neon" aria-hidden="true">✦</span> Design UI/UX Précis
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium">
+                  <span className="text-neon" aria-hidden="true">✦</span> 3D &amp; Performance
+                </span>
+              </div>
             </div>
           </div>
 
@@ -399,7 +414,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
             <div className="max-w-2xl">
-              <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Sélection</p>
+              <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Portfolio &amp; Réalisations</p>
               <SectionTitle
                 as="h2"
                 id="projets-titre"
@@ -417,7 +432,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
               <BlurText
                 as="p"
-                text="Des expériences pensées pour être rapides, accessibles et visuellement cohérentes — de la scène 3D au design system."
+                text="Donner vie aux idées : des réalisations où l'élégance du design visuel rencontre la puissance de l'ingénierie moderne."
                 className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg"
                 delay={50}
                 animateBy="words"
@@ -434,10 +449,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
             <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/80 via-neon/5 to-neon2/10 p-8 shadow-soft backdrop-blur-sm transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">
-                <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Signature</p>
+                <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Identité Visuelle &amp; Motion</p>
                 <SectionTitle
                   as="h3"
-                  text="Une marque, une morsure"
+                  text="Créativité &amp; Impact"
                   className="mt-3 max-w-md"
                   fontSize={42}
                   fontWeight={700}
@@ -451,7 +466,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 />
                 <BlurText
                   as="p"
-                  text="Un champ de formes animé par un shader WebGPU, découpé par un masque SVG : les vagues grises ne se révèlent qu'à l'intérieur de la morsure. Le même langage graphique appliqué à tout le portfolio."
+                  text="Créer une empreinte mémorable : l'alliance d'une direction artistique affûtée, d'effets visuels immersifs et d'une rigueur technique au service de chaque projet."
                   className="mt-4 text-base leading-relaxed text-ice/80 sm:text-lg"
                   delay={40}
                   animateBy="words"
@@ -485,9 +500,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                Expertise
+                Expertise Technique
                 <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
-                <span className="text-neon">Stack &amp; outils</span>
+                <span className="text-neon">Stack &amp; Outils</span>
               </span>
               <SectionTitle
                 as="h2"
@@ -504,14 +519,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 trigger="scroll"
               />
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
-                Les technologies et outils que j’utilise pour concevoir des interfaces rapides, immersives et cohérentes.
+                Un écosystème technologique complet et moderne — du pixel parfait sur le front-end à la fiabilité d&apos;une architecture backend performante et évolutive.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ice/40">
-                <span>{STACK_WHEEL_ITEMS.length} technologies</span>
+                <span>{STACK_WHEEL_ITEMS.length} technologies maîtrisées</span>
                 <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
-                <span>{SKILL_GROUPS.length} catégories</span>
+                <span>{SKILL_GROUPS.length} piliers d&apos;expertise</span>
                 <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
-                <span>Veille continue</span>
+                <span>Veille &amp; Innovation continue</span>
               </div>
             </div>
             <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/60 shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] backdrop-blur-md">
@@ -594,11 +609,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             </div>
 
             <div className="mt-14 flex flex-col items-center gap-2 text-center">
-              <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">
-                Vue détaillée
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-neon">
+                Maîtrise par domaine d&apos;intervention
               </p>
-              <p className="text-xs text-ice/50">
-                {TOTAL_SKILLS} compétences référencées · {SKILL_DOMAINS.length} domaines
+              <p className="max-w-xl text-sm leading-relaxed text-ice/70">
+                Du front-end réactif à l&apos;infrastructure cloud et l&apos;IA : explorez mon écosystème technologique étape par étape.
+              </p>
+              <p className="font-mono text-xs text-ice/40">
+                {TOTAL_SKILLS} compétences clés · {SKILL_DOMAINS.length} domaines spécialisés
               </p>
             </div>
 
@@ -621,9 +639,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
               <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                Parcours
+                Évolution &amp; Savoir-Faire
                 <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
-                <span className="text-neon">Formation</span>
+                <span className="text-neon">Parcours</span>
               </span>
               <SectionTitle
                 as="h2"
@@ -641,7 +659,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 trigger="scroll"
               />
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
-                Chaque livre est une étape de ma formation : clique sur une couverture pour ouvrir sa fiche, puis glisse l’ouvrage pour l’explorer.
+                Une progression méthodique guidée par la curiosité technique, la rigueur de l&apos;ingénierie et la passion constante de bâtir des solutions concrètes.
               </p>
             </div>
 
@@ -675,9 +693,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           id="contact"
           email={PROFILE.email}
           phone={PROFILE.phone}
-          title="Travaillons ensemble"
-          subtitle="Contact"
-          description="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."
+          title="Donnons vie à vos projets"
+          subtitle="Contact &amp; Collaboration"
+          description="Vous avez un projet innovant, un besoin en développement ou une vision à concrétiser ? Discutons-en et créons ensemble une expérience numérique d'exception."
           className="bg-bg/[0.72] py-24 sm:py-32"
         />
 

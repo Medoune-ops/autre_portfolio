@@ -899,14 +899,14 @@ export function BooksShowcase({
 
       SLOTS.hero = SLOTS.portrait
         ? [
-          { p: [-1.36, -0.58, -0.12], r: [-0.045, 0.4, 0.185], s: 1.25 },
-          { p: [0.2, -0.22, 0.6], r: [-0.05, -0.1, -0.035], s: 1.35 },
-          { p: [1.62, -0.62, -0.34], r: [-0.045, -0.42, -0.17], s: 1.25 },
+          { p: [-1.36, -1.03, -0.12], r: [-0.045, 0.4, 0.185], s: 1.25 },
+          { p: [0.2, -0.67, 0.6], r: [-0.05, -0.1, -0.035], s: 1.35 },
+          { p: [1.62, -1.07, -0.34], r: [-0.045, -0.42, -0.17], s: 1.25 },
         ]
         : [
-          { p: [-2.05, -0.58, -0.12], r: [-0.045, 0.4, 0.185], s: 1.22 },
-          { p: [0.25, -0.36, 0.6], r: [-0.05, -0.1, -0.035], s: 1.32 },
-          { p: [2.35, -0.64, -0.34], r: [-0.045, -0.42, -0.17], s: 1.22 },
+          { p: [-2.05, -1.03, -0.12], r: [-0.045, 0.4, 0.185], s: 1.22 },
+          { p: [0.25, -0.81, 0.6], r: [-0.05, -0.1, -0.035], s: 1.32 },
+          { p: [2.35, -1.09, -0.34], r: [-0.045, -0.42, -0.17], s: 1.22 },
         ];
 
       if (!showDetailPanel) {
@@ -1734,7 +1734,7 @@ export function BooksShowcase({
     >
       {/* hero word */}
       <div
-        className={`pointer-events-none absolute left-1/2 top-[18%] z-[5] -translate-x-1/2 select-none transition-all duration-500 ease-out ${heroWordVisible ? 'translate-y-0 opacity-100' : uiMode === 'hero' ? '-translate-y-0 translate-y-[60px] opacity-0' : '-translate-y-11 opacity-0'
+        className={`pointer-events-none absolute left-1/2 top-[9%] z-[1] -translate-x-1/2 select-none transition-all duration-500 ease-out ${heroWordVisible ? 'translate-y-0 opacity-100' : uiMode === 'hero' ? '-translate-y-0 translate-y-[60px] opacity-0' : '-translate-y-11 opacity-0'
           }`}
       >
         <span className="block whitespace-nowrap text-current text-[clamp(4.5rem,22.5cqw,18rem)] font-extrabold leading-[0.85] tracking-[-0.015em]">

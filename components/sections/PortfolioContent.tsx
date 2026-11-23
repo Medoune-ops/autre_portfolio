@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE, STATS } from "@/data/portfolio";
+import { FORMATION_BOOKS, NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
@@ -10,6 +10,7 @@ import TextLoop from "@/components/ui/TextLoop";
 import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
 import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
+import BooksShowcase from "@/components/ui/BooksShowcase";
 import {
   siAngular,
   siClaude,
@@ -615,24 +616,62 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
             </div>
 
-            <dl className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-slate-900/10 rounded-2xl border border-slate-900/10 bg-white/75 py-6 shadow-soft backdrop-blur-sm">
-              {STATS.map((stat) => (
-                <div key={stat.label} className="px-4 text-center sm:px-6">
-                  <dt className="sr-only">{stat.label}</dt>
-                  <dd>
-                    <span className="block text-3xl font-semibold tracking-tight text-ice sm:text-4xl">{stat.value}</span>
-                    <BlurText
-                      as="span"
-                      text={stat.label}
-                      className="mt-2 block text-sm font-medium text-ice/70 sm:text-base"
-                      delay={80}
-                      animateBy="words"
-                      direction="top"
-                    />
-                  </dd>
-                </div>
-              ))}
-            </dl>
+          </div>
+        </section>
+
+        {/* FORMATION — chaque livre = une étape du parcours */}
+        <section id="formation" aria-labelledby="formation-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
+          <div className={`${CONTAINER} relative`}>
+            <div className="mx-auto mb-10 max-w-3xl text-center">
+              <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
+                Parcours
+                <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
+                <span className="text-neon">Formation</span>
+              </span>
+              <SectionTitle
+                as="h2"
+                id="formation-titre"
+                text="Mon parcours"
+                className="mt-5"
+                fontSize={52}
+                fontWeight={700}
+                letterSpacing={-1.5}
+                strokeWidth={1.3}
+                drawDuration={1.8}
+                fillDelay={0.5}
+                fillDuration={2.4}
+                stagger={0.04}
+                trigger="scroll"
+              />
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
+                Chaque livre est une étape de ma formation : clique sur une couverture pour ouvrir sa fiche, puis glisse l’ouvrage pour l’explorer.
+              </p>
+            </div>
+
+            <div className="relative h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] sm:h-[700px]">
+              <BooksShowcase
+                books={FORMATION_BOOKS}
+                heroTitle="Parcours"
+                navTitle="Formation"
+                themeColors={{
+                  navy: "#141a32",
+                  pink: "#475569",
+                  cream: "#f8fafc",
+                  lav: "#cbd5e1",
+                  peri: "#94a3b8",
+                  bgLight: "#f8fafc",
+                  bgDark: "#0f172a",
+                  foregroundLight: "#0f172a",
+                  foregroundDark: "#f8fafc",
+                }}
+              />
+            </div>
+
+            <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ice/40">
+              {FORMATION_BOOKS.length} étapes · {FORMATION_BOOKS[0]?.year.split(" — ")[0]} — {FORMATION_BOOKS[FORMATION_BOOKS.length - 1]?.year}
+            </p>
           </div>
         </section>
 

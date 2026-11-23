@@ -134,6 +134,7 @@ const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
 
 const CONTAINER = "mx-auto w-full max-w-6xl px-6 lg:px-8";
+const FULL_CONTAINER = "mx-auto w-full px-4 sm:px-6 lg:px-8";
 
 type SectionTitleProps = {
   text: string;
@@ -280,14 +281,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
           <div className={`${CONTAINER} pointer-events-none relative z-10`}>
             <div className="pointer-events-auto max-w-xl">
-              <p className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/75 px-4 py-2 text-sm font-medium text-ice/85 shadow-sm backdrop-blur-md">
-                <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-60" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-neon" />
-                </span>
-                <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
-              </p>
-
               <SectionTitle
                 as="h1"
                 id="accueil-titre"
@@ -483,7 +476,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           className="relative border-t border-slate-900/10 py-24 sm:py-32"
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
-          <div className={`${CONTAINER} relative`}>
+          <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
               <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
@@ -553,7 +546,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 </div>
               </div>
 
-              <div className="relative h-[440px] w-full sm:h-[540px] lg:h-[620px]">
+              <div className="relative h-[60vh] min-h-[520px] w-full lg:h-[72vh]">
                 <ToolWheel
                   items={STACK_WHEEL_ITEMS}
                   showDetails
@@ -622,7 +615,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         {/* FORMATION — chaque livre = une étape du parcours */}
         <section id="formation" aria-labelledby="formation-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
-          <div className={`${CONTAINER} relative`}>
+          <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
               <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
@@ -650,7 +643,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </p>
             </div>
 
-            <div className="relative h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] sm:h-[700px]">
+            <div className="relative h-[70vh] min-h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] lg:h-[82vh]">
               <BooksShowcase
                 books={FORMATION_BOOKS}
                 heroTitle="Parcours"

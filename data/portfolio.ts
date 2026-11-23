@@ -157,7 +157,165 @@ function drawWrappedText(
   if (line) x.fillText(line, left, y);
 }
 
-function formationCover(title: string, school: string, year: string, bg: string, accent: string) {
+function drawBrainShape(x: CanvasRenderingContext2D, cx: number, cy: number, scale: number, color: string) {
+  x.save();
+  x.translate(cx, cy);
+  x.scale(scale, scale);
+  x.strokeStyle = color;
+  x.lineWidth = 2.6;
+  x.lineCap = "round";
+  x.lineJoin = "round";
+
+  // Silhouette des deux hémisphères.
+  x.beginPath();
+  x.moveTo(0, -78);
+  x.bezierCurveTo(-26, -104, -74, -100, -92, -66);
+  x.bezierCurveTo(-126, -62, -140, -20, -122, 8);
+  x.bezierCurveTo(-140, 40, -118, 78, -82, 76);
+  x.bezierCurveTo(-62, 98, -20, 96, 0, 76);
+  x.bezierCurveTo(20, 96, 62, 98, 82, 76);
+  x.bezierCurveTo(118, 78, 140, 40, 122, 8);
+  x.bezierCurveTo(140, -20, 126, -62, 92, -66);
+  x.bezierCurveTo(74, -100, 26, -104, 0, -78);
+  x.closePath();
+  x.stroke();
+
+  // Sillon central.
+  x.beginPath();
+  x.moveTo(0, -78);
+  x.lineTo(0, 76);
+  x.stroke();
+
+  // Circonvolutions, symétriques de chaque côté.
+  const folds = [
+    [-10, -58, -50, -70, -70, -44],
+    [-12, -28, -60, -34, -76, -10],
+    [-8, 2, -55, 2, -78, 24],
+    [-12, 32, -48, 38, -60, 60],
+    [-76, -60, -96, -38, -84, -14],
+    [-88, 12, -106, 32, -80, 52],
+  ];
+  folds.forEach(([x1, y1, cx1, cy1, cx2, cy2]) => {
+    [-1, 1].forEach((side) => {
+      x.beginPath();
+      x.moveTo(side * x1, y1);
+      x.bezierCurveTo(side * cx1, cy1, side * cx2, cy2, side * (cx2 + 8), cy2 + 12);
+      x.stroke();
+    });
+  });
+
+  // Tronc cérébral.
+  x.beginPath();
+  x.moveTo(-14, 76);
+  x.bezierCurveTo(-18, 100, -8, 118, 4, 124);
+  x.bezierCurveTo(18, 116, 20, 96, 14, 76);
+  x.stroke();
+
+  x.restore();
+}
+
+function drawCodeMotif(x: CanvasRenderingContext2D, w: number, h: number, color: string) {
+  x.save();
+  x.globalAlpha = 0.16;
+  x.fillStyle = color;
+  x.strokeStyle = color;
+  x.lineWidth = 2;
+  x.font = "700 44px ui-monospace, SFMono-Regular, Menlo, monospace";
+
+  const glyphs = ["</>", "{ }", "[ ]", "=>", "//", "01", "#", "()"];
+  const spots = [
+    [w - 320, 250],
+    [w - 210, 430],
+    [w - 350, 630],
+    [90, h - 430],
+    [230, h - 370],
+    [w - 270, h - 470],
+  ];
+  spots.forEach(([sx, sy], i) => x.fillText(glyphs[i % glyphs.length], sx, sy));
+
+  const nodes = [
+    [w - 150, 300],
+    [w - 250, 370],
+    [w - 300, 480],
+    [w - 190, 560],
+  ];
+  x.beginPath();
+  nodes.forEach(([nx, ny], i) => (i ? x.lineTo(nx, ny) : x.moveTo(nx, ny)));
+  x.stroke();
+  nodes.forEach(([nx, ny]) => {
+    x.beginPath();
+    x.arc(nx, ny, 7, 0, Math.PI * 2);
+    x.fill();
+  });
+  x.restore();
+}
+
+function drawCircuitMotif(x: CanvasRenderingContext2D, w: number, h: number, color: string) {
+  x.save();
+  x.globalAlpha = 0.2;
+  x.strokeStyle = color;
+  x.fillStyle = color;
+  x.lineWidth = 2;
+
+  const chipX = w - 330;
+  const chipY = 280;
+  const chipSize = 170;
+  x.strokeRect(chipX, chipY, chipSize, chipSize);
+  x.strokeRect(chipX + 42, chipY + 42, chipSize - 84, chipSize - 84);
+  for (let i = 0; i < 5; i++) {
+    const py = chipY + 24 + i * 30;
+    x.beginPath();
+    x.moveTo(chipX - 34, py);
+    x.lineTo(chipX, py);
+    x.stroke();
+    x.beginPath();
+    x.moveTo(chipX + chipSize, py);
+    x.lineTo(chipX + chipSize + 34, py);
+    x.stroke();
+  }
+
+  const traces = [
+    [
+      [chipX - 34, chipY + 24],
+      [90, chipY + 24],
+      [90, chipY + 150],
+    ],
+    [
+      [chipX + chipSize + 34, chipY + 114],
+      [w - 60, chipY + 114],
+      [w - 60, chipY + 240],
+    ],
+    [
+      [chipX + 40, chipY + chipSize],
+      [chipX + 40, chipY + chipSize + 120],
+      [w - 150, chipY + chipSize + 120],
+    ],
+  ];
+  traces.forEach((path) => {
+    x.beginPath();
+    path.forEach(([px, py], i) => (i ? x.lineTo(px, py) : x.moveTo(px, py)));
+    x.stroke();
+    const [endX, endY] = path[path.length - 1];
+    x.beginPath();
+    x.arc(endX, endY, 8, 0, Math.PI * 2);
+    x.fill();
+  });
+
+  x.font = "600 26px ui-monospace, SFMono-Regular, Menlo, monospace";
+  x.fillText("CPU", chipX + 60, chipY + 92);
+  x.restore();
+}
+
+type CoverMotif = "code" | "circuit" | "brain";
+
+function formationCover(
+  title: string,
+  school: string,
+  year: string,
+  bg: string,
+  accent: string,
+  motif: CoverMotif = "code",
+) {
   return (x: CanvasRenderingContext2D, w: number, h: number) => {
     const gradient = x.createLinearGradient(0, 0, w, h);
     gradient.addColorStop(0, bg);
@@ -175,6 +333,17 @@ function formationCover(title: string, school: string, year: string, bg: string,
       x.stroke();
     }
     x.restore();
+
+    if (motif === "code") {
+      drawCodeMotif(x, w, h, accent);
+    } else if (motif === "circuit") {
+      drawCircuitMotif(x, w, h, accent);
+    } else {
+      x.save();
+      x.globalAlpha = 0.32;
+      drawBrainShape(x, w * 0.5, h * 0.52, 1.7, accent);
+      x.restore();
+    }
 
     x.fillStyle = accent;
     x.fillRect(84, 104, 116, 8);
@@ -221,6 +390,7 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "2023 — En cours",
       "#1d3b5c",
       "#6dd6ff",
+      "code",
     ),
     edge: "#dfe8f0",
     backBg: "#1d3b5c",
@@ -243,6 +413,7 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "2022 — 2025",
       "#3b2359",
       "#e3a8ff",
+      "circuit",
     ),
     edge: "#eadff2",
     backBg: "#3b2359",
@@ -264,6 +435,7 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "2021",
       "#0f463f",
       "#7de3c1",
+      "brain",
     ),
     edge: "#dcece6",
     backBg: "#0f463f",

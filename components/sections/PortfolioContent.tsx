@@ -11,6 +11,7 @@ import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
 import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 import BooksShowcase from "@/components/ui/BooksShowcase";
+import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import {
   siAngular,
   siClaude,
@@ -668,65 +669,29 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           </div>
         </section>
 
-        {/* CONTACT / FOOTER */}
-        <section id="contact" aria-labelledby="contact-titre" className="relative py-24 sm:py-32">
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-neon2/10 to-transparent" />
-          <div className={`${CONTAINER} relative`}>
-            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/80 p-8 text-center shadow-soft backdrop-blur-sm sm:p-14">
-              <div aria-hidden="true" className="pointer-events-none absolute -top-24 left-1/2 h-64 w-[32rem] -translate-x-1/2 rounded-full bg-neon/15 blur-[100px]" />
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-neon/40 to-transparent" />
-              <div className="relative">
-                <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Contact</p>
-                <SectionTitle
-                  as="h2"
-                  id="contact-titre"
-                  text="Travaillons ensemble"
-                  className="mt-3"
-                  fontSize={52}
-                  fontWeight={700}
-                  letterSpacing={-1.5}
-                  strokeWidth={1.3}
-                  drawDuration={1.8}
-                  fillDelay={0.5}
-                  fillDuration={2.4}
-                  stagger={0.04}
-                  trigger="scroll"
-                />
-                <BlurText
-                  as="p"
-                  text="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."
-                  className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ice/80 sm:text-lg"
-                  delay={50}
-                  animateBy="words"
-                  direction="top"
-                />
-                <div className="mt-9 flex flex-col items-center gap-5">
-                  <a
-                    href={`mailto:${PROFILE.email}`}
-                    className={`inline-flex items-center gap-2 rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(71,85,105,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(71,85,105,0.75)] active:translate-y-0 ${FOCUS}`}
-                  >
-                    {PROFILE.email}
-                    <span aria-hidden="true">→</span>
-                  </a>
-                  <p className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/70 px-4 py-2 text-sm text-ice/80 shadow-sm">
-                    <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
-                    <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* CONTACT */}
+        <ContactWithGlobe
+          id="contact"
+          email={PROFILE.email}
+          title="Travaillons ensemble"
+          subtitle="Contact"
+          description="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."
+          className="bg-bg/[0.72] py-24 sm:py-32"
+        />
 
-            <footer className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-900/10 pt-8 text-sm text-ice/75 sm:flex-row">
-              <p>
-                © {year} {PROFILE.name}. Tous droits réservés.
-              </p>
-              <a href="#accueil" className={`rounded-md transition-colors hover:text-ice ${FOCUS}`}>
-                Retour en haut ↑
-              </a>
-            </footer>
-          </div>
-        </section>
+        {/* FOOTER */}
+        <footer className={`${CONTAINER} relative flex flex-col items-center justify-between gap-5 py-10 text-sm text-ice/75 sm:flex-row`}>
+          <p>
+            © {year} {PROFILE.name}. Tous droits réservés.
+          </p>
+          <p className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/70 px-4 py-2 text-sm text-ice/80 shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
+            <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
+          </p>
+          <a href="#accueil" className={`rounded-md transition-colors hover:text-ice ${FOCUS}`}>
+            Retour en haut ↑
+          </a>
+        </footer>
       </main>
     </div>
   );

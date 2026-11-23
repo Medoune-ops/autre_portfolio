@@ -9,16 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-separator": "^1.2.0",
+    "@radix-ui/react-slot": "^1.5.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.17.14",
     "@react-three/postprocessing": "^2.16.3",
     "@splinetool/react-spline": "^4.2.0",
     "@splinetool/runtime": "^2.0.196",
+    "@types/d3": "^7.4.3",
+    "@types/topojson-client": "^3.1.5",
+    "@types/topojson-specification": "^1.0.5",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3": "^7.9.2",
     "framer-motion": "^14.14.0",
     "gsap": "^3.12.5",
     "lenis": "^1.1.20",
     "lucide-react": "^1.76.0",
+    "motion": "^14.14.0",
     "next": "14.2.35",
     "postprocessing": "^6.36.6",
     "react": "^18.3.1",
@@ -26,6 +34,7 @@
     "simple-icons": "^16.38.0",
     "tailwind-merge": "^3.7.0",
     "three": "^0.170.0",
+    "topojson-client": "^3.1.0",
     "vgpu": "^0.5.0"
   },
   "devDependencies": {

@@ -162,7 +162,7 @@ function drawBrainShape(x: CanvasRenderingContext2D, cx: number, cy: number, sca
   x.translate(cx, cy);
   x.scale(scale, scale);
   x.strokeStyle = color;
-  x.lineWidth = 2.6;
+  x.lineWidth = 3.4;
   x.lineCap = "round";
   x.lineJoin = "round";
 
@@ -216,20 +216,20 @@ function drawBrainShape(x: CanvasRenderingContext2D, cx: number, cy: number, sca
 
 function drawCodeMotif(x: CanvasRenderingContext2D, w: number, h: number, color: string) {
   x.save();
-  x.globalAlpha = 0.16;
+  x.globalAlpha = 0.55;
   x.fillStyle = color;
   x.strokeStyle = color;
-  x.lineWidth = 2;
-  x.font = "700 44px ui-monospace, SFMono-Regular, Menlo, monospace";
+  x.lineWidth = 3;
+  x.font = "700 52px ui-monospace, SFMono-Regular, Menlo, monospace";
 
   const glyphs = ["</>", "{ }", "[ ]", "=>", "//", "01", "#", "()"];
   const spots = [
-    [w - 320, 250],
-    [w - 210, 430],
-    [w - 350, 630],
-    [90, h - 430],
-    [230, h - 370],
-    [w - 270, h - 470],
+    [w - 340, 250],
+    [w - 310, 640],
+    [w - 370, 790],
+    [90, h - 470],
+    [250, h - 400],
+    [w - 290, h - 560],
   ];
   spots.forEach(([sx, sy], i) => x.fillText(glyphs[i % glyphs.length], sx, sy));
 
@@ -244,7 +244,7 @@ function drawCodeMotif(x: CanvasRenderingContext2D, w: number, h: number, color:
   x.stroke();
   nodes.forEach(([nx, ny]) => {
     x.beginPath();
-    x.arc(nx, ny, 7, 0, Math.PI * 2);
+    x.arc(nx, ny, 10, 0, Math.PI * 2);
     x.fill();
   });
   x.restore();
@@ -252,13 +252,13 @@ function drawCodeMotif(x: CanvasRenderingContext2D, w: number, h: number, color:
 
 function drawCircuitMotif(x: CanvasRenderingContext2D, w: number, h: number, color: string) {
   x.save();
-  x.globalAlpha = 0.2;
+  x.globalAlpha = 0.5;
   x.strokeStyle = color;
   x.fillStyle = color;
-  x.lineWidth = 2;
+  x.lineWidth = 3;
 
   const chipX = w - 330;
-  const chipY = 280;
+  const chipY = 620;
   const chipSize = 170;
   x.strokeRect(chipX, chipY, chipSize, chipSize);
   x.strokeRect(chipX + 42, chipY + 42, chipSize - 84, chipSize - 84);
@@ -301,8 +301,8 @@ function drawCircuitMotif(x: CanvasRenderingContext2D, w: number, h: number, col
     x.fill();
   });
 
-  x.font = "600 26px ui-monospace, SFMono-Regular, Menlo, monospace";
-  x.fillText("CPU", chipX + 60, chipY + 92);
+  x.font = "700 32px ui-monospace, SFMono-Regular, Menlo, monospace";
+  x.fillText("CPU", chipX + 56, chipY + 94);
   x.restore();
 }
 
@@ -340,8 +340,8 @@ function formationCover(
       drawCircuitMotif(x, w, h, accent);
     } else {
       x.save();
-      x.globalAlpha = 0.32;
-      drawBrainShape(x, w * 0.5, h * 0.52, 1.7, accent);
+      x.globalAlpha = 0.55;
+      drawBrainShape(x, w * 0.5, h * 0.52, 1.8, accent);
       x.restore();
     }
 

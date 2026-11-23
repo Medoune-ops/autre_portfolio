@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ScribbleIntro } from "@/components/ui/scribble-intro";
 import SiteBackground from "@/components/ui/site-background";
+import SwarmCursor from "@/components/ui/SwarmCursor";
 import { PortfolioContent } from "@/components/sections/PortfolioContent";
 
 export default function Page() {
@@ -15,6 +16,15 @@ export default function Page() {
         <PortfolioContent active={introDone} />
       </div>
       {!introDone && <ScribbleIntro onComplete={() => setIntroDone(true)} />}
+
+      {/* Essaim de particules qui suit le curseur sur toute la page. */}
+      <SwarmCursor
+        count={800}
+        size={2.6}
+        spread={90}
+        swirl={0.6}
+        clickEffect="burst"
+      />
     </div>
   );
 }

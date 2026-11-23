@@ -104,7 +104,7 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
     const d = drag.current; if (!d) return
     let next: number
     if (d.kind === "knob") { const b = box.current!.getBoundingClientRect(); next = ((e.clientX - b.left - PAD) / (W - PAD * 2)) * last }
-    else next = d.p - (e.clientX - d.x) / (Math.min(300, W - 60) * 0.7)
+    else next = d.p - (e.clientX - d.x) / (Math.min(420, W - 80) * 0.7)
     const now = performance.now(); const cur = pos.get(); d.v = (next - cur) / Math.max(1, now - d.t) * 1000; d.t = now
     pos.set(Math.max(-0.2, Math.min(n - 0.8, next)))
   }
@@ -113,12 +113,12 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
     const m: Record<string, number> = { ArrowRight: step + 1, ArrowUp: step + 1, ArrowLeft: step - 1, ArrowDown: step - 1, Home: 0, End: n - 1 }
     if (e.key in m) { e.preventDefault(); setPlaying(false); settle(m[e.key]) }
   }
-  const cw = Math.min(340, W - 60)
+  const cw = Math.min(460, W - 80)
   const btn = "grid size-11 place-items-center rounded-full border border-border bg-card outline-none transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-35"
   const isLast = step === n - 1
   return (
-    <div className="mx-auto w-full max-w-3xl" style={{ "--sp-gold": accentColor } as React.CSSProperties}>
-      <section aria-roledescription="carrousel" aria-label={title} className={cn("relative w-full overflow-hidden rounded-3xl border border-border bg-white/50 p-5 pb-6 text-foreground backdrop-blur-md", className)}>
+    <div className="w-full" style={{ "--sp-gold": accentColor } as React.CSSProperties}>
+      <section aria-roledescription="carrousel" aria-label={title} className={cn("relative w-full overflow-hidden rounded-3xl border border-border bg-white/50 p-5 pb-6 text-foreground backdrop-blur-md sm:p-8", className)}>
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(60% 40% at 50% 0%, color-mix(in oklab, ${GOLD} 20%, transparent), transparent), radial-gradient(50% 40% at 100% 100%, color-mix(in oklab, var(--primary) 16%, transparent), transparent)` }} />
         <div className="relative flex items-center justify-between">
           <div><h2 className="text-lg font-semibold tracking-tight">{title}</h2><p className="text-sm tabular-nums text-muted-foreground" aria-live="polite">Étape {step + 1} sur {n} : {steps[step]?.title}{playing ? " · lecture auto" : ""}</p></div>
@@ -156,7 +156,7 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
           </motion.div>
         </div>
 
-        <div onPointerDown={begin("card")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} className="relative mt-2 h-[19rem] touch-pan-y cursor-grab select-none active:cursor-grabbing" style={{ perspective: 1000 }}>
+        <div onPointerDown={begin("card")} onPointerMove={move} onPointerUp={end} onPointerCancel={end} className="relative mt-2 h-[30rem] touch-pan-y cursor-grab select-none active:cursor-grabbing sm:h-[34rem]" style={{ perspective: 1000 }}>
           <ul className="relative h-full">{steps.map((s, i) => <StepCard key={s.id} s={s} i={i} pos={pos} w={cw} reduce={reduce} active={i === step} total={n} />)}</ul>
         </div>
 

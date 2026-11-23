@@ -1734,7 +1734,7 @@ export function BooksShowcase({
     >
       {/* hero word */}
       <div
-        className={`pointer-events-none absolute left-1/2 top-[18%] z-[1] -translate-x-1/2 select-none transition-all duration-500 ease-out ${heroWordVisible ? 'translate-y-0 opacity-100' : uiMode === 'hero' ? '-translate-y-0 translate-y-[60px] opacity-0' : '-translate-y-11 opacity-0'
+        className={`pointer-events-none absolute left-1/2 top-[18%] z-[5] -translate-x-1/2 select-none transition-all duration-500 ease-out ${heroWordVisible ? 'translate-y-0 opacity-100' : uiMode === 'hero' ? '-translate-y-0 translate-y-[60px] opacity-0' : '-translate-y-11 opacity-0'
           }`}
       >
         <span className="block whitespace-nowrap text-current text-[clamp(4.5rem,22.5cqw,18rem)] font-extrabold leading-[0.85] tracking-[-0.015em]">

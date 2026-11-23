@@ -358,7 +358,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* STACKS */}
-        <section aria-label="Technologies maîtrisées" className="relative overflow-hidden border-t border-slate-900/10 py-8 sm:py-12">
+        <section aria-label="Technologies maîtrisées" className="relative overflow-hidden py-8 sm:py-12">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className="relative">
             <TextLoop
@@ -388,7 +388,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* PROJETS */}
-        <section id="projets" aria-labelledby="projets-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
+        <section id="projets" aria-labelledby="projets-titre" className="relative py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute top-24 left-1/2 h-64 w-[40rem] -translate-x-1/2 rounded-full bg-neon2/10 blur-[120px]" />
           <div className={`${CONTAINER} relative`}>
@@ -473,7 +473,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="competences"
           aria-label="Compétences"
-          className="relative border-t border-slate-900/10 py-24 sm:py-32"
+          className="relative py-24 sm:py-32"
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
@@ -613,7 +613,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* FORMATION — chaque livre = une étape du parcours */}
-        <section id="formation" aria-labelledby="formation-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
+        <section id="formation" aria-labelledby="formation-titre" className="relative py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
@@ -669,7 +669,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* CONTACT / FOOTER */}
-        <section id="contact" aria-labelledby="contact-titre" className="relative border-t border-slate-900/10 py-24 sm:py-32">
+        <section id="contact" aria-labelledby="contact-titre" className="relative py-24 sm:py-32">
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-neon2/10 to-transparent" />
           <div className={`${CONTAINER} relative`}>

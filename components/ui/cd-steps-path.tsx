@@ -60,7 +60,7 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
   )
 }
 
-export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0, accentColor = "#94a3b8", autoPlay = false, autoPlayInterval = 3200, onChange, className }: StepsPathProps) {
+export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0, accentColor = "#789a99", autoPlay = false, autoPlayInterval = 3200, onChange, className }: StepsPathProps) {
   const reduce = !!useReducedMotion()
   const n = steps.length, last = Math.max(1, n - 1)
   const box = React.useRef<HTMLDivElement>(null)

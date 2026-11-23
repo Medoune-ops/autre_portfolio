@@ -42,14 +42,14 @@ export function Loader() {
   return (
     <div className="loader" role="status" aria-live="polite">
       <div style={{ textAlign: "center" }}>
-        <div style={{ letterSpacing: "0.18em", fontSize: 12, color: "#475569", textTransform: "uppercase" }}>
+        <div style={{ letterSpacing: "0.18em", fontSize: 12, color: "#2872a1", textTransform: "uppercase" }}>
           Initialisation
         </div>
         <div style={{ marginTop: 6, fontSize: 28, fontWeight: 600 }}>Cerveau immersif</div>
         <div className="loader__bar" aria-hidden>
           <span style={{ width: `${display}%`, transition: "width 0.2s ease" }} />
         </div>
-        <div style={{ marginTop: 8, fontSize: 12, color: "rgba(15,23,42,0.6)" }}>{Math.round(display)}%</div>
+        <div style={{ marginTop: 8, fontSize: 12, color: "rgba(22,35,44,0.6)" }}>{Math.round(display)}%</div>
       </div>
     </div>
   );

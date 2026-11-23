@@ -17,9 +17,9 @@
 /* Repli si WebGPU n'est pas disponible : dégradé clair animé visuellement. */
 .site-bg .shape-waves {
   background-image:
-    radial-gradient(120% 80% at 50% 0%, rgba(71, 85, 105, 0.18), transparent 62%),
-    radial-gradient(90% 70% at 85% 85%, rgba(100, 116, 139, 0.14), transparent 66%),
-    linear-gradient(160deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%);
+    radial-gradient(120% 80% at 50% 0%, rgba(203, 221, 233, 0.5), transparent 62%),
+    radial-gradient(90% 70% at 85% 85%, rgba(120, 154, 153, 0.28), transparent 66%),
+    linear-gradient(160deg, #f8fafc 0%, #f1f5f9 55%, #e6eef2 100%);
 }
 
 /* Voile global géré au niveau de la page pour une lisibilité uniforme sur tout le site. */

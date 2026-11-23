@@ -19,8 +19,8 @@ export default function SiteBackground() {
           shapes="mixed"
           cellSize={10}
           dotSize={0.85}
-          color="#475569"
-          hoverColor="#334155"
+          color="#789a99"
+          hoverColor="#2872a1"
           backgroundColor="#f1f5f9"
           speed={1.2}
           scale={1}

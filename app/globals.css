@@ -4,9 +4,12 @@
 
 :root {
   --bg: #f1f5f9;
-  --neon: #475569;
-  --neon2: #334155;
-  --ice: #0f172a;
+  --neon: #2872a1;
+  --neon2: #1c5a82;
+  --ice: #16232c;
+  --mist: #cbdde9;
+  --steel: #789a99;
+  --amber: #f59e0b;
 }
 
 html, body {
@@ -71,8 +74,8 @@ canvas {
 .panel__inner {
   pointer-events: auto;
   background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(71, 85, 105, 0.22);
-  box-shadow: 0 0 40px rgba(71, 85, 105, 0.08), inset 0 0 30px rgba(51, 65, 85, 0.04);
+  border: 1px solid rgba(120, 154, 153, 0.3);
+  box-shadow: 0 0 40px rgba(40, 114, 161, 0.08), inset 0 0 30px rgba(203, 221, 233, 0.12);
   backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 20px 22px;
@@ -102,7 +105,7 @@ canvas {
   margin: 6px 0 8px;
 }
 .panel__text {
-  color: rgba(15, 23, 42, 0.78);
+  color: rgba(22, 35, 44, 0.78);
   line-height: 1.6;
   font-size: 15px;
 }
@@ -125,11 +128,11 @@ canvas {
   font-size: clamp(34px, 6vw, 72px);
   font-weight: 700;
   letter-spacing: -0.02em;
-  text-shadow: 0 0 30px rgba(71, 85, 105, 0.12);
+  text-shadow: 0 0 30px rgba(40, 114, 161, 0.14);
 }
 .hud__sub {
   margin-top: 10px;
-  color: rgba(15, 23, 42, 0.7);
+  color: rgba(22, 35, 44, 0.7);
   font-size: clamp(14px, 1.6vw, 18px);
 }
 .scroll-hint {
@@ -141,7 +144,7 @@ canvas {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  color: rgba(15, 23, 42, 0.55);
+  color: rgba(22, 35, 44, 0.55);
   font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -149,7 +152,7 @@ canvas {
 .scroll-hint__line {
   width: 1px;
   height: 42px;
-  background: linear-gradient(to bottom, rgba(71, 85, 105, 0.7), rgba(71, 85, 105, 0));
+  background: linear-gradient(to bottom, rgba(40, 114, 161, 0.75), rgba(40, 114, 161, 0));
   animation: hint 1.8s ease-in-out infinite;
 }
 @keyframes hint {
@@ -168,7 +171,7 @@ canvas {
 .loader__bar {
   width: min(360px, 70vw);
   height: 3px;
-  background: rgba(15,23,42,0.08);
+  background: rgba(22,35,44,0.08);
   border-radius: 999px;
   overflow: hidden;
   margin-top: 14px;
@@ -176,8 +179,8 @@ canvas {
 .loader__bar > span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #94a3b8, #475569);
-  box-shadow: 0 0 18px rgba(71,85,105,0.35);
+  background: linear-gradient(90deg, #789a99, #2872a1);
+  box-shadow: 0 0 18px rgba(40,114,161,0.35);
 }
 
 .final-cta {
@@ -199,9 +202,9 @@ canvas {
   padding: 12px 22px;
   border-radius: 999px;
   color: #ffffff;
-  background: linear-gradient(90deg, #94a3b8, #475569);
+  background: linear-gradient(90deg, #2872a1, #1c5a82);
   font-weight: 600;
-  box-shadow: 0 0 30px rgba(71,85,105,0.35);
+  box-shadow: 0 0 30px rgba(40,114,161,0.35);
 }
 
 /* Reduced motion: pas d'animations superflues */

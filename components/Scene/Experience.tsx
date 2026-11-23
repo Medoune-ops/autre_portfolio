@@ -45,7 +45,7 @@ export function Experience() {
     <>
       <ambientLight intensity={0.35} />
       <directionalLight position={[3, 4, 5]} intensity={1.1} color="#f1f5f9" />
-      <pointLight position={[-3, 1, 2]} intensity={1.2} color="#94a3b8" />
+      <pointLight position={[-3, 1, 2]} intensity={1.2} color="#789a99" />
       <pointLight position={[2, -2, -2]} intensity={0.8} color="#64748b" />
 
       <CameraRig />
@@ -56,7 +56,7 @@ export function Experience() {
       {/* brume légère */}
       <mesh position={[0, 0, -2]}>
         <planeGeometry args={[30, 20]} />
-        <meshBasicMaterial color="#0f172a" transparent opacity={0.15} />
+        <meshBasicMaterial color="#16232c" transparent opacity={0.15} />
       </mesh>
     </>
   );

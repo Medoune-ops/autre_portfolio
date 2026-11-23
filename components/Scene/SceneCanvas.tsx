@@ -15,11 +15,11 @@ export default function SceneCanvas() {
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
         style={{ touchAction: "pan-y" }}
         onCreated={({ gl }) => {
-          gl.setClearColor("#0f172a", 1);
+          gl.setClearColor("#16232c", 1);
         }}
       >
-        <color attach="background" args={["#0f172a"]} />
-        <fog attach="fog" args={["#0f172a", 6, 16]} />
+        <color attach="background" args={["#16232c"]} />
+        <fog attach="fog" args={["#16232c", 6, 16]} />
         <Suspense fallback={null}>
           <Experience />
           <EffectComposer enableNormalPass={false}>

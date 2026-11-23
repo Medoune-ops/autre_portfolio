@@ -169,7 +169,7 @@ const TextLoop = ({
   uppercase = true,
   color,
   ribbon = true,
-  ribbonColor = '#475569',
+  ribbonColor = '#789a99',
   ribbonWidth = 86,
   edgeFade = 0,
   pauseOnHover = true,

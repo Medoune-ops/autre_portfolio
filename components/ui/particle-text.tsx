@@ -37,7 +37,7 @@ export function ParticleText({
   text,
   className,
   font = "700 96px system-ui, -apple-system, Segoe UI, sans-serif",
-  color = "#0f172a",
+  color = "#16232c",
   particleColor,
   maxDimension = 360,
   size = 1.2,

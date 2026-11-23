@@ -319,7 +319,7 @@ function formationCover(
   return (x: CanvasRenderingContext2D, w: number, h: number) => {
     const gradient = x.createLinearGradient(0, 0, w, h);
     gradient.addColorStop(0, bg);
-    gradient.addColorStop(1, "#0a0e1c");
+    gradient.addColorStop(1, "#16232c");
     x.fillStyle = gradient;
     x.fillRect(0, 0, w, h);
 
@@ -388,15 +388,15 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "Développement d'Applications",
       "UNCHK",
       "2023 — En cours",
-      "#1d3b5c",
-      "#6dd6ff",
+      "#1c5a82",
+      "#cbdde9",
       "code",
     ),
-    edge: "#dfe8f0",
-    backBg: "#1d3b5c",
+    edge: "#dce9f1",
+    backBg: "#1c5a82",
     backInk: "255,255,255",
-    spineBg: "#1d3b5c",
-    spineInk: "#6dd6ff",
+    spineBg: "#1c5a82",
+    spineInk: "#cbdde9",
   },
   {
     id: "licence-genie-informatique",
@@ -411,15 +411,15 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "Génie Informatique",
       "UNIPRO · Dakar",
       "2022 — 2025",
-      "#3b2359",
-      "#e3a8ff",
+      "#2c5553",
+      "#f59e0b",
       "circuit",
     ),
-    edge: "#eadff2",
-    backBg: "#3b2359",
+    edge: "#e7efeb",
+    backBg: "#2c5553",
     backInk: "255,255,255",
-    spineBg: "#3b2359",
-    spineInk: "#e3a8ff",
+    spineBg: "#2c5553",
+    spineInk: "#f59e0b",
   },
   {
     id: "baccalaureat",
@@ -433,15 +433,15 @@ export const FORMATION_BOOKS: BookCfg[] = [
       "Baccalauréat",
       "I.S.E.F",
       "2021",
-      "#0f463f",
-      "#7de3c1",
+      "#2872a1",
+      "#cbdde9",
       "brain",
     ),
-    edge: "#dcece6",
-    backBg: "#0f463f",
+    edge: "#dce9f1",
+    backBg: "#2872a1",
     backInk: "255,255,255",
-    spineBg: "#0f463f",
-    spineInk: "#7de3c1",
+    spineBg: "#2872a1",
+    spineInk: "#cbdde9",
   },
 ];
 

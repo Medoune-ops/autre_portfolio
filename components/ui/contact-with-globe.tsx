@@ -826,8 +826,8 @@ export default function ContactWithGlobe({
                 autoRotate
                 autoRotateSpeed={0.45}
                 strokeWidth={0.6}
-                strokeColor="#64748b"
-                sphereOutlineColor="#94a3b8"
+                strokeColor="#789a99"
+                sphereOutlineColor="#cbdde9"
               />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg to-transparent dark:from-slate-950" />
             </div>
@@ -917,7 +917,7 @@ export default function ContactWithGlobe({
               className="group h-11 w-fit rounded-xl bg-neon px-8 text-sm font-semibold text-white hover:bg-neon2"
             >
               Envoyer
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 text-amber transition-transform duration-200 group-hover:translate-x-1" />
             </Button>
           </motion.form>
         </div>

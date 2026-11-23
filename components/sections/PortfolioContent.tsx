@@ -178,7 +178,7 @@ function SectionTitle({
           text={text}
           strokeColor="transparent"
           strokeWidth={0}
-          fillColor="#94a3b8"
+          fillColor="#789a99"
           fillMode="fade"
           drawDuration={0.01}
           fillDelay={0}
@@ -194,8 +194,8 @@ function SectionTitle({
         <span aria-hidden="true" className="absolute inset-0 block">
           <StrokeText
             text={text}
-            strokeColor="#94a3b8"
-            fillColor="#020617"
+            strokeColor="#789a99"
+            fillColor="#16232c"
             strokeStyle="solid"
             strokeWidth={strokeWidth}
             dashLength={10}
@@ -234,7 +234,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             className={`group flex items-center gap-2.5 rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
             aria-label={`Retour à l'accueil — ${PROFILE.name}`}
           >
-            <span className="h-2.5 w-2.5 rounded-full bg-neon shadow-[0_0_14px_3px_rgba(71,85,105,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_14px_3px_rgba(245,158,11,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {PROFILE.name}
           </a>
           <nav aria-label="Navigation principale">
@@ -333,7 +333,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <a
                   href="#projets"
-                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(71,85,105,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(71,85,105,0.75)] active:translate-y-0 ${FOCUS}`}
+                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(40,114,161,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(40,114,161,0.75)] active:translate-y-0 ${FOCUS}`}
                 >
                   Voir les projets
                   <span aria-hidden="true" className="ml-2 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
@@ -376,7 +376,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               uppercase
               color="#f8fafc"
               ribbon
-              ribbonColor="#334155"
+              ribbonColor="#789a99"
               ribbonWidth={96}
               edgeFade={0.12}
               cross={false}
@@ -510,12 +510,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 <span>Veille continue</span>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/60 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/60 shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] backdrop-blur-md">
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 opacity-60"
                 style={{
-                  backgroundImage: "radial-gradient(circle, rgba(15,23,42,0.16) 1px, transparent 1px)",
+                  backgroundImage: "radial-gradient(circle, rgba(22,35,44,0.16) 1px, transparent 1px)",
                   backgroundSize: "24px 24px",
                   WebkitMaskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
                   maskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
@@ -525,7 +525,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
                 style={{
-                  background: "radial-gradient(ellipse 58% 52% at 50% 46%, rgba(71,85,105,0.12), transparent 72%)",
+                  background: "radial-gradient(ellipse 58% 52% at 50% 46%, rgba(40,114,161,0.12), transparent 72%)",
                 }}
               />
 
@@ -558,11 +558,11 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   subtitle=""
                   background="transparent"
                   surface="#ffffff"
-                  color="#0f172a"
-                  mutedColor="rgba(15,23,42,0.72)"
-                  accent="#475569"
-                  signal="#334155"
-                  lineColor="rgba(15,23,42,0.12)"
+                  color="#16232c"
+                  mutedColor="rgba(22,35,44,0.72)"
+                  accent="#2872a1"
+                  signal="#789a99"
+                  lineColor="rgba(120,154,153,0.3)"
                   frame={false}
                   autoplay
                   pauseOnHover
@@ -594,7 +594,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             </div>
 
             <div className="mt-14 flex flex-col items-center gap-2 text-center">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">Vue détaillée</p>
+              <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />
+                Vue détaillée
+              </p>
               <p className="text-xs text-ice/50">
                 {TOTAL_SKILLS} compétences référencées · {SKILL_DOMAINS.length} domaines
               </p>
@@ -604,7 +607,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <StepsPath
                 steps={SKILL_STEPS}
                 title="Mes stacks, domaine par domaine"
-                accentColor="#94a3b8"
+                accentColor="#789a99"
                 autoPlay
                 autoPlayInterval={4200}
               />
@@ -644,20 +647,20 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </p>
             </div>
 
-            <div className="relative h-[70vh] min-h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.5)] lg:h-[82vh]">
+            <div className="relative h-[70vh] min-h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] lg:h-[82vh]">
               <BooksShowcase
                 books={FORMATION_BOOKS}
                 heroTitle="Parcours"
                 navTitle="Formation"
                 themeColors={{
-                  navy: "#141a32",
-                  pink: "#475569",
+                  navy: "#1c5a82",
+                  pink: "#2872a1",
                   cream: "#f8fafc",
-                  lav: "#cbd5e1",
-                  peri: "#94a3b8",
+                  lav: "#cbdde9",
+                  peri: "#789a99",
                   bgLight: "#f8fafc",
-                  bgDark: "#0f172a",
-                  foregroundLight: "#0f172a",
+                  bgDark: "#16232c",
+                  foregroundLight: "#16232c",
                   foregroundDark: "#f8fafc",
                 }}
               />
@@ -683,10 +686,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <footer className={`${CONTAINER} relative flex flex-col items-center justify-between gap-5 py-10 text-sm text-ice/75 sm:flex-row`}>
           <p>
             © {year} {PROFILE.name}. Tous droits réservés.
-          </p>
-          <p className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/70 px-4 py-2 text-sm text-ice/80 shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
-            <BlurText as="span" text={PROFILE.availability} delay={80} animateBy="words" direction="top" />
           </p>
           <a href="#accueil" className={`rounded-md transition-colors hover:text-ice ${FOCUS}`}>
             Retour en haut ↑

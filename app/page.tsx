@@ -18,13 +18,18 @@ export default function Page() {
       {!introDone && <ScribbleIntro onComplete={() => setIntroDone(true)} />}
 
       {/* Essaim de particules qui suit le curseur sur toute la page. */}
-      <SwarmCursor
-        count={800}
-        size={1.1}
-        spread={90}
-        swirl={0.6}
-        clickEffect="burst"
-      />
+      <div className="pointer-events-none fixed inset-0 z-50 h-screen w-screen overflow-hidden">
+        <SwarmCursor
+          count={800}
+          size={2.6}
+          spread={90}
+          swirl={0.6}
+          clickEffect="burst"
+          color="#2872a1"
+          accentColor="#f59e0b"
+          className="h-full w-full"
+        />
+      </div>
     </div>
   );
 }

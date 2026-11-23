@@ -8,13 +8,47 @@ export const SPLINE_SCENE =
 
 export const PROFILE = {
   name: "Medoune",
+  fullName: "Medoune Seck",
   role: "Développeur front-end & expériences 3D",
   tagline:
     "Je conçois des interfaces immersives où le mouvement, la lumière et la 3D servent le contenu.",
   bio: "Passionné par le détail visuel et la performance, je transforme des idées en expériences web fluides : scènes 3D temps réel, animations maîtrisées et design systems cohérents.",
-  email: "hello@example.com",
+  email: "smedoune16@gmail.com",
+  phone: "+221 76 921 10 73",
+  location: "Keur Massar, Dakar",
   availability: "Disponible pour de nouveaux projets",
 };
+
+export type CVOption = {
+  lang: "fr" | "en";
+  code: string;
+  name: string;
+  subtitle: string;
+  fileName: string;
+  href: string;
+  badge: string;
+};
+
+export const CV_OPTIONS: CVOption[] = [
+  {
+    lang: "fr",
+    code: "FR",
+    name: "Français",
+    subtitle: "CV Développeur & Designer (PDF)",
+    fileName: "CV_Medoune_SECK_FR.pdf",
+    href: "/cv/CV_Medoune_SECK_FR.pdf",
+    badge: "FR",
+  },
+  {
+    lang: "en",
+    code: "EN",
+    name: "English",
+    subtitle: "Developer & Designer Resume (PDF)",
+    fileName: "CV_Medoune_SECK_EN.pdf",
+    href: "/cv/CV_Medoune_SECK_EN.pdf",
+    badge: "EN",
+  },
+];
 
 export const NAV_LINKS = [
   { label: "Accueil", href: "#accueil" },

@@ -12,6 +12,7 @@ import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 import BooksShowcase from "@/components/ui/BooksShowcase";
 import ContactWithGlobe from "@/components/ui/contact-with-globe";
+import { CVDownloadDropdown } from "@/components/ui/cv-download-dropdown";
 import {
   siAngular,
   siClaude,
@@ -237,20 +238,24 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             <span className="h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_14px_3px_rgba(245,158,11,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {PROFILE.name}
           </a>
-          <nav aria-label="Navigation principale">
-            <ul className="flex items-center gap-1 text-xs sm:gap-2 sm:text-sm">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className={`rounded-full px-3 py-1.5 text-ice/75 transition-all duration-200 hover:bg-white/70 hover:text-ice hover:shadow-sm ${FOCUS}`}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <nav aria-label="Navigation principale">
+              <ul className="flex items-center gap-1 text-xs sm:gap-2 sm:text-sm">
+                {NAV_LINKS.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      className={`rounded-full px-3 py-1.5 text-ice/75 transition-all duration-200 hover:bg-white/70 hover:text-ice hover:shadow-sm ${FOCUS}`}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <div className="hidden h-4 w-px bg-slate-900/15 sm:block" aria-hidden="true" />
+            <CVDownloadDropdown variant="header" />
+          </div>
         </div>
       </header>
 
@@ -344,6 +349,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 >
                   Me contacter
                 </a>
+                <CVDownloadDropdown variant="hero" />
               </div>
             </div>
           </div>
@@ -676,6 +682,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <ContactWithGlobe
           id="contact"
           email={PROFILE.email}
+          phone={PROFILE.phone}
           title="Travaillons ensemble"
           subtitle="Contact"
           description="Un projet, une idée ou simplement envie d'échanger sur la 3D et le front-end ? Écrivez-moi, je réponds rapidement."

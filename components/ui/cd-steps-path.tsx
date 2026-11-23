@@ -51,7 +51,7 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
         {s.tags && s.tags.length > 0 && (
           <ul className="relative mt-3 flex flex-wrap gap-1.5">
             {s.tags.map((tag) => (
-              <li key={tag} className="rounded-lg border border-border bg-muted/50 px-2 py-1 text-[11px] font-medium leading-4 text-foreground/80">{tag}</li>
+              <li key={tag} className="rounded-lg border border-[#cbdde9] bg-[#cbdde9]/70 px-2 py-1 text-[11px] font-medium leading-4 text-[#16232c]">{tag}</li>
             ))}
           </ul>
         )}

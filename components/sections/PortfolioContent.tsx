@@ -607,7 +607,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <StepsPath
                 steps={SKILL_STEPS}
                 title="Mes stacks, domaine par domaine"
-                accentColor="#789a99"
+                accentColor="#cbdde9"
                 autoPlay
                 autoPlayInterval={4200}
               />

@@ -9,10 +9,9 @@ export const SPLINE_SCENE =
 export const PROFILE = {
   name: "Medoune",
   fullName: "Medoune Seck",
-  role: "Développeur front-end & expériences 3D",
-  tagline:
-    "Je conçois des interfaces immersives où le mouvement, la lumière et la 3D servent le contenu.",
-  bio: "Passionné par le détail visuel et la performance, je transforme des idées en expériences web fluides : scènes 3D temps réel, animations maîtrisées et design systems cohérents.",
+  role: "Web Designer & Developer",
+  tagline: "Génie Informatique · Full-Stack Development · UI/UX Design",
+  bio: "Développeur & Designer diplômé d'une Licence en Génie Informatique (Mention Bien). Maîtrise full-stack, design UI/UX et communication digitale. Autonome, rigoureux et orienté impact sur des projets tech ambitieux.",
   email: "smedoune16@gmail.com",
   phone: "+221 76 921 10 73",
   location: "Keur Massar, Dakar",

@@ -13,6 +13,7 @@ import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 import BooksShowcase from "@/components/ui/BooksShowcase";
 import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import { CVDownloadDropdown } from "@/components/ui/cv-download-dropdown";
+import { PopButton } from "@/components/ui/PopButton";
 import {
   siAngular,
   siClaude,
@@ -338,19 +339,23 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
 
               <div className="mt-10 flex flex-wrap items-center gap-4">
-                <a
+                <PopButton
+                  as="a"
                   href="#projets"
-                  className={`group inline-flex items-center justify-center rounded-full bg-neon px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-10px_rgba(40,114,161,0.7)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-neon2 hover:shadow-[0_16px_36px_-12px_rgba(40,114,161,0.75)] active:translate-y-0 ${FOCUS}`}
+                  variant="primary"
+                  size="md"
                 >
                   Voir les projets
-                  <span aria-hidden="true" className="ml-2 transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-                </a>
-                <a
+                  <span aria-hidden="true" className="ml-2 transition-transform duration-200 group-hover:translate-x-1">→</span>
+                </PopButton>
+                <PopButton
+                  as="a"
                   href="#contact"
-                  className={`inline-flex items-center justify-center rounded-full border border-slate-900/15 bg-white/70 px-7 py-3.5 text-sm font-semibold text-ice shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-neon/40 hover:bg-white hover:shadow-md active:translate-y-0 ${FOCUS}`}
+                  variant="secondary"
+                  size="md"
                 >
                   Me contacter
-                </a>
+                </PopButton>
                 <CVDownloadDropdown variant="hero" />
               </div>
 

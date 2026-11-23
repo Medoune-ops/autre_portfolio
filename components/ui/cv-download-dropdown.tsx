@@ -215,7 +215,7 @@ export function CVDownloadDropdown({
         aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label="Télécharger mon CV (choix FR ou EN)"
-        className={`group inline-flex items-center justify-center gap-2 rounded-full border border-slate-900/15 bg-white/80 px-6 py-3.5 text-sm font-semibold text-ice shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-neon/40 hover:bg-white hover:shadow-md active:translate-y-0 ${FOCUS}`}
+        className={`group relative inline-flex items-center justify-center gap-2 select-none font-bold text-sm px-6 py-3.5 rounded-2xl cursor-pointer outline-none transition-all duration-150 ease-[cubic-bezier(0,0,0.58,1)] bg-white text-[#16232c] border-2 border-[#16232c] shadow-[0_8px_0_-1px_#cbdde9,0_8px_0_1px_#16232c,0_16px_20px_-6px_rgba(22,35,44,0.15)] hover:bg-slate-50 hover:translate-y-1 hover:shadow-[0_5px_0_-1px_#cbdde9,0_5px_0_1px_#16232c,0_10px_14px_-4px_rgba(22,35,44,0.12)] active:translate-y-2 active:shadow-[0_0px_0_-1px_#cbdde9,0_0px_0_1px_#16232c,0_2px_4px_0_rgba(22,35,44,0.08)] ${FOCUS}`}
       >
         <FileDown className="h-4 w-4 text-neon transition-transform duration-200 group-hover:scale-110" />
         <span>Télécharger mon CV</span>

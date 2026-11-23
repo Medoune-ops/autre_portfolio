@@ -327,8 +327,12 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
             <span className="hidden sm:inline">Faites glisser le curseur ou balayez les cartes</span>
             <span className="inline sm:hidden">Balayez pour naviguer</span>
           </p>
-          <button type="button" onClick={() => { setPlaying(false); settle(isLast ? 0 : step + 1) }} className="flex h-11 items-center gap-2 rounded-full bg-[#2872a1] px-5 text-sm font-semibold text-white shadow-[0_8px_20px_-6px_rgba(40,114,161,0.5)] outline-none transition-all hover:-translate-y-0.5 hover:bg-[#1c5a82] hover:shadow-[0_12px_26px_-8px_rgba(40,114,161,0.55)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:translate-y-0">
-            {isLast ? <>Recommencer <RotateCcw className="size-4" aria-hidden /></> : <>Suivant <ArrowRight className="size-4" aria-hidden /></>}
+          <button
+            type="button"
+            onClick={() => { setPlaying(false); settle(isLast ? 0 : step + 1) }}
+            className="group relative inline-flex h-11 items-center gap-2 rounded-2xl border-2 border-[#16232c] bg-[#2872a1] px-5 text-sm font-bold text-white shadow-[0_6px_0_-1px_#1c5a82,0_6px_0_1px_#16232c,0_12px_16px_-4px_rgba(40,114,161,0.35)] outline-none transition-all duration-150 hover:bg-[#1c5a82] hover:translate-y-[2px] hover:shadow-[0_4px_0_-1px_#1c5a82,0_4px_0_1px_#16232c,0_8px_10px_-2px_rgba(40,114,161,0.3)] active:translate-y-[6px] active:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            {isLast ? <>Recommencer <RotateCcw className="size-4" aria-hidden /></> : <>Suivant <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></>}
           </button>
         </div>
       </section>

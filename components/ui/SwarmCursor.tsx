@@ -38,7 +38,7 @@ type Ripple = { x: number; y: number; life: number };
 
 export default function SwarmCursor({
   count = 800,
-  size = 2.6,
+  size = 1.1,
   spread = 90,
   swirl = 0.6,
   clickEffect = "burst",
@@ -81,8 +81,17 @@ export default function SwarmCursor({
     };
     resize();
 
-    const mouse = { x: width / 2, y: height / 2, active: false };
+    const mouse = {
+      x: width / 2,
+      y: height / 2,
+      vx: 0,
+      vy: 0,
+      speed: 0,
+      active: false,
+    };
     const onPointerMove = (event: PointerEvent) => {
+      mouse.vx = event.clientX - mouse.x;
+      mouse.vy = event.clientY - mouse.y;
       mouse.x = event.clientX;
       mouse.y = event.clientY;
       mouse.active = true;
@@ -114,16 +123,18 @@ export default function SwarmCursor({
     };
 
     const particles: Particle[] = Array.from({ length: count }, (_, i) => {
-      const angle = Math.random() * Math.PI * 2;
-      const radius = Math.sqrt(Math.random()) * spread;
+      // Les particules sont dense au centre et réparties en bras de spirale :
+      // c'est ce qui donne la silhouette d'un tourbillon, pas d'un anneau.
+      const radius = Math.pow(Math.random(), 1.8) * spread;
+      const angle = Math.random() * Math.PI * 2 + radius * 0.045;
       return {
-        x: mouse.x + Math.cos(angle) * radius,
+        x: mouse.x + Math.cos(angle) * radius * 0.5,
         y: mouse.y + Math.sin(angle) * radius,
         vx: 0,
         vy: 0,
         angle,
         radius,
-        speed: (0.6 + Math.random() * 0.8) * (i % 7 === 0 ? -1 : 1),
+        speed: 0.7 + Math.random() * 0.7,
         accent: i % 17 === 0,
       };
     });
@@ -133,30 +144,44 @@ export default function SwarmCursor({
       ctx.clearRect(0, 0, width, height);
 
       if (mouse.active) {
-        const spin = swirl * 0.012;
+        // Vitesse du pointeur lissée : elle pilote la longueur de la traînée.
+        mouse.speed += (Math.hypot(mouse.vx, mouse.vy) - mouse.speed) * 0.12;
+        mouse.vx *= 0.88;
+        mouse.vy *= 0.88;
+        const tail = Math.min(1, mouse.speed / 28);
 
         for (const particle of particles) {
-          particle.angle += spin * particle.speed;
-          // Léger mouvement radial pour garder un essaim vivant.
-          const drift = 0.6 * Math.sin(particle.angle * 3 + frame * 0.01);
-          const targetRadius = particle.radius + drift;
+          const t = particle.radius / spread;
 
-          const targetX = mouse.x + Math.cos(particle.angle) * targetRadius;
-          const targetY = mouse.y + Math.sin(particle.angle) * targetRadius;
+          // Rotation différentielle : le cœur tourne plus vite que les bords,
+          // ce qui étire les bras en spirale.
+          particle.angle += swirl * 0.02 * (1.7 - t) * particle.speed;
 
-          particle.vx += (targetX - particle.x) * 0.035;
-          particle.vy += (targetY - particle.y) * 0.035;
-          particle.vx *= 0.88;
-          particle.vy *= 0.88;
+          // Entonnoir : étroit en haut, large en bas.
+          const yNorm = (Math.sin(particle.angle) + 1) / 2;
+          const funnel = 0.18 + yNorm * 1.25;
+          const wobble = 1 + 0.08 * Math.sin(frame * 0.02 + particle.angle * 2);
+          const rx = particle.radius * funnel * wobble;
+          const ry = particle.radius * 1.35;
+
+          // Les particules externes traînent derrière le mouvement du curseur.
+          const lag = t * tail * 1.4;
+          const targetX = mouse.x + Math.cos(particle.angle) * rx - mouse.vx * lag;
+          const targetY = mouse.y + Math.sin(particle.angle) * ry - mouse.vy * lag;
+
+          particle.vx += (targetX - particle.x) * 0.03;
+          particle.vy += (targetY - particle.y) * 0.03;
+          particle.vx *= 0.9;
+          particle.vy *= 0.9;
           particle.x += particle.vx;
           particle.y += particle.vy;
 
           const speed = Math.hypot(particle.vx, particle.vy);
-          const alpha = Math.max(0.18, Math.min(0.85, 0.35 + speed * 0.035));
+          const alpha = Math.max(0.22, Math.min(0.8, 0.3 + speed * 0.03));
           ctx.globalAlpha = alpha;
           ctx.fillStyle = particle.accent ? accentColor : color;
           ctx.beginPath();
-          ctx.arc(particle.x, particle.y, particle.accent ? size * 1.3 : size, 0, Math.PI * 2);
+          ctx.arc(particle.x, particle.y, particle.accent ? size * 1.15 : size, 0, Math.PI * 2);
           ctx.fill();
         }
       }

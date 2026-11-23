@@ -20,7 +20,7 @@ export default function Page() {
       {/* Essaim de particules qui suit le curseur sur toute la page. */}
       <SwarmCursor
         count={800}
-        size={2.6}
+        size={1.1}
         spread={90}
         swirl={0.6}
         clickEffect="burst"

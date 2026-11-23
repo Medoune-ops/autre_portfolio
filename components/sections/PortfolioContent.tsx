@@ -374,9 +374,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               fontWeight={700}
               letterSpacing={1.5}
               uppercase
-              color="#f8fafc"
+              color="#16232c"
               ribbon
-              ribbonColor="#789a99"
+              ribbonColor="#cbdde9"
               ribbonWidth={96}
               edgeFade={0.12}
               cross={false}

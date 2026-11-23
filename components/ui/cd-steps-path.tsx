@@ -89,10 +89,9 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
           </span>
           <div className="min-w-0">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white"
+              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white"
               style={{ background: dc.gradient }}
             >
-              <span className="h-1 w-1 rounded-full bg-white/70" aria-hidden />
               Domaine {i + 1}
             </span>
           </div>
@@ -114,25 +113,16 @@ function StepCard({ s, i, pos, w, reduce, active, total }: { s: PathStep; i: num
         {/* Tags / Chips des stacks */}
         {s.tags && s.tags.length > 0 && (
           <ul className="relative mt-4 flex flex-wrap gap-2">
-            {s.tags.map((tag, ti) => (
+            {s.tags.map((tag) => (
               <li
                 key={tag}
-                className="group/tag relative inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-[11px] font-semibold leading-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group/tag relative inline-flex items-center rounded-xl border px-3 py-1.5 text-[11px] font-semibold leading-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                 style={{
                   borderColor: `${dc.tagBg}30`,
                   background: `linear-gradient(135deg, ${dc.tagBg}0A, ${dc.tagBg}14)`,
                   color: dc.tagBg,
                 }}
               >
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  aria-hidden
-                  style={{
-                    backgroundColor: dc.tagBg,
-                    boxShadow: `0 0 0 1px white, 0 0 0 3px ${dc.tagBg}30`,
-                    opacity: 0.7 + (ti % 3) * 0.1,
-                  }}
-                />
                 {tag}
               </li>
             ))}
@@ -218,13 +208,7 @@ export function StepsPath({ steps, title = "Comment ça marche", defaultStep = 0
           <div>
             <h2 className="text-lg font-bold tracking-tight text-[#16232c]">{title}</h2>
             <p className="mt-0.5 text-sm tabular-nums text-[#16232c]/60" aria-live="polite">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  {playing && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2872a1] opacity-40" />}
-                  <span className={cn("relative inline-flex h-2 w-2 rounded-full", playing ? "bg-[#2872a1]" : "bg-[#789a99]")} />
-                </span>
-                Domaine {step + 1} sur {n} : {steps[step]?.title}{playing ? " · lecture auto" : ""}
-              </span>
+              Domaine {step + 1} sur {n} : {steps[step]?.title}{playing ? " · lecture auto" : ""}
             </p>
           </div>
           <div className="flex items-center gap-2">

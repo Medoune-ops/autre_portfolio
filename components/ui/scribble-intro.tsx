@@ -84,7 +84,6 @@ export function ScribbleIntro({
         />
       </div>
       <p className="pointer-events-none absolute inset-x-0 bottom-6 flex items-center justify-center gap-2 text-xs tracking-[0.2em] uppercase text-white/40">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/60" aria-hidden="true" />
         Chargement de l&apos;expérience
       </p>
     </div>

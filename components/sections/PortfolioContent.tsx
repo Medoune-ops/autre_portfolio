@@ -232,10 +232,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <div className={`${CONTAINER} flex items-center justify-between gap-4 py-3.5 sm:py-4`}>
           <a
             href="#accueil"
-            className={`group flex items-center gap-2.5 rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
+            className={`group flex items-center rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
             aria-label={`Retour à l'accueil — ${PROFILE.name}`}
           >
-            <span className="h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_14px_3px_rgba(245,158,11,0.45)] transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {PROFILE.name}
           </a>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -485,8 +484,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
                 Expertise
                 <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
                 <span className="text-neon">Stack &amp; outils</span>
@@ -537,10 +535,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
               <div className="relative flex items-center justify-between gap-4 border-b border-slate-900/[0.08] px-5 py-3.5 sm:px-7">
                 <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2 w-2" aria-hidden="true">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neon opacity-40" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-neon" />
-                  </span>
                   <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ice/60">
                     Carte des stacks
                   </span>
@@ -601,7 +595,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
             <div className="mt-14 flex flex-col items-center gap-2 text-center">
               <p className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ice/40">
-                <span className="h-1.5 w-1.5 rounded-full bg-amber" aria-hidden="true" />
                 Vue détaillée
               </p>
               <p className="text-xs text-ice/50">
@@ -627,8 +620,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2.5 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-neon" aria-hidden="true" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
                 Parcours
                 <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
                 <span className="text-neon">Formation</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FORMATION_BOOKS, NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
@@ -43,10 +43,14 @@ import {
   siVercel,
 } from "simple-icons";
 import {
+  ChevronLeft,
+  ChevronRight,
   CloudCog,
   Code2,
   Database,
+  Pause,
   PenTool,
+  Play,
   ServerCog,
   Smartphone,
   Sparkles,
@@ -119,33 +123,38 @@ const FOOTER_COLUMNS = [
   },
 ];
 
-// Sélection de stacks affichées dans la roue, avec leurs logos officiels.
-const STACK_WHEEL_ITEMS: ToolWheelItem[] = [
-  { label: "HTML5", description: "Structure des pages web", path: siHtml5.path, fillRule: "nonzero" },
-  { label: "CSS", description: "Mise en forme et design", path: siCss.path, fillRule: "nonzero" },
-  { label: "JavaScript", description: "Langage du web", path: siJavascript.path, fillRule: "nonzero" },
-  { label: "TypeScript", description: "JavaScript typé", path: siTypescript.path, fillRule: "nonzero" },
-  { label: "Python", description: "Langage polyvalent", path: siPython.path, fillRule: "nonzero" },
-  { label: "React", description: "Bibliothèque d'interface", path: siReact.path, fillRule: "nonzero" },
-  { label: "Next.js", description: "Framework React full-stack", path: siNextdotjs.path, fillRule: "nonzero" },
-  { label: "Tailwind CSS", description: "Styles utilitaires", path: siTailwindcss.path, fillRule: "nonzero" },
-  { label: "Angular", description: "Framework front-end", path: siAngular.path, fillRule: "nonzero" },
-  { label: "Node.js", description: "Runtime JavaScript", path: siNodedotjs.path, fillRule: "nonzero" },
-  { label: "Express", description: "Framework backend minimal", path: siExpress.path, fillRule: "nonzero" },
-  { label: "NestJS", description: "Backend Node.js structuré", path: siNestjs.path, fillRule: "nonzero" },
-  { label: "Laravel", description: "Framework PHP", path: siLaravel.path, fillRule: "nonzero" },
-  { label: "Expo", description: "Apps React Native", path: siExpo.path, fillRule: "nonzero" },
-  { label: "Flutter", description: "UI mobile multiplateforme", path: siFlutter.path, fillRule: "nonzero" },
-  { label: "MySQL", description: "Base de données relationnelle", path: siMysql.path, fillRule: "nonzero" },
-  { label: "PostgreSQL", description: "Base de données SQL", path: siPostgresql.path, fillRule: "nonzero" },
-  { label: "MongoDB", description: "Base NoSQL orientée documents", path: siMongodb.path, fillRule: "nonzero" },
-  { label: "Prisma", description: "ORM pour TypeScript", path: siPrisma.path, fillRule: "nonzero" },
-  { label: "Docker", description: "Conteneurisation", path: siDocker.path, fillRule: "nonzero" },
-  { label: "Git", description: "Versionnage du code", path: siGit.path, fillRule: "nonzero" },
-  { label: "GitHub", description: "Hébergement et CI/CD", path: siGithub.path, fillRule: "nonzero" },
-  { label: "Vercel", description: "Déploiement front-end", path: siVercel.path, fillRule: "nonzero" },
-  { label: "Figma", description: "Design d'interfaces", path: siFigma.path, fillRule: "nonzero" },
-  { label: "Claude", description: "Assistant IA d'Anthropic", path: siClaude.path, fillRule: "nonzero" },
+export type EnrichedStackItem = ToolWheelItem & {
+  domain: "Front-end" | "Back-end & API" | "Mobile" | "BDD & DevOps" | "Design & IA";
+  level: string;
+};
+
+// Sélection de stacks affichées dans la roue, avec leurs logos officiels et métadonnées.
+const STACK_WHEEL_ITEMS: EnrichedStackItem[] = [
+  { label: "HTML5", description: "Structure sémantique, accessibilité WCAG et SEO technique", path: siHtml5.path, fillRule: "nonzero", domain: "Front-end", level: "Expert" },
+  { label: "CSS3", description: "Animations fluides, Grid, Flexbox et design moderne réactif", path: siCss.path, fillRule: "nonzero", domain: "Front-end", level: "Expert" },
+  { label: "JavaScript", description: "ES6+, async/await, DOM et logique applicative réactive", path: siJavascript.path, fillRule: "nonzero", domain: "Front-end", level: "Avancé" },
+  { label: "TypeScript", description: "Typage strict, interfaces génériques et haute maintenabilité", path: siTypescript.path, fillRule: "nonzero", domain: "Front-end", level: "Avancé" },
+  { label: "Python", description: "Automatisation, scripts data et logique backend polyvalente", path: siPython.path, fillRule: "nonzero", domain: "Back-end & API", level: "Maîtrisé" },
+  { label: "React", description: "Composants modulaires, hooks avancés et architecture de pointe", path: siReact.path, fillRule: "nonzero", domain: "Front-end", level: "Expert" },
+  { label: "Next.js", description: "App Router full-stack, Server Components, SSR et optimisations", path: siNextdotjs.path, fillRule: "nonzero", domain: "Front-end", level: "Expert" },
+  { label: "Tailwind CSS", description: "Design systems ultra-rapides, utilitaires et micro-interactions", path: siTailwindcss.path, fillRule: "nonzero", domain: "Front-end", level: "Expert" },
+  { label: "Angular", description: "Framework robuste orienté entreprise et services injectables", path: siAngular.path, fillRule: "nonzero", domain: "Front-end", level: "Maîtrisé" },
+  { label: "Node.js", description: "Runtime JavaScript serveur asynchrone pour microservices et APIs", path: siNodedotjs.path, fillRule: "nonzero", domain: "Back-end & API", level: "Avancé" },
+  { label: "Express", description: "APIs RESTful légères, middlewares et routage haute performance", path: siExpress.path, fillRule: "nonzero", domain: "Back-end & API", level: "Avancé" },
+  { label: "NestJS", description: "Backend TypeScript modulaire, microservices et injection de dépendances", path: siNestjs.path, fillRule: "nonzero", domain: "Back-end & API", level: "Avancé" },
+  { label: "Laravel", description: "Framework PHP robuste, Eloquent ORM et architecture MVC", path: siLaravel.path, fillRule: "nonzero", domain: "Back-end & API", level: "Maîtrisé" },
+  { label: "Expo", description: "Applications mobiles React Native universelles iOS et Android", path: siExpo.path, fillRule: "nonzero", domain: "Mobile", level: "Avancé" },
+  { label: "Flutter", description: "Interfaces mobiles natives et performantes multiplateformes", path: siFlutter.path, fillRule: "nonzero", domain: "Mobile", level: "Exploré" },
+  { label: "MySQL", description: "Base relationnelle SQL, indexation et requêtes relationnelles", path: siMysql.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Avancé" },
+  { label: "PostgreSQL", description: "Base relationnelle avancée, intégrité des données et JSONB", path: siPostgresql.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Avancé" },
+  { label: "MongoDB", description: "Base NoSQL flexible orientée documents et pipelines d'agrégation", path: siMongodb.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Maîtrisé" },
+  { label: "Prisma", description: "ORM type-safe de nouvelle génération pour TypeScript et bases SQL", path: siPrisma.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Avancé" },
+  { label: "Docker", description: "Conteneurisation d'applications et environnements reproductibles", path: siDocker.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Maîtrisé" },
+  { label: "Git", description: "Gestion de versions distribuée, branches et historiques rigoureux", path: siGit.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Expert" },
+  { label: "GitHub", description: "Workflows CI/CD automatisés, revues de code et collaboration", path: siGithub.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Avancé" },
+  { label: "Vercel", description: "Déploiement Edge continu, Serverless et monitoring temps réel", path: siVercel.path, fillRule: "nonzero", domain: "BDD & DevOps", level: "Avancé" },
+  { label: "Figma", description: "Conception UI/UX, wireframes interactifs et design tokens", path: siFigma.path, fillRule: "nonzero", domain: "Design & IA", level: "Avancé" },
+  { label: "Claude", description: "Intégration d'agents IA, prompts d'ingénierie et automatisation", path: siClaude.path, fillRule: "nonzero", domain: "Design & IA", level: "Avancé" },
 ];
 
 const DOMAIN_ICONS: Record<string, LucideIcon> = {
@@ -157,6 +166,15 @@ const DOMAIN_ICONS: Record<string, LucideIcon> = {
   "Design & outils": PenTool,
   IA: Sparkles,
 };
+
+const STACK_DOMAINS = [
+  "Tous",
+  "Front-end",
+  "Back-end & API",
+  "Mobile",
+  "BDD & DevOps",
+  "Design & IA",
+] as const;
 
 const TOTAL_SKILLS = SKILL_GROUPS.reduce((total, group) => total + group.items.length, 0);
 
@@ -265,7 +283,36 @@ function SectionTitle({
 export function PortfolioContent({ active = true }: { active?: boolean }) {
   const year = new Date().getFullYear();
   const [activeStack, setActiveStack] = useState(0);
+  const [isWheelPaused, setIsWheelPaused] = useState(false);
+  const [domainFilter, setDomainFilter] = useState<string>("Tous");
   const activeStackItem = STACK_WHEEL_ITEMS[activeStack] ?? STACK_WHEEL_ITEMS[0];
+
+  // Rotation automatique fluide et pause intelligente
+  useEffect(() => {
+    if (isWheelPaused) return;
+    const interval = setInterval(() => {
+      setActiveStack((prev) => (prev + 1) % STACK_WHEEL_ITEMS.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [isWheelPaused]);
+
+  const handlePrevStack = () => {
+    setActiveStack((prev) => (prev - 1 + STACK_WHEEL_ITEMS.length) % STACK_WHEEL_ITEMS.length);
+  };
+
+  const handleNextStack = () => {
+    setActiveStack((prev) => (prev + 1) % STACK_WHEEL_ITEMS.length);
+  };
+
+  const handleDomainFilter = (domain: string) => {
+    setDomainFilter(domain);
+    if (domain !== "Tous") {
+      const targetIndex = STACK_WHEEL_ITEMS.findIndex((item) => item.domain === domain);
+      if (targetIndex !== -1) {
+        setActiveStack(targetIndex);
+      }
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
@@ -574,42 +621,87 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 <span>Veille &amp; Innovation continue</span>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/60 shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] backdrop-blur-md">
+            {/* Conteneur principal de la roue interactive ultra embellie */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/75 shadow-[0_30px_90px_-40px_rgba(22,35,44,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_40px_100px_-35px_rgba(40,114,161,0.25)]">
+              {/* Coins HUD style futuriste */}
+              <div className="pointer-events-none absolute left-3 top-3 z-30 h-4 w-4 border-l-2 border-t-2 border-neon/50" aria-hidden="true" />
+              <div className="pointer-events-none absolute right-3 top-3 z-30 h-4 w-4 border-r-2 border-t-2 border-neon/50" aria-hidden="true" />
+              <div className="pointer-events-none absolute bottom-3 left-3 z-30 h-4 w-4 border-b-2 border-l-2 border-neon/50" aria-hidden="true" />
+              <div className="pointer-events-none absolute bottom-3 right-3 z-30 h-4 w-4 border-b-2 border-r-2 border-neon/50" aria-hidden="true" />
+
+              {/* Décors de fond : matrice de points et halos */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 opacity-60"
+                className="pointer-events-none absolute inset-0 opacity-40"
                 style={{
-                  backgroundImage: "radial-gradient(circle, rgba(22,35,44,0.16) 1px, transparent 1px)",
+                  backgroundImage: "radial-gradient(circle, rgba(22,35,44,0.18) 1px, transparent 1px)",
                   backgroundSize: "24px 24px",
-                  WebkitMaskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
-                  maskImage: "radial-gradient(ellipse 72% 72% at 50% 45%, #000 18%, transparent 76%)",
+                  WebkitMaskImage: "radial-gradient(ellipse 75% 75% at 50% 45%, #000 20%, transparent 75%)",
+                  maskImage: "radial-gradient(ellipse 75% 75% at 50% 45%, #000 20%, transparent 75%)",
                 }}
               />
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
                 style={{
-                  background: "radial-gradient(ellipse 58% 52% at 50% 46%, rgba(40,114,161,0.12), transparent 72%)",
+                  background: "radial-gradient(ellipse 65% 55% at 50% 48%, rgba(40,114,161,0.14), transparent 72%)",
                 }}
               />
 
-              <div className="relative flex items-center justify-between gap-4 border-b border-slate-900/[0.08] px-5 py-3.5 sm:px-7">
+              {/* Anneaux d'orbites technologiques et radar gyroscopique */}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden" aria-hidden="true">
+                <div className="h-[280px] w-[280px] rounded-full border border-dashed border-neon/25 animate-[spin_50s_linear_infinite]" />
+                <div className="absolute h-[430px] w-[430px] rounded-full border border-slate-900/[0.07]" />
+                <div className="absolute h-[580px] w-[580px] rounded-full border border-dashed border-steel/20 animate-[spin_70s_linear_infinite_reverse]" />
+                {/* Lignes de visée gyroscopiques */}
+                <div className="absolute h-px w-[620px] bg-gradient-to-r from-transparent via-slate-900/[0.08] to-transparent" />
+                <div className="absolute h-[620px] w-px bg-gradient-to-b from-transparent via-slate-900/[0.08] to-transparent" />
+              </div>
+
+              {/* Barre supérieure : statut live + filtres de domaine interactifs */}
+              <div className="relative z-20 flex flex-col gap-3 border-b border-slate-900/[0.08] bg-white/40 px-5 py-3.5 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-7">
                 <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ice/60">
-                    Carte des stacks
+                  <span className="relative flex h-2 w-2">
+                    <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${isWheelPaused ? "bg-amber-400" : "animate-ping bg-emerald-400"}`} />
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${isWheelPaused ? "bg-amber-500" : "bg-emerald-500"}`} />
+                  </span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-ice/70">
+                    Système Gyroscopique 360°
+                  </span>
+                  <span className="hidden h-3 w-px bg-slate-900/10 sm:inline" aria-hidden="true" />
+                  <span className="hidden font-mono text-[10px] text-neon uppercase tracking-[0.18em] sm:inline">
+                    {isWheelPaused ? "En pause" : "Rotation active"}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ice/40 sm:text-[10px]">
-                  <span className="hidden sm:inline">Rotation automatique</span>
-                  <span className="hidden h-3 w-px bg-slate-900/10 sm:inline" aria-hidden="true" />
-                  <span className="sm:hidden">{STACK_WHEEL_ITEMS.length}</span>
-                  <span className="hidden sm:inline">{STACK_WHEEL_ITEMS.length} technologies</span>
+
+                {/* Filtres par domaine d'expertise */}
+                <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Filtrer les technologies par domaine">
+                  {STACK_DOMAINS.map((domain) => {
+                    const isSelected = domainFilter === domain;
+                    return (
+                      <button
+                        key={domain}
+                        onClick={() => handleDomainFilter(domain)}
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase transition-all duration-200 ${
+                          isSelected
+                            ? "bg-neon text-white shadow-sm shadow-neon/30"
+                            : "bg-white/80 text-ice/60 hover:bg-white hover:text-ice border border-slate-900/5"
+                        }`}
+                        role="tab"
+                        aria-selected={isSelected}
+                      >
+                        {domain}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="relative h-[60vh] min-h-[520px] w-full lg:h-[72vh]">
+              {/* Roue interactive des technologies */}
+              <div className="relative h-[62vh] min-h-[530px] w-full lg:h-[74vh]">
                 <ToolWheel
                   items={STACK_WHEEL_ITEMS}
+                  active={activeStack}
                   showDetails
                   ariaLabel="Roue des stacks"
                   onActiveChange={setActiveStack}
@@ -624,31 +716,110 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                   signal="#789a99"
                   lineColor="rgba(120,154,153,0.3)"
                   frame={false}
-                  autoplay
                   pauseOnHover
                 />
               </div>
 
-              <div className="relative flex flex-col gap-3 border-t border-slate-900/[0.08] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                <div className="flex min-w-0 items-baseline gap-2.5">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ice/40">Sélection</span>
-                  <span className="truncate text-sm font-semibold text-ice">{activeStackItem.label}</span>
-                  <span className="hidden truncate text-xs text-ice/50 md:inline">{activeStackItem.description}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-[2px]" aria-hidden="true">
-                    {STACK_WHEEL_ITEMS.map((item, index) => (
-                      <span
-                        key={item.label}
-                        className={`h-1 rounded-full transition-all duration-300 ${
-                          index === activeStack ? "w-4 bg-neon" : "w-[3px] bg-slate-900/20"
-                        }`}
-                      />
-                    ))}
+              {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}
+              <div className="relative z-20 flex flex-col gap-4 border-t border-slate-900/[0.08] bg-white/70 px-5 py-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neon/25 bg-white shadow-sm transition-transform duration-300 hover:scale-105">
+                    <svg viewBox="0 0 24 24" className="h-6 w-6 fill-neon" aria-hidden="true">
+                      <path d={activeStackItem.path} fillRule="nonzero" />
+                    </svg>
                   </div>
-                  <span className="font-mono text-[10px] tabular-nums text-ice/50">
-                    {String(activeStack + 1).padStart(2, "0")} / {String(STACK_WHEEL_ITEMS.length).padStart(2, "0")}
-                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="truncate text-base font-bold text-ice tracking-tight">{activeStackItem.label}</span>
+                      <span className="rounded-full border border-neon/20 bg-neon/10 px-2.5 py-0.5 text-[10px] font-semibold text-neon uppercase tracking-wider">
+                        {activeStackItem.domain}
+                      </span>
+                      <span className="rounded-full border border-slate-900/10 bg-slate-900/5 px-2 py-0.5 text-[10px] font-medium text-ice/60">
+                        {activeStackItem.level}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-ice/70">{activeStackItem.description}</p>
+                  </div>
+                </div>
+
+                {/* Commandes interactives de rotation */}
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  <button
+                    onClick={handlePrevStack}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white text-ice/75 shadow-sm transition-all hover:border-neon/30 hover:bg-neon/10 hover:text-neon active:scale-95"
+                    aria-label="Technologie précédente"
+                    title="Technologie précédente"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setIsWheelPaused((p) => !p)}
+                    className="flex h-9 items-center gap-1.5 rounded-lg border border-slate-900/10 bg-white px-3 text-xs font-semibold text-ice/80 shadow-sm transition-all hover:border-neon/30 hover:bg-neon/10 hover:text-neon active:scale-95"
+                    aria-label={isWheelPaused ? "Reprendre la rotation automatique" : "Mettre la rotation en pause"}
+                    title={isWheelPaused ? "Reprendre" : "Pause"}
+                  >
+                    {isWheelPaused ? (
+                      <>
+                        <Play className="h-3.5 w-3.5 fill-current" />
+                        <span>Lecture</span>
+                      </>
+                    ) : (
+                      <>
+                        <Pause className="h-3.5 w-3.5 fill-current" />
+                        <span>Pause</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleNextStack}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-900/10 bg-white text-ice/75 shadow-sm transition-all hover:border-neon/30 hover:bg-neon/10 hover:text-neon active:scale-95"
+                    aria-label="Technologie suivante"
+                    title="Technologie suivante"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+
+                  <div className="ml-2 flex items-center gap-1.5 pl-2 border-l border-slate-900/10">
+                    <span className="font-mono text-xs font-semibold tabular-nums text-neon">
+                      {String(activeStack + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-mono text-[10px] text-ice/40">/</span>
+                    <span className="font-mono text-xs tabular-nums text-ice/50">
+                      {String(STACK_WHEEL_ITEMS.length).padStart(2, "0")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bandeau interactif de sélection rapide de toutes les stacks */}
+              <div className="relative z-20 border-t border-slate-900/[0.08] bg-slate-50/70 p-3 sm:px-6">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {STACK_WHEEL_ITEMS.map((item, index) => {
+                    const isCurrent = index === activeStack;
+                    const matchesFilter = domainFilter === "Tous" || item.domain === domainFilter;
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={() => {
+                          setActiveStack(index);
+                          setIsWheelPaused(true);
+                        }}
+                        className={`group flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-all duration-200 ${
+                          isCurrent
+                            ? "bg-neon text-white font-semibold shadow-sm shadow-neon/30 scale-105"
+                            : matchesFilter
+                            ? "bg-white text-ice/75 hover:bg-white hover:text-neon border border-slate-900/10"
+                            : "bg-white/40 text-ice/40 border border-slate-900/5 opacity-50 hover:opacity-100"
+                        }`}
+                        title={`${item.label} — ${item.description}`}
+                      >
+                        <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 fill-current ${isCurrent ? "text-white" : "text-neon"}`}>
+                          <path d={item.path} fillRule="nonzero" />
+                        </svg>
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -35,6 +35,11 @@ function wrap(index: number, total: number) {
   return total > 0 ? ((Math.trunc(Number.isFinite(index) ? index : 0) % total) + total) % total : 0;
 }
 
+/** Limite la précision des pourcentages pour garantir un rendu serveur/client identique. */
+function pct(value: number) {
+  return Number(value.toFixed(6));
+}
+
 function Photo({ item, thumbnail = false }: { item: FerrisWheelItem; thumbnail?: boolean }) {
   const [failed, setFailed] = React.useState("");
   const [loading, setLoading] = React.useState("");
@@ -347,7 +352,7 @@ export function FerrisWheelGallery({
               <div ref={wheelRef} data-wheel className="absolute left-[17%] top-[13%] size-[66%] rounded-full border-2 border-foreground/15" style={{ transform: `rotate(${initialAngle.current}deg)` }}>
                 <div aria-hidden="true" className="absolute inset-[6%] rounded-full border border-foreground/10" />
                 {Array.from({ length: 24 }, (_, light) => (
-                  <span key={`light-${light}`} aria-hidden="true" data-rim-light className="absolute size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chart-2/60" style={{ left: `${50 + Math.sin(light * Math.PI / 12) * 50}%`, top: `${50 - Math.cos(light * Math.PI / 12) * 50}%` }} />
+                  <span key={`light-${light}`} aria-hidden="true" data-rim-light className="absolute size-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chart-2/60" style={{ left: `${pct(50 + Math.sin(light * Math.PI / 12) * 50)}%`, top: `${pct(50 - Math.cos(light * Math.PI / 12) * 50)}%` }} />
                 ))}
                 {items.map((item, index) => {
                   const radians = -sign * index * slot * Math.PI / 180;
@@ -355,7 +360,7 @@ export function FerrisWheelGallery({
                   return (
                     <React.Fragment key={`${item.id ?? item.src}-${index}`}>
                       <span aria-hidden="true" className="absolute left-1/2 top-1/2 h-px w-1/2 origin-left bg-foreground/10" style={{ transform: `rotate(${-90 - sign * index * slot}deg)` }} />
-                      <div data-gondola-anchor={index} className="absolute z-10 w-[34%]" style={{ left: `${50 + Math.sin(radians) * 50}%`, top: `${50 - Math.cos(radians) * 50}%`, zIndex: isActive ? 20 : 10 }}>
+                      <div data-gondola-anchor={index} className="absolute z-10 w-[34%]" style={{ left: `${pct(50 + Math.sin(radians) * 50)}%`, top: `${pct(50 - Math.cos(radians) * 50)}%`, zIndex: isActive ? 20 : 10 }}>
                         <div ref={(node) => { counters.current[index] = node; }} data-counter={index} className="relative origin-top-left" style={{ transform: `rotate(${-initialAngle.current}deg)` }}>
                           <div className="absolute left-0 top-0 w-full -translate-x-1/2">
                             <div ref={(node) => { gondolas.current[index] = node; }} data-pendulum={index} className="relative origin-top">

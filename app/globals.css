@@ -51,6 +51,15 @@ canvas {
   display: block;
 }
 
+/* Rangées de puces défilantes : masque la barre de défilement native */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* conteneur de scroll (hauteur pilotée par les phases) */
 #scroll-root {
   position: relative;

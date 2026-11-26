@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FORMATION_BOOKS, NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
@@ -8,7 +8,7 @@ import StrokeText from "@/components/ui/StrokeText";
 import BlurText from "@/components/ui/BlurText";
 import TextLoop from "@/components/ui/TextLoop";
 import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
-import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
+import { SkillDomainGrid } from "@/components/ui/skill-domain-grid";
 import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
 import BooksShowcase from "@/components/ui/BooksShowcase";
 import ContactWithGlobe from "@/components/ui/contact-with-globe";
@@ -45,16 +45,8 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  CloudCog,
-  Code2,
-  Database,
   Pause,
-  PenTool,
   Play,
-  ServerCog,
-  Smartphone,
-  Sparkles,
-  type LucideIcon,
 } from "lucide-react";
 
 const PROJECT_GALLERY_ITEMS = [
@@ -157,16 +149,6 @@ const STACK_WHEEL_ITEMS: EnrichedStackItem[] = [
   { label: "Claude", description: "Intégration d'agents IA, prompts d'ingénierie et automatisation", path: siClaude.path, fillRule: "nonzero", domain: "Design & IA", level: "Avancé" },
 ];
 
-const DOMAIN_ICONS: Record<string, LucideIcon> = {
-  "Front-end": Code2,
-  "Back-end & API": ServerCog,
-  Mobile: Smartphone,
-  "Bases de données": Database,
-  "Infra / DevOps": CloudCog,
-  "Design & outils": PenTool,
-  IA: Sparkles,
-};
-
 const STACK_DOMAINS = [
   "Tous",
   "Front-end",
@@ -178,16 +160,12 @@ const STACK_DOMAINS = [
 
 const TOTAL_SKILLS = SKILL_GROUPS.reduce((total, group) => total + group.items.length, 0);
 
-const SKILL_STEPS: PathStep[] = SKILL_DOMAINS.map((domain) => {
-  const Icon = DOMAIN_ICONS[domain.title] ?? Code2;
-  return {
-    id: domain.title,
-    title: domain.title,
-    body: domain.description,
-    tags: domain.stacks,
-    icon: <Icon size={20} strokeWidth={1.8} aria-hidden="true" />,
-  };
-});
+const LEVEL_SCORE: Record<string, number> = {
+  Expert: 5,
+  Avancé: 4,
+  Maîtrisé: 3,
+  Exploré: 2,
+};
 
 const ALL_STACKS_TEXT = SKILL_GROUPS.flatMap((group) => group.items).join(" ✦ ");
 
@@ -285,7 +263,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   const [activeStack, setActiveStack] = useState(0);
   const [isWheelPaused, setIsWheelPaused] = useState(false);
   const [domainFilter, setDomainFilter] = useState<string>("Tous");
+  const quickSelectorRef = useRef<HTMLDivElement | null>(null);
   const activeStackItem = STACK_WHEEL_ITEMS[activeStack] ?? STACK_WHEEL_ITEMS[0];
+  const activeLevel = LEVEL_SCORE[activeStackItem.level] ?? 3;
 
   // Rotation automatique fluide et pause intelligente
   useEffect(() => {
@@ -295,6 +275,15 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
     }, 2800);
     return () => clearInterval(interval);
   }, [isWheelPaused]);
+
+  // Garde la puce active centrée dans le sélecteur horizontal, sans faire défiler la page.
+  useEffect(() => {
+    const container = quickSelectorRef.current;
+    const chip = container?.querySelector<HTMLElement>(`[data-stack-index="${activeStack}"]`);
+    if (!container || !chip) return;
+    const target = chip.offsetLeft - container.clientWidth / 2 + chip.clientWidth / 2;
+    container.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [activeStack]);
 
   const handlePrevStack = () => {
     setActiveStack((prev) => (prev - 1 + STACK_WHEEL_ITEMS.length) % STACK_WHEEL_ITEMS.length);
@@ -613,16 +602,36 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-ice/80 sm:text-lg">
                 Un écosystème technologique complet et moderne — du pixel parfait sur le front-end à la fiabilité d&apos;une architecture backend performante et évolutive.
               </p>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ice/40">
-                <span>{STACK_WHEEL_ITEMS.length} technologies maîtrisées</span>
-                <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
-                <span>{SKILL_GROUPS.length} piliers d&apos;expertise</span>
-                <span className="h-1 w-1 rounded-full bg-slate-900/20" aria-hidden="true" />
-                <span>Veille &amp; Innovation continue</span>
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.16em]">
+                {[
+                  { value: String(STACK_WHEEL_ITEMS.length), label: "technologies" },
+                  { value: String(SKILL_DOMAINS.length).padStart(2, "0"), label: "domaines" },
+                  { value: String(TOTAL_SKILLS), label: "compétences clés" },
+                ].map((stat) => (
+                  <span
+                    key={stat.label}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-900/[0.07] bg-white/55 px-3.5 py-1.5 text-ice/45 shadow-sm backdrop-blur"
+                  >
+                    <span className="font-semibold tabular-nums text-neon">{stat.value}</span>
+                    {stat.label}
+                  </span>
+                ))}
+                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-600/15 bg-emerald-50/70 px-3.5 py-1.5 text-emerald-700/70 shadow-sm backdrop-blur">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                  Veille continue
+                </span>
               </div>
             </div>
             {/* Conteneur principal de la roue interactive ultra embellie */}
-            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/75 shadow-[0_30px_90px_-40px_rgba(22,35,44,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_40px_100px_-35px_rgba(40,114,161,0.25)]">
+            <div className="group/wheel relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/75 ring-1 ring-slate-900/[0.06] shadow-[0_30px_90px_-40px_rgba(22,35,44,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_40px_100px_-35px_rgba(40,114,161,0.25)]">
+              {/* Liseré lumineux supérieur */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 z-30 h-[2px] bg-gradient-to-r from-transparent via-neon/50 to-transparent"
+              />
               {/* Coins HUD style futuriste */}
               <div className="pointer-events-none absolute left-3 top-3 z-30 h-4 w-4 border-l-2 border-t-2 border-neon/50" aria-hidden="true" />
               <div className="pointer-events-none absolute right-3 top-3 z-30 h-4 w-4 border-r-2 border-t-2 border-neon/50" aria-hidden="true" />
@@ -675,14 +684,18 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 </div>
 
                 {/* Filtres par domaine d'expertise */}
-                <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Filtrer les technologies par domaine">
+                <div
+                  className="scrollbar-hide -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 pb-0.5"
+                  role="tablist"
+                  aria-label="Filtrer les technologies par domaine"
+                >
                   {STACK_DOMAINS.map((domain) => {
                     const isSelected = domainFilter === domain;
                     return (
                       <button
                         key={domain}
                         onClick={() => handleDomainFilter(domain)}
-                        className={`rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase transition-all duration-200 ${
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase transition-all duration-200 ${
                           isSelected
                             ? "bg-neon text-white shadow-sm shadow-neon/30"
                             : "bg-white/80 text-ice/60 hover:bg-white hover:text-ice border border-slate-900/5"
@@ -698,7 +711,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
 
               {/* Roue interactive des technologies */}
-              <div className="relative h-[62vh] min-h-[530px] w-full lg:h-[74vh]">
+              <div className="relative h-[56vh] min-h-[500px] w-full lg:h-[64vh]">
                 <ToolWheel
                   items={STACK_WHEEL_ITEMS}
                   active={activeStack}
@@ -723,10 +736,11 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}
               <div className="relative z-20 flex flex-col gap-4 border-t border-slate-900/[0.08] bg-white/70 px-5 py-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-7">
                 <div className="flex min-w-0 items-center gap-3.5">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neon/25 bg-white shadow-sm transition-transform duration-300 hover:scale-105">
+                  <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-neon/20 bg-gradient-to-br from-white to-mist/40 shadow-sm transition-transform duration-300 hover:scale-105">
                     <svg viewBox="0 0 24 24" className="h-6 w-6 fill-neon" aria-hidden="true">
                       <path d={activeStackItem.path} fillRule="nonzero" />
                     </svg>
+                    <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white" aria-hidden="true" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -734,7 +748,16 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                       <span className="rounded-full border border-neon/20 bg-neon/10 px-2.5 py-0.5 text-[10px] font-semibold text-neon uppercase tracking-wider">
                         {activeStackItem.domain}
                       </span>
-                      <span className="rounded-full border border-slate-900/10 bg-slate-900/5 px-2 py-0.5 text-[10px] font-medium text-ice/60">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-900/10 bg-slate-900/5 px-2 py-0.5 text-[10px] font-medium text-ice/60">
+                        <span className="flex items-end gap-[2px]" aria-hidden="true">
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <span
+                              key={i}
+                              className={`w-[2px] rounded-full ${i < activeLevel ? "bg-neon" : "bg-slate-900/15"}`}
+                              style={{ height: `${4 + i * 1.6}px` }}
+                            />
+                          ))}
+                        </span>
                         {activeStackItem.level}
                       </span>
                     </div>
@@ -793,13 +816,17 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
               {/* Bandeau interactif de sélection rapide de toutes les stacks */}
               <div className="relative z-20 border-t border-slate-900/[0.08] bg-slate-50/70 p-3 sm:px-6">
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div
+                  ref={quickSelectorRef}
+                  className="scrollbar-hide flex items-center gap-2 overflow-x-auto pb-1"
+                >
                   {STACK_WHEEL_ITEMS.map((item, index) => {
                     const isCurrent = index === activeStack;
                     const matchesFilter = domainFilter === "Tous" || item.domain === domainFilter;
                     return (
                       <button
                         key={item.label}
+                        data-stack-index={index}
                         onClick={() => {
                           setActiveStack(index);
                           setIsWheelPaused(true);
@@ -812,8 +839,9 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                             : "bg-white/40 text-ice/40 border border-slate-900/5 opacity-50 hover:opacity-100"
                         }`}
                         title={`${item.label} — ${item.description}`}
+                        aria-pressed={isCurrent}
                       >
-                        <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 fill-current ${isCurrent ? "text-white" : "text-neon"}`}>
+                        <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 fill-current ${isCurrent ? "text-white" : "text-neon"}`} aria-hidden="true">
                           <path d={item.path} fillRule="nonzero" />
                         </svg>
                         <span>{item.label}</span>
@@ -821,30 +849,12 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                     );
                   })}
                 </div>
+                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-slate-50 to-transparent" />
+                <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-slate-50 to-transparent" />
               </div>
             </div>
 
-            <div className="mt-14 flex flex-col items-center gap-2 text-center">
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-neon">
-                Maîtrise par domaine d&apos;intervention
-              </p>
-              <p className="max-w-xl text-sm leading-relaxed text-ice/70">
-                Du front-end réactif à l&apos;infrastructure cloud et l&apos;IA : explorez mon écosystème technologique étape par étape.
-              </p>
-              <p className="font-mono text-xs text-ice/40">
-                {TOTAL_SKILLS} compétences clés · {SKILL_DOMAINS.length} domaines spécialisés
-              </p>
-            </div>
-
-            <div className="mt-6">
-              <StepsPath
-                steps={SKILL_STEPS}
-                title="Mes stacks, domaine par domaine"
-                accentColor="#cbdde9"
-                autoPlay
-                autoPlayInterval={4200}
-              />
-            </div>
+            <SkillDomainGrid domains={SKILL_DOMAINS} className="mx-auto mt-16 max-w-6xl" />
 
           </div>
         </section>

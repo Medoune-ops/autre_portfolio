@@ -745,16 +745,17 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         />
 
         {/* FOOTER INTERACTIF FUZZY GAZE */}
-        <section aria-label="Pied de page interactif" className="relative">
+        <section aria-label="Pied de page interactif" className="relative border-t border-slate-900/10">
           <FuzzyGazeFooter
             wordmark="Medoune"
             wordmarkHref="#accueil"
             email={PROFILE.email}
             columns={FOOTER_COLUMNS}
+            background="#16232c"
             height="85svh"
           />
-          <div className="border-t border-white/10 bg-[#90acf7] py-6 text-center text-xs text-white/80">
-            <p>© {year} {PROFILE.name}. Tous droits réservés.</p>
+          <div className="border-t border-white/10 bg-[#16232c] py-6 text-center text-xs">
+            <p className="text-mist/70">© {year} {PROFILE.name}. Tous droits réservés.</p>
           </div>
         </section>
       </main>

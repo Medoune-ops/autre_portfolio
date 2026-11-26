@@ -62,7 +62,7 @@ const config: Config = {
         glow: "0 0 0 1px rgba(40, 114, 161, 0.16), 0 12px 40px rgba(40, 114, 161, 0.16)",
       },
       fontFamily: {
-        sans: ["ui-sans-serif", "system-ui", "Segoe UI", "sans-serif"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

@@ -342,18 +342,23 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   const [footerRef, showFooter] = useNearViewport<HTMLDivElement>("500px");
   const activeStackItem = STACK_WHEEL_ITEMS[activeStack] ?? STACK_WHEEL_ITEMS[0];
 
-  // Diffère la scène 3D lourde après le premier rendu pour améliorer le chargement initial.
+  // Diffère la scène 3D lourde après le premier rendu ; désactivée sur mobile/reduced-motion pour éviter les ralentissements.
   useEffect(() => {
     if (!active) return;
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+    if (!desktop || reduced || saveData) return;
+
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       cancelIdleCallback?: (id: number) => void;
     };
     if (typeof win.requestIdleCallback === "function") {
-      const id = win.requestIdleCallback(() => setSplineReady(true), { timeout: 1500 });
+      const id = win.requestIdleCallback(() => setSplineReady(true), { timeout: 1800 });
       return () => win.cancelIdleCallback?.(id);
     }
-    const timer = window.setTimeout(() => setSplineReady(true), 700);
+    const timer = window.setTimeout(() => setSplineReady(true), 900);
     return () => window.clearTimeout(timer);
   }, [active]);
 
@@ -385,7 +390,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
+    <div className="relative min-h-screen bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
       <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-bg/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
         <div className={`${CONTAINER} flex items-center justify-between gap-3 py-3 sm:py-4`}>
           <a
@@ -454,7 +459,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="accueil"
           aria-labelledby="accueil-titre"
-          className="relative flex min-h-[100svh] items-center pb-[56%] pt-28 sm:pb-[42%] sm:pt-32 lg:py-24"
+          className="relative flex min-h-screen items-center pb-[56%] pt-28 sm:pb-[42%] sm:pt-32 lg:py-24 [min-height:100dvh]"
         >
           {/* Scène 3D : occupe toute la hauteur du héro, cadrée à droite sur grand écran. */}
           <div
@@ -462,7 +467,11 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             role="img"
             aria-label="Scène 3D interactive présentant le travail de Medoune"
           >
-            <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={splineReady} />
+            {splineReady ? (
+              <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-neon/10 via-transparent to-neon2/10" aria-hidden="true" />
+            )}
           </div>
 
           {/* Voile de lisibilité : dense sous le texte, plus léger à droite pour laisser voir la scène 3D. */}
@@ -1027,10 +1036,10 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               email={PROFILE.email}
               columns={FOOTER_COLUMNS}
               background="#16232c"
-              height="85svh"
+              height="85dvh"
             />
           ) : (
-            <div className="h-[85svh] w-full bg-[#16232c]" aria-hidden="true" />
+            <div className="h-[85dvh] w-full bg-[#16232c]" aria-hidden="true" />
           )}
           <div className="border-t border-white/10 bg-[#16232c] py-6 text-center text-xs">
             <p className="text-mist/70">© {year} {PROFILE.name}. Tous droits réservés.</p>

@@ -313,7 +313,7 @@ export function FerrisWheelGallery({
               tabIndex={0}
               aria-label="Browse the collection"
               className={`relative mx-auto w-full max-w-[380px] select-none overflow-hidden rounded-3xl pb-4 md:max-w-[520px] lg:max-w-[560px] ${focusRing}`}
-              style={{ touchAction: "none" }}
+              style={{ touchAction: "pan-y" }}
               onPointerDown={(event) => {
                 if (!event.isPrimary || event.button !== 0) return;
                 setPaused(true);

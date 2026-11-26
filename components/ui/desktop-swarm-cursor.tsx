@@ -13,8 +13,14 @@ export function DesktopSwarmCursor() {
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const ua = navigator.userAgent;
+    const platform = navigator.platform || "";
+    const isMacLike = /Mac|iPod|iPhone|iPad/.test(platform) || /Mac OS X/.test(ua);
+    const highDpr = window.devicePixelRatio > 1.5;
+    const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+    const lowPower = isMacLike || highDpr || saveData;
 
-    const update = () => setEnabled(media.matches && !reduced.matches);
+    const update = () => setEnabled(media.matches && !reduced.matches && !lowPower);
     update();
 
     media.addEventListener("change", update);
@@ -30,7 +36,7 @@ export function DesktopSwarmCursor() {
   return (
     <div className="pointer-events-none fixed inset-0 z-50 hidden h-screen w-screen overflow-hidden md:block">
       <SwarmCursor
-        count={72}
+        count={56}
         size={2.2}
         spread={75}
         swirl={0.5}

@@ -13,9 +13,10 @@
 }
 
 html, body {
-  height: 100%;
+  min-height: 100%;
   background: var(--bg);
   color: var(--ice);
+  overflow-x: hidden;
 }
 
 html {
@@ -31,7 +32,6 @@ html {
 
 body {
   margin: 0;
-  overflow-x: hidden;
 }
 
 /* Scribble Clock : styles sortis du composant pour éviter un mismatch d'hydratation */
@@ -281,4 +281,27 @@ canvas {
     3.9px 4.4px 6.6px -1.7px hsl(205 20% 10% / 0.1),
     6.5px 7.2px 10.9px -2.1px hsl(205 20% 10% / 0.1),
     8px 9px 14px -2.5px hsl(205 20% 10% / 0.2);
+}
+
+/* Rangées de puces défilantes : masque la barre de défilement native */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile/coarse pointer: réduire les effets coûteux pour éviter les saccades. */
+@media (max-width: 768px), (pointer: coarse) {
+  .backdrop-blur,
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur-lg,
+  .backdrop-blur-xl,
+  .backdrop-blur-2xl,
+  .backdrop-blur-3xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
 }

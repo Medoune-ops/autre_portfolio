@@ -232,7 +232,7 @@ const CSS =
   "@container (max-width:599px){.fgf-in{padding:44px 24px 34px}.fgf-top{row-gap:34px}.fgf-nav-a,.fgf-nav-b{grid-column:1 / -1}.fgf-nav-b{grid-row:3}.fgf-head{margin-bottom:19px}.fgf-list{row-gap:18px}}" +
   "@media (prefers-reduced-motion:reduce){.fgf-link,.fgf-link::after,.fgf-mail::after,.fgf-eye{transition:none}}"
 
-export default function FuzzyGazeFooter({
+export function FuzzyGazeFooter({
   wordmark = "Wooly",
   wordmarkHref = "#",
   columns = DEFAULT_COLUMNS,
@@ -505,3 +505,5 @@ export default function FuzzyGazeFooter({
     </footer>
   )
 }
+
+export default FuzzyGazeFooter;

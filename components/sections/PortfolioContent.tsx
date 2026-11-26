@@ -14,6 +14,7 @@ import BooksShowcase from "@/components/ui/BooksShowcase";
 import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import { CVDownloadDropdown } from "@/components/ui/cv-download-dropdown";
 import { PopButton } from "@/components/ui/PopButton";
+import { FuzzyGazeFooter } from "@/components/ui/fuzzy-gaze-footer";
 import {
   siAngular,
   siClaude,
@@ -76,6 +77,45 @@ const PROJECT_GALLERY_ITEMS = [
     year: "2025",
     alt: "Lumières néon cyan dans un environnement sombre",
     src: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+const FOOTER_COLUMNS = [
+  {
+    title: "Navigation",
+    links: [
+      { label: "Accueil", href: "#accueil" },
+      { label: "Projets récents", href: "#projets" },
+      { label: "Compétences", href: "#competences" },
+      { label: "Parcours", href: "#formation" },
+    ],
+  },
+  {
+    title: "Profil & CV",
+    links: [
+      { label: "Télécharger CV (FR)", href: "/cv/CV_Medoune_SECK_FR.pdf" },
+      { label: "Download Resume (EN)", href: "/cv/CV_Medoune_SECK_EN.pdf" },
+      { label: "Keur Massar, Dakar", href: "#contact" },
+      { label: "Disponible de suite", href: "#contact" },
+    ],
+  },
+  {
+    title: "Expertises",
+    links: [
+      { label: "Architecture Full-Stack", href: "#competences" },
+      { label: "Design UI/UX & Motion", href: "#competences" },
+      { label: "3D & Performance Web", href: "#projets" },
+      { label: "Intelligence Artificielle", href: "#competences" },
+    ],
+  },
+  {
+    title: "Connexion",
+    links: [
+      { label: "GitHub (@Medoune-ops)", href: "https://github.com/Medoune-ops" },
+      { label: "Écrire un e-mail", href: `mailto:${PROFILE.email}` },
+      { label: "Téléphone direct", href: `tel:${PROFILE.phone.replace(/\s+/g, "")}` },
+      { label: "Retour en haut ↑", href: "#accueil" },
+    ],
   },
 ];
 
@@ -704,15 +744,19 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           className="bg-bg/[0.72] py-24 sm:py-32"
         />
 
-        {/* FOOTER */}
-        <footer className={`${CONTAINER} relative flex flex-col items-center justify-between gap-5 py-10 text-sm text-ice/75 sm:flex-row`}>
-          <p>
-            © {year} {PROFILE.name}. Tous droits réservés.
-          </p>
-          <a href="#accueil" className={`rounded-md transition-colors hover:text-ice ${FOCUS}`}>
-            Retour en haut ↑
-          </a>
-        </footer>
+        {/* FOOTER INTERACTIF FUZZY GAZE */}
+        <section aria-label="Pied de page interactif" className="relative">
+          <FuzzyGazeFooter
+            wordmark="Medoune"
+            wordmarkHref="#accueil"
+            email={PROFILE.email}
+            columns={FOOTER_COLUMNS}
+            height="85svh"
+          />
+          <div className="border-t border-white/10 bg-[#90acf7] py-6 text-center text-xs text-white/80">
+            <p>© {year} {PROFILE.name}. Tous droits réservés.</p>
+          </div>
+        </section>
       </main>
     </div>
   );

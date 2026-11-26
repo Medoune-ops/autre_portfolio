@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Fond de site ultra performant :
  * Halos ambiants doux et grille tech en pur CSS accéléré par le GPU (0% CPU, 60-120 FPS constant).

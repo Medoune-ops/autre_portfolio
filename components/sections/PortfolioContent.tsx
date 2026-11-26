@@ -1,20 +1,66 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+
+function useNearViewport<T extends HTMLElement>(margin = "500px") {
+  const ref = useRef<T | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (visible) return;
+    const node = ref.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: margin },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [margin, visible]);
+
+  return [ref, visible] as const;
+}
 import { FORMATION_BOOKS, NAV_LINKS, PROFILE, SKILL_DOMAINS, SKILL_GROUPS, SPLINE_SCENE } from "@/data/portfolio";
 import { SplineScene } from "@/components/ui/splite";
 import BiteMark from "@/components/ui/BiteMark";
 import StrokeText from "@/components/ui/StrokeText";
 import BlurText from "@/components/ui/BlurText";
 import TextLoop from "@/components/ui/TextLoop";
-import { ToolWheel, type ToolWheelItem } from "@/components/ui/tool-wheel";
+import type { ToolWheelItem } from "@/components/ui/tool-wheel";
 import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
-import { FerrisWheelGallery } from "@/components/ui/ferris-wheel-gallery";
-import BooksShowcase from "@/components/ui/BooksShowcase";
-import ContactWithGlobe from "@/components/ui/contact-with-globe";
 import { CVDownloadDropdown } from "@/components/ui/cv-download-dropdown";
 import { PopButton } from "@/components/ui/PopButton";
-import { FuzzyGazeFooter } from "@/components/ui/fuzzy-gaze-footer";
+
+const ToolWheel = dynamic(() => import("@/components/ui/tool-wheel").then((m) => m.ToolWheel), {
+  ssr: false,
+  loading: () => <div className="h-[62vh] min-h-[530px] w-full animate-pulse rounded-3xl bg-slate-100/70" aria-hidden="true" />,
+});
+const FerrisWheelGallery = dynamic(
+  () => import("@/components/ui/ferris-wheel-gallery").then((m) => m.FerrisWheelGallery),
+  { ssr: false, loading: () => <div className="h-[420px] w-full animate-pulse rounded-3xl bg-slate-100/70" aria-hidden="true" /> },
+);
+const BooksShowcase = dynamic(() => import("@/components/ui/BooksShowcase"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full animate-pulse bg-slate-100/70" aria-hidden="true" />,
+});
+const ContactWithGlobe = dynamic(() => import("@/components/ui/contact-with-globe"), {
+  ssr: false,
+  loading: () => <div className="min-h-[640px] w-full animate-pulse bg-slate-100/40" aria-hidden="true" />,
+});
+const FuzzyGazeFooter = dynamic(
+  () => import("@/components/ui/fuzzy-gaze-footer").then((m) => m.FuzzyGazeFooter),
+  { ssr: false, loading: () => <div className="h-[70svh] w-full bg-[#16232c]" aria-hidden="true" /> },
+);
 import {
   siAngular,
   siClaude,
@@ -48,12 +94,14 @@ import {
   CloudCog,
   Code2,
   Database,
+  Menu,
   Pause,
   PenTool,
   Play,
   ServerCog,
   Smartphone,
   Sparkles,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -285,7 +333,29 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   const [activeStack, setActiveStack] = useState(0);
   const [isWheelPaused, setIsWheelPaused] = useState(false);
   const [domainFilter, setDomainFilter] = useState<string>("Tous");
+  const [splineReady, setSplineReady] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [projectsRef, showProjects] = useNearViewport<HTMLDivElement>("700px");
+  const [skillsRef, showSkills] = useNearViewport<HTMLDivElement>("700px");
+  const [formationRef, showFormation] = useNearViewport<HTMLDivElement>("700px");
+  const [contactRef, showContact] = useNearViewport<HTMLDivElement>("700px");
+  const [footerRef, showFooter] = useNearViewport<HTMLDivElement>("500px");
   const activeStackItem = STACK_WHEEL_ITEMS[activeStack] ?? STACK_WHEEL_ITEMS[0];
+
+  // Diffère la scène 3D lourde après le premier rendu pour améliorer le chargement initial.
+  useEffect(() => {
+    if (!active) return;
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof win.requestIdleCallback === "function") {
+      const id = win.requestIdleCallback(() => setSplineReady(true), { timeout: 1500 });
+      return () => win.cancelIdleCallback?.(id);
+    }
+    const timer = window.setTimeout(() => setSplineReady(true), 700);
+    return () => window.clearTimeout(timer);
+  }, [active]);
 
   // Rotation automatique fluide et pause intelligente
   useEffect(() => {
@@ -317,17 +387,18 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
       <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-bg/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
-        <div className={`${CONTAINER} flex items-center justify-between gap-4 py-3.5 sm:py-4`}>
+        <div className={`${CONTAINER} flex items-center justify-between gap-3 py-3 sm:py-4`}>
           <a
             href="#accueil"
-            className={`group flex items-center rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
+            className={`group flex shrink-0 items-center rounded-md text-sm font-semibold tracking-tight text-ice transition-colors hover:text-neon ${FOCUS}`}
             aria-label={`Retour à l'accueil — ${PROFILE.name}`}
           >
             {PROFILE.name}
           </a>
+
           <div className="flex items-center gap-2 sm:gap-3">
-            <nav aria-label="Navigation principale">
-              <ul className="flex items-center gap-1 text-xs sm:gap-2 sm:text-sm">
+            <nav aria-label="Navigation principale" className="hidden md:block">
+              <ul className="flex items-center gap-1 text-sm">
                 {NAV_LINKS.map((link) => (
                   <li key={link.href}>
                     <a
@@ -340,10 +411,42 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 ))}
               </ul>
             </nav>
-            <div className="hidden h-4 w-px bg-slate-900/15 sm:block" aria-hidden="true" />
+            <div className="hidden h-4 w-px bg-slate-900/15 md:block" aria-hidden="true" />
             <CVDownloadDropdown variant="header" />
+            <button
+              type="button"
+              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-900/10 bg-white/70 text-ice/80 shadow-sm transition hover:bg-white hover:text-ice md:hidden ${FOCUS}`}
+              aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+            </button>
           </div>
         </div>
+
+        {mobileMenuOpen && (
+          <nav
+            id="mobile-nav"
+            aria-label="Navigation mobile"
+            className="border-t border-slate-900/10 bg-bg/95 backdrop-blur-xl md:hidden"
+          >
+            <ul className={`${CONTAINER} grid gap-1 py-3`}>
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block rounded-xl px-3 py-2.5 text-sm font-medium text-ice/80 transition hover:bg-white hover:text-ice ${FOCUS}`}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </header>
 
       <main>
@@ -351,15 +454,15 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="accueil"
           aria-labelledby="accueil-titre"
-          className="relative flex min-h-screen items-center py-24"
+          className="relative flex min-h-[100svh] items-center pb-[56%] pt-28 sm:pb-[42%] sm:pt-32 lg:py-24"
         >
           {/* Scène 3D : occupe toute la hauteur du héro, cadrée à droite sur grand écran. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[54%] overflow-hidden lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-auto lg:aspect-[5/6]"
+            className="absolute inset-x-0 bottom-0 h-[50%] overflow-hidden sm:h-[46%] lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-auto lg:aspect-[5/6]"
             role="img"
             aria-label="Scène 3D interactive présentant le travail de Medoune"
           >
-            <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={active} />
+            <SplineScene scene={SPLINE_SCENE} className="h-full w-full" active={splineReady} />
           </div>
 
           {/* Voile de lisibilité : dense sous le texte, plus léger à droite pour laisser voir la scène 3D. */}
@@ -374,18 +477,15 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
           <div className={`${CONTAINER} pointer-events-none relative z-30`}>
             <div className="pointer-events-auto max-w-xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-neon/20 bg-white/75 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-neon shadow-sm backdrop-blur">
-                Façonner des expériences web d&apos;impact
-              </span>
               <SectionTitle
                 as="h1"
                 id="accueil-titre"
                 text={PROFILE.name}
-                className="mt-5"
-                fontSize={128}
+                className="mt-5 max-w-[min(100%,34rem)]"
+                fontSize={112}
                 fontWeight={800}
-                letterSpacing={-4}
-                strokeWidth={1.6}
+                letterSpacing={-3}
+                strokeWidth={1.5}
                 drawDuration={2.2}
                 fillDelay={0.8}
                 fillDuration={3.2}
@@ -396,11 +496,11 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               <SectionTitle
                 as="p"
                 text={PROFILE.role}
-                className="mt-3"
-                fontSize={54}
+                className="mt-3 max-w-[min(100%,34rem)]"
+                fontSize={42}
                 fontWeight={700}
-                letterSpacing={-1}
-                strokeWidth={1.2}
+                letterSpacing={-0.8}
+                strokeWidth={1.1}
                 drawDuration={2.0}
                 fillDelay={1.0}
                 fillDuration={3.0}
@@ -460,14 +560,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
             </div>
           </div>
 
-          <a
-            href="#projets"
-            className={`pointer-events-auto absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 rounded-full px-3 py-2 text-xs font-medium tracking-[0.18em] text-ice/60 uppercase transition-colors hover:text-ice sm:inline-flex ${FOCUS}`}
-            aria-label="Défiler vers les projets"
-          >
-            <span>Défiler</span>
-            <span aria-hidden="true" className="h-8 w-px bg-gradient-to-b from-neon/70 to-transparent" />
-          </a>
         </section>
 
         {/* STACKS */}
@@ -532,11 +624,15 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               />
             </div>
 
-            <div className="mt-12">
-              <FerrisWheelGallery
-                items={PROJECT_GALLERY_ITEMS}
-                aria-label="Galerie des projets récents"
-              />
+            <div ref={projectsRef} className="mt-12 min-h-[420px]">
+              {showProjects ? (
+                <FerrisWheelGallery
+                  items={PROJECT_GALLERY_ITEMS}
+                  aria-label="Galerie des projets récents"
+                />
+              ) : (
+                <div className="h-[420px] w-full animate-pulse rounded-3xl bg-slate-100/60" aria-hidden="true" />
+              )}
             </div>
 
             <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/80 via-neon/5 to-neon2/10 p-8 shadow-soft backdrop-blur-sm transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
@@ -591,11 +687,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                Expertise Technique
-                <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
-                <span className="text-neon">Stack &amp; Outils</span>
-              </span>
               <SectionTitle
                 as="h2"
                 text="Compétences"
@@ -698,26 +789,30 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
 
               {/* Roue interactive des technologies */}
-              <div className="relative h-[62vh] min-h-[530px] w-full lg:h-[74vh]">
-                <ToolWheel
-                  items={STACK_WHEEL_ITEMS}
-                  active={activeStack}
-                  showDetails
-                  ariaLabel="Roue des stacks"
-                  onActiveChange={setActiveStack}
-                  eyebrow=""
-                  title=""
-                  subtitle=""
-                  background="transparent"
-                  surface="#ffffff"
-                  color="#16232c"
-                  mutedColor="rgba(22,35,44,0.72)"
-                  accent="#2872a1"
-                  signal="#789a99"
-                  lineColor="rgba(120,154,153,0.3)"
-                  frame={false}
-                  pauseOnHover
-                />
+              <div ref={skillsRef} className="relative h-[58vh] min-h-[480px] w-full sm:min-h-[530px] lg:h-[74vh]">
+                {showSkills ? (
+                  <ToolWheel
+                    items={STACK_WHEEL_ITEMS}
+                    active={activeStack}
+                    showDetails
+                    ariaLabel="Roue des stacks"
+                    onActiveChange={setActiveStack}
+                    eyebrow=""
+                    title=""
+                    subtitle=""
+                    background="transparent"
+                    surface="#ffffff"
+                    color="#16232c"
+                    mutedColor="rgba(22,35,44,0.72)"
+                    accent="#2872a1"
+                    signal="#789a99"
+                    lineColor="rgba(120,154,153,0.3)"
+                    frame={false}
+                    pauseOnHover
+                  />
+                ) : (
+                  <div className="h-full w-full animate-pulse rounded-3xl bg-slate-100/60" aria-hidden="true" />
+                )}
               </div>
 
               {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}
@@ -854,11 +949,6 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-bg/[0.72]" />
           <div className={`${FULL_CONTAINER} relative`}>
             <div className="mx-auto mb-10 max-w-3xl text-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/60 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-ice/60 shadow-sm backdrop-blur">
-                Évolution &amp; Savoir-Faire
-                <span className="h-3 w-px bg-slate-900/20" aria-hidden="true" />
-                <span className="text-neon">Parcours</span>
-              </span>
               <SectionTitle
                 as="h2"
                 id="formation-titre"
@@ -879,23 +969,27 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </p>
             </div>
 
-            <div className="relative h-[70vh] min-h-[620px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] lg:h-[82vh]">
-              <BooksShowcase
-                books={FORMATION_BOOKS}
-                heroTitle="Parcours"
-                navTitle="Formation"
-                themeColors={{
-                  navy: "#1c5a82",
-                  pink: "#2872a1",
-                  cream: "#f8fafc",
-                  lav: "#cbdde9",
-                  peri: "#789a99",
-                  bgLight: "#f8fafc",
-                  bgDark: "#16232c",
-                  foregroundLight: "#16232c",
-                  foregroundDark: "#f8fafc",
-                }}
-              />
+            <div ref={formationRef} className="relative h-[65vh] min-h-[520px] overflow-hidden rounded-3xl border border-slate-900/10 bg-white shadow-[0_30px_80px_-50px_rgba(22,35,44,0.5)] sm:min-h-[620px] lg:h-[82vh]">
+              {showFormation ? (
+                <BooksShowcase
+                  books={FORMATION_BOOKS}
+                  heroTitle="Parcours"
+                  navTitle="Formation"
+                  themeColors={{
+                    navy: "#1c5a82",
+                    pink: "#2872a1",
+                    cream: "#f8fafc",
+                    lav: "#cbdde9",
+                    peri: "#789a99",
+                    bgLight: "#f8fafc",
+                    bgDark: "#16232c",
+                    foregroundLight: "#16232c",
+                    foregroundDark: "#f8fafc",
+                  }}
+                />
+              ) : (
+                <div className="h-full w-full animate-pulse bg-slate-100/60" aria-hidden="true" />
+              )}
             </div>
 
             <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-ice/40">
@@ -905,26 +999,39 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         </section>
 
         {/* CONTACT */}
-        <ContactWithGlobe
-          id="contact"
-          email={PROFILE.email}
-          phone={PROFILE.phone}
-          title="Donnons vie à vos projets"
-          subtitle="Contact &amp; Collaboration"
-          description="Vous avez un projet innovant, un besoin en développement ou une vision à concrétiser ? Discutons-en et créons ensemble une expérience numérique d'exception."
-          className="bg-bg/[0.72] py-24 sm:py-32"
-        />
+        <div ref={contactRef} className="min-h-[640px]">
+          {showContact ? (
+            <ContactWithGlobe
+              id="contact"
+              email={PROFILE.email}
+              phone={PROFILE.phone}
+              title="Donnons vie à vos projets"
+              description="Vous avez un projet innovant, un besoin en développement ou une vision à concrétiser ? Discutons-en et créons ensemble une expérience numérique d'exception."
+              className="bg-bg/[0.72] py-24 sm:py-32"
+            />
+          ) : (
+            <div className="min-h-[640px] w-full animate-pulse bg-slate-100/40" aria-hidden="true" />
+          )}
+        </div>
 
         {/* FOOTER INTERACTIF FUZZY GAZE */}
-        <section aria-label="Pied de page interactif" className="relative border-t border-slate-900/10">
-          <FuzzyGazeFooter
-            wordmark="Medoune"
-            wordmarkHref="#accueil"
-            email={PROFILE.email}
-            columns={FOOTER_COLUMNS}
-            background="#16232c"
-            height="85svh"
-          />
+        <section
+          ref={footerRef}
+          aria-label="Pied de page interactif"
+          className="relative border-t border-slate-900/10"
+        >
+          {showFooter ? (
+            <FuzzyGazeFooter
+              wordmark="Medoune"
+              wordmarkHref="#accueil"
+              email={PROFILE.email}
+              columns={FOOTER_COLUMNS}
+              background="#16232c"
+              height="85svh"
+            />
+          ) : (
+            <div className="h-[85svh] w-full bg-[#16232c]" aria-hidden="true" />
+          )}
           <div className="border-t border-white/10 bg-[#16232c] py-6 text-center text-xs">
             <p className="text-mist/70">© {year} {PROFILE.name}. Tous droits réservés.</p>
           </div>

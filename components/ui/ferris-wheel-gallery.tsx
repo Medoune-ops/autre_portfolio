@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, ArrowRight, ChevronDown, ImageIcon, Pause, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, ImageIcon, Pause, Play } from "lucide-react";
 
 export interface FerrisWheelItem {
   id?: string;
@@ -54,7 +54,7 @@ function Photo({ item, thumbnail = false }: { item: FerrisWheelItem; thumbnail?:
   return (
     <>
       {pending && <span aria-hidden="true" data-photo-skeleton className="absolute inset-0 bg-muted motion-safe:animate-pulse" />}
-      {failed !== item.src && <img ref={image} src={item.src} alt={thumbnail ? "" : item.alt} draggable={false} onLoad={() => setShown(item.src)} onError={() => setFailed(item.src)} data-photo-state={pending ? "loading" : "ready"} className={`absolute inset-0 size-full object-cover ${pending ? "opacity-0" : loading === item.src ? "opacity-100 transition-opacity duration-500 motion-reduce:transition-none" : ""}`} />}
+      {failed !== item.src && <img ref={image} src={item.src} alt={thumbnail ? "" : item.alt} loading="lazy" decoding="async" draggable={false} onLoad={() => setShown(item.src)} onError={() => setFailed(item.src)} data-photo-state={pending ? "loading" : "ready"} className={`absolute inset-0 size-full object-cover ${pending ? "opacity-0" : loading === item.src ? "opacity-100 transition-opacity duration-500 motion-reduce:transition-none" : ""}`} />}
       {failed === item.src && (
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-muted text-muted-foreground" role={thumbnail ? undefined : "img"} aria-label={thumbnail ? undefined : `${item.alt} — image unavailable`}>
           <ImageIcon className={thumbnail ? "size-4" : "size-6"} aria-hidden="true" />
@@ -342,10 +342,6 @@ export function FerrisWheelGallery({
               onLostPointerCapture={() => { drag.current = null; }}
             >
               <div className="relative aspect-square">
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 flex flex-col items-center gap-1 text-muted-foreground">
-                <span className="text-xs font-medium tracking-[0.22em]">ON VIEW</span>
-                <ChevronDown className="size-3.5" />
-              </div>
               <svg aria-hidden="true" className="pointer-events-none absolute inset-0 size-full text-foreground/20" viewBox="0 0 400 400" fill="none">
                 <path d="M200 184 146 362M200 184 254 362M124 362H276" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
               </svg>

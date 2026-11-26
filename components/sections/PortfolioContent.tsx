@@ -264,11 +264,11 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
         <section
           id="accueil"
           aria-labelledby="accueil-titre"
-          className="relative flex min-h-screen items-center overflow-hidden py-24"
+          className="relative flex min-h-screen items-center py-24"
         >
           {/* Scène 3D : occupe toute la hauteur du héro, cadrée à droite sur grand écran. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-[54%] lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-auto lg:aspect-[5/6]"
+            className="absolute inset-x-0 bottom-0 h-[54%] overflow-hidden lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-auto lg:aspect-[5/6]"
             role="img"
             aria-label="Scène 3D interactive présentant le travail de Medoune"
           >
@@ -278,14 +278,14 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           {/* Voile de lisibilité : dense sous le texte, plus léger à droite pour laisser voir la scène 3D. */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-bg/[0.88] via-bg/[0.78] to-bg/45 lg:bg-gradient-to-r lg:from-bg/[0.92] lg:via-bg/[0.72] lg:to-transparent"
+            className="pointer-events-none absolute inset-0 overflow-hidden bg-gradient-to-b from-bg/[0.88] via-bg/[0.78] to-bg/45 lg:bg-gradient-to-r lg:from-bg/[0.92] lg:via-bg/[0.72] lg:to-transparent"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg/60 to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 overflow-hidden bg-gradient-to-t from-bg/60 to-transparent"
           />
 
-          <div className={`${CONTAINER} pointer-events-none relative z-10`}>
+          <div className={`${CONTAINER} pointer-events-none relative z-30`}>
             <div className="pointer-events-auto max-w-xl">
               <span className="inline-flex items-center gap-2 rounded-full border border-neon/20 bg-white/75 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-neon shadow-sm backdrop-blur">
                 Façonner des expériences web d&apos;impact

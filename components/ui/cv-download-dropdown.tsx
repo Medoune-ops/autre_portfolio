@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Download, ExternalLink, FileDown } from "lucide-react";
 import { CV_OPTIONS, type CVOption } from "@/data/portfolio";
+import { cn } from "@/lib/utils";
 
 const FOCUS =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
@@ -19,7 +20,42 @@ export function CVDownloadDropdown({
   align = "left",
 }: CVDownloadDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpwards, setOpenUpwards] = useState(false);
+  const [alignRight, setAlignRight] = useState(align === "right");
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Détection dynamique de l'espace disponible (vertical et horizontal)
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const updatePosition = () => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const dropdownHeight = 330;
+        const dropdownWidth = 320;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const spaceRight = window.innerWidth - rect.left;
+
+        // Ouvrir vers le haut si peu de place en bas et plus de place en haut
+        setOpenUpwards(spaceBelow < dropdownHeight && spaceAbove > spaceBelow);
+
+        // Aligner à droite si le menu déborderait à droite de l'écran
+        if (align === "right" || spaceRight < dropdownWidth) {
+          setAlignRight(true);
+        } else {
+          setAlignRight(false);
+        }
+      };
+
+      updatePosition();
+      window.addEventListener("resize", updatePosition);
+      window.addEventListener("scroll", updatePosition);
+      return () => {
+        window.removeEventListener("resize", updatePosition);
+        window.removeEventListener("scroll", updatePosition);
+      };
+    }
+  }, [isOpen, align]);
 
   // Fermeture automatique au clic à l'extérieur ou touche Escape
   useEffect(() => {
@@ -79,7 +115,7 @@ export function CVDownloadDropdown({
           <div
             role="menu"
             aria-orientation="vertical"
-            className="absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-2xl border border-slate-900/10 bg-white/95 p-2 shadow-[0_20px_50px_-15px_rgba(22,35,44,0.25)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-150"
+            className="absolute right-0 top-full z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] origin-top-right rounded-2xl border border-slate-900/10 bg-white/95 p-2 shadow-[0_20px_50px_-15px_rgba(22,35,44,0.25)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto"
           >
             <div className="px-3 py-2 border-b border-slate-900/10 mb-1">
               <p className="text-[11px] font-semibold tracking-wider text-ice/50 uppercase">
@@ -236,9 +272,13 @@ export function CVDownloadDropdown({
         <div
           role="menu"
           aria-orientation="vertical"
-          className={`absolute ${
-            align === "right" ? "right-0" : "left-0"
-          } top-full z-50 mt-2.5 w-80 origin-top-left rounded-3xl border border-slate-900/10 bg-white/95 p-3 shadow-[0_25px_60px_-15px_rgba(22,35,44,0.28)] backdrop-blur-xl animate-in fade-in-0 zoom-in-95 duration-150`}
+          className={cn(
+            "absolute z-50 w-[min(20rem,calc(100vw-2rem))] rounded-3xl border border-slate-900/10 bg-white/95 p-3 shadow-[0_25px_60px_-15px_rgba(22,35,44,0.28)] backdrop-blur-xl animate-in fade-in-0 duration-150 max-h-[min(85vh,440px)] overflow-y-auto",
+            openUpwards
+              ? "bottom-full mb-2.5 origin-bottom"
+              : "top-full mt-2.5 origin-top",
+            alignRight ? "right-0 origin-top-right" : "left-0 origin-top-left"
+          )}
         >
           <div className="px-3 py-2 border-b border-slate-900/10 mb-2">
             <p className="text-[10px] font-bold tracking-widest text-neon uppercase">

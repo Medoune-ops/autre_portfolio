@@ -368,7 +368,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
     if (isWheelPaused) return;
     const interval = setInterval(() => {
       setActiveStack((prev) => (prev + 1) % STACK_WHEEL_ITEMS.length);
-    }, 2800);
+    }, 4500);
     return () => clearInterval(interval);
   }, [isWheelPaused]);
 

@@ -801,29 +801,31 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               {/* Roue interactive des technologies */}
               <div ref={skillsRef} className="relative h-[58vh] min-h-[480px] w-full sm:min-h-[530px] lg:h-[74vh]">
                 {showSkills ? (
-                  <ToolWheel
-                    items={STACK_WHEEL_ITEMS}
-                    active={activeStack}
-                    showDetails
-                    ariaLabel="Roue des stacks"
-                    onActiveChange={setActiveStack}
-                    eyebrow=""
-                    title=""
-                    subtitle=""
-                    background="transparent"
-                    surface="#ffffff"
-                    color="#16232c"
-                    mutedColor="rgba(22,35,44,0.72)"
-                    accent="#2872a1"
-                    signal="#789a99"
-                    lineColor="rgba(120,154,153,0.3)"
-                    frame={false}
-                    pauseOnHover
-                  />
+                  <>
+                    <ToolWheel
+                      items={STACK_WHEEL_ITEMS}
+                      active={activeStack}
+                      showDetails
+                      ariaLabel="Roue des stacks"
+                      onActiveChange={setActiveStack}
+                      eyebrow=""
+                      title=""
+                      subtitle=""
+                      background="transparent"
+                      surface="#ffffff"
+                      color="#16232c"
+                      mutedColor="rgba(22,35,44,0.72)"
+                      accent="#2872a1"
+                      signal="#789a99"
+                      lineColor="rgba(120,154,153,0.3)"
+                      frame={false}
+                      pauseOnHover
+                    />
+                    <BionicLimbs pulseKey={activeStack} />
+                  </>
                 ) : (
                   <div className="h-full w-full animate-pulse rounded-3xl bg-slate-100/60" aria-hidden="true" />
                 )}
-                <BionicLimbs pulseKey={activeStack} />
               </div>
 
               {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}

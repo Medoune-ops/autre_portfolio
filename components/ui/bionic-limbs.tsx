@@ -31,9 +31,9 @@ const CSS = `
 .bio-spin, .bio-spin-rev { transform-box: fill-box; transform-origin: center; }
 .bio-spin { animation: bio-rot 14s linear infinite; }
 .bio-spin-rev { animation: bio-rot 18s linear infinite reverse; }
-.bio-pulse { filter: drop-shadow(0 0 3px rgba(40,114,161,0.85)); animation: bio-pulse 2.2s ease-in-out infinite; }
-.bio-tip { filter: drop-shadow(0 0 3px rgba(40,114,161,0.9)); animation: bio-pulse 2.2s ease-in-out infinite; }
-.bio-amber { filter: drop-shadow(0 0 3px rgba(245,158,11,0.8)); animation: bio-pulse 3.1s ease-in-out infinite; }
+.bio-pulse { animation: bio-pulse 2.2s ease-in-out infinite; }
+.bio-tip { animation: bio-pulse 2.2s ease-in-out infinite; }
+.bio-amber { animation: bio-pulse 3.1s ease-in-out infinite; }
 .bio-ping { transform-box: fill-box; transform-origin: center; animation: bio-ping 1s ease-out both; }
 @keyframes bio-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @keyframes bio-flex-a { 0%,100% { transform: rotate(0deg); } 42%,62% { transform: rotate(13deg); } }
@@ -185,7 +185,7 @@ function Limb({ side, pulseKey, uid }: { side: "left" | "right"; pulseKey: numbe
 export function BionicLimbs({ pulseKey = 0 }: { pulseKey?: number }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden md:block">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden [contain:layout_style] md:block">
       <style>{CSS}</style>
       <Limb side="left" pulseKey={pulseKey} uid={`${uid}l`} />
       <Limb side="right" pulseKey={pulseKey} uid={`${uid}r`} />

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { CSSProperties, SVGProps, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
@@ -484,8 +484,6 @@ const TextLoop = ({
 
   const loopText = unit.repeat(metrics.reps);
   const crossText = unit.repeat(metrics.crossReps);
-  const fitLength = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.reps : metrics.length || undefined;
-  const crossFit = metrics.unitWidth > 0 ? metrics.unitWidth * metrics.crossReps : metrics.crossLength || undefined;
   const paint = (ink: string, opacity: number): SVGProps<SVGTextElement> =>
     outline
       ? {
@@ -585,8 +583,6 @@ const TextLoop = ({
                 {...crossPaint}
                 dominantBaseline="central"
                 aria-hidden="true"
-                textLength={crossFit}
-                lengthAdjust="spacing"
               >
                 <textPath ref={crossHeadRef} href={`#${crossId}`} startOffset={0}>
                   {crossText}
@@ -599,8 +595,6 @@ const TextLoop = ({
                 {...crossPaint}
                 dominantBaseline="central"
                 aria-hidden="true"
-                textLength={crossFit}
-                lengthAdjust="spacing"
               >
                 <textPath ref={crossTailRef} href={`#${crossId}`} startOffset={0}>
                   {crossText}
@@ -645,8 +639,6 @@ const TextLoop = ({
               {...mainPaint}
               dominantBaseline="central"
               aria-hidden="true"
-              textLength={fitLength}
-              lengthAdjust="spacing"
             >
               <textPath ref={headRef} href={`#${pathId}`} startOffset={0}>
                 {loopText}
@@ -659,8 +651,6 @@ const TextLoop = ({
               {...mainPaint}
               dominantBaseline="central"
               aria-hidden="true"
-              textLength={fitLength}
-              lengthAdjust="spacing"
             >
               <textPath ref={tailRef} href={`#${pathId}`} startOffset={0}>
                 {loopText}
@@ -674,4 +664,3 @@ const TextLoop = ({
 };
 
 export default TextLoop;
-

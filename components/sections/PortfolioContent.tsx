@@ -40,6 +40,7 @@ import type { ToolWheelItem } from "@/components/ui/tool-wheel";
 import { StepsPath, type PathStep } from "@/components/ui/cd-steps-path";
 import { CVDownloadDropdown } from "@/components/ui/cv-download-dropdown";
 import { PopButton } from "@/components/ui/PopButton";
+import { BionicLimbs } from "@/components/ui/bionic-limbs";
 
 const ToolWheel = dynamic(() => import("@/components/ui/tool-wheel").then((m) => m.ToolWheel), {
   ssr: false,
@@ -822,6 +823,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
                 ) : (
                   <div className="h-full w-full animate-pulse rounded-3xl bg-slate-100/60" aria-hidden="true" />
                 )}
+                <BionicLimbs pulseKey={activeStack} />
               </div>
 
               {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}

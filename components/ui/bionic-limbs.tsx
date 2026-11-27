@@ -185,7 +185,7 @@ function Limb({ side, pulseKey, uid }: { side: "left" | "right"; pulseKey: numbe
 export function BionicLimbs({ pulseKey = 0 }: { pulseKey?: number }) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden [contain:layout_style] md:block">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 hidden [contain:layout_style_paint] md:block">
       <style>{CSS}</style>
       <Limb side="left" pulseKey={pulseKey} uid={`${uid}l`} />
       <Limb side="right" pulseKey={pulseKey} uid={`${uid}r`} />

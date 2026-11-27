@@ -392,7 +392,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
 
   return (
     <div className="relative min-h-screen bg-transparent font-sans text-ice antialiased selection:bg-neon/20">
-      <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-bg/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-bg/70">
+      <header className="sticky top-0 z-50 border-b border-slate-900/10 bg-bg/95 shadow-sm">
         <div className={`${CONTAINER} flex items-center justify-between gap-3 py-3 sm:py-4`}>
           <a
             href="#accueil"
@@ -436,7 +436,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
           <nav
             id="mobile-nav"
             aria-label="Navigation mobile"
-            className="border-t border-slate-900/10 bg-bg/95 backdrop-blur-xl md:hidden"
+            className="border-t border-slate-900/10 bg-bg/95 md:hidden"
           >
             <ul className={`${CONTAINER} grid gap-1 py-3`}>
               {NAV_LINKS.map((link) => (
@@ -645,7 +645,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               )}
             </div>
 
-            <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/80 via-neon/5 to-neon2/10 p-8 shadow-soft backdrop-blur-sm transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
+            <div className="mt-16 grid items-center gap-10 overflow-hidden rounded-3xl border border-slate-900/10 bg-gradient-to-br from-white/90 via-neon/5 to-neon2/10 p-8 shadow-soft transition-shadow duration-300 hover:shadow-glow sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,340px)] md:gap-14">
               <div className="max-w-md">
                 <p className="text-sm font-medium tracking-[0.22em] text-neon uppercase">Identité Visuelle &amp; Motion</p>
                 <SectionTitle
@@ -723,7 +723,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
             </div>
             {/* Conteneur principal de la roue interactive ultra embellie */}
-            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/75 shadow-[0_30px_90px_-40px_rgba(22,35,44,0.35)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_40px_100px_-35px_rgba(40,114,161,0.25)]">
+            <div className="relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white/95 shadow-[0_30px_90px_-40px_rgba(22,35,44,0.35)] transition-shadow duration-500 hover:shadow-[0_40px_100px_-35px_rgba(40,114,161,0.25)]">
               {/* Coins HUD style futuriste */}
               <div className="pointer-events-none absolute left-3 top-3 z-30 h-4 w-4 border-l-2 border-t-2 border-neon/50" aria-hidden="true" />
               <div className="pointer-events-none absolute right-3 top-3 z-30 h-4 w-4 border-r-2 border-t-2 border-neon/50" aria-hidden="true" />
@@ -760,7 +760,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
 
               {/* Barre supérieure : statut live + filtres de domaine interactifs */}
-              <div className="relative z-20 flex flex-col gap-3 border-b border-slate-900/[0.08] bg-white/40 px-5 py-3.5 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between sm:px-7">
+              <div className="relative z-20 flex flex-col gap-3 border-b border-slate-900/[0.08] bg-white/85 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
                 <div className="flex items-center gap-2.5">
                   <span className="relative flex h-2 w-2">
                     <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${isWheelPaused ? "bg-amber-400" : "animate-ping bg-emerald-400"}`} />
@@ -829,7 +829,7 @@ export function PortfolioContent({ active = true }: { active?: boolean }) {
               </div>
 
               {/* Station de contrôle et fiche détaillée de la technologie sélectionnée */}
-              <div className="relative z-20 flex flex-col gap-4 border-t border-slate-900/[0.08] bg-white/70 px-5 py-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:px-7">
+              <div className="relative z-20 flex flex-col gap-4 border-t border-slate-900/[0.08] bg-white/90 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
                 <div className="flex min-w-0 items-center gap-3.5">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-neon/25 bg-white shadow-sm transition-transform duration-300 hover:scale-105">
                     <svg viewBox="0 0 24 24" className="h-6 w-6 fill-neon" aria-hidden="true">

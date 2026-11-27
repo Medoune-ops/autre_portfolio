@@ -1,6 +1,5 @@
 import SiteBackground from "@/components/ui/site-background";
 import { PortfolioContent } from "@/components/sections/PortfolioContent";
-import { DesktopSwarmCursor } from "@/components/ui/desktop-swarm-cursor";
 
 export default function Page() {
   return (
@@ -9,9 +8,6 @@ export default function Page() {
       <div className="relative z-10">
         <PortfolioContent active={true} />
       </div>
-
-      {/* Effet décoratif desktop chargé uniquement sur écran large et sans reduced-motion. */}
-      <DesktopSwarmCursor />
     </div>
   );
 }
